@@ -56,3 +56,20 @@ Record of all architectural choices, API verifications, helpline data checks, an
   - Any high-risk credential (`[OTP]`, `[PIN]`, `[CVV]`, `[CARD]`) shared in `pressure` or `extraction` stages immediately triggers server-side override `terminal="user_fell"`.
   - Scammer output passes through `validate_scammer_output`: rejects real Indian phone numbers, non-`.example` URLs, and non-`@fakebank` UPI addresses.
   - Distress phrases in English and Hindi ("scared", "terrified", "police is outside", "main dar gaya", "mere paise kat gaye") trip `safety_break=True`, prompting a `[Sensei]` reassurance message.
+
+## 2026-10-14 — Phase 2: Train Frontend Decisions & Verifications
+
+### 1. Next.js Static Export & Client Suspense Boundaries
+- Configured App router static export (`output: 'export'`) with Next.js 15.
+- Because `useSearchParams()` requires client-side dynamic search parameters during static export, wrapped `/train/play` and `/train/debrief` content in `<Suspense>` boundaries with loading spinners to satisfy prerendering constraints while allowing seamless client navigation.
+
+### 2. Client-Side PII Scrubbing
+- Implemented `lib/pii.ts` mirroring the backend scrubber (Luhn card validation, Devanagari digit translation, Indian mobile numbers, UPI IDs, PAN, Aadhaar, OTP/PIN/CVV context).
+- Added real-time shield indicator above the composer so users receive immediate reassurance that test credentials are safe.
+
+### 3. Accessible Pressure Indicator
+- Built `PressureMeter` with 10 discrete segments and color step thresholds (Matcha green 0–3, Kihada gold 4–6, Beni vermilion 7–10).
+- Included explicit textual level tags ("Low", "Medium", "Critical") and `role="meter"` with ARIA attributes (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`) ensuring non-color-reliant accessibility.
+
+### 4. Non-Color Reliant Strike Markers
+- Implemented `StrikeMarker` for replay moments using distinct icons and explicit text ("Blocked" with shield-check, "Landed" with alert-triangle, "Neutral" with minus) to ensure compliance with WCAG accessibility guidelines.
