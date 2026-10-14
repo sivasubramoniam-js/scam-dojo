@@ -1,0 +1,71 @@
+- id: 1
+  slug: upi_collect_refund
+  name_en: UPI Collect / Fake Refund
+  name_hi: UPI कलेक्ट / नकली रिफ़ंड
+  summary_en: Scammer tricks victim into approving a UPI collect request or entering their UPI PIN under the pretext of receiving money or a refund.
+  summary_hi: पैसे मिलने या रिफ़ंड के बहाने UPI पिन डालने या कलेक्ट रिक्वेस्ट स्वीकार करने का झांसा।
+  typical_channels: ["chat", "sms", "phone_sms"]
+  severity: 5
+
+- id: 2
+  slug: kyc_fraud
+  name_en: Fake KYC / Account Suspension
+  name_hi: नकली KYC / खाता बंदी
+  summary_en: Threat of immediate bank or wallet block unless an unverified link is opened or OTP is provided to a caller.
+  summary_hi: खाता या वॉलेट बंद होने की धमकी देकर लिंक खोलवाने या OTP माँगने की धोखाधड़ी।
+  typical_channels: ["sms", "phone_sms", "call"]
+  severity: 4
+
+- id: 3
+  slug: job_task_fraud
+  name_en: Work-From-Home Task Scam
+  name_hi: वर्क-फ्रॉम-होम टास्क घोटाला
+  summary_en: Offers daily payments for simple rating or liking tasks, then requires cash deposits to unlock earnings.
+  summary_hi: आसान काम के बदले पैसे का वादा, फिर कमाई निकालने के लिए खुद पैसे जमा कराने का झांसा।
+  typical_channels: ["chat", "email"]
+  severity: 4
+
+- id: 4
+  slug: digital_arrest
+  name_en: Digital Arrest / Impersonation
+  name_hi: डिजिटल अरेस्ट / अफ़सर बनकर धमकी
+  summary_en: Fraudsters pose as police, CBI, customs, or court officials on video calls demanding money transfers to 'safe accounts'.
+  summary_hi: वीडियो कॉल पर पुलिस या जांच एजेंसी बनकर गिरफ़्तारी का डर दिखाकर पैसे ऐंठना।
+  typical_channels: ["call", "phone_sms"]
+  severity: 5
+
+- id: 5
+  slug: courier_customs
+  name_en: Courier / Parcel Customs Fraud
+  name_hi: कूरियर / पार्सल कस्टम्स घोटाला
+  summary_en: Fake notification that an illegal package in your name is stuck at customs, demanding clearance fees.
+  summary_hi: आपके नाम से नशीले पदार्थ या अवैध पार्सल मिलने का झूठा दावा और पेनल्टी की माँग।
+  typical_channels: ["sms", "call"]
+  severity: 4
+
+- id: 6
+  slug: electricity_bill
+  name_en: Utility / Electricity Disconnection
+  name_hi: बिजली बिल / कनेक्शन कटने की धमकी
+  summary_en: Fake SMS threatening electricity will be disconnected tonight unless a specific number is called or app installed.
+  summary_hi: आज रात बिजली कटने का फ़र्ज़ी संदेश भेजकर तुरंत दिए गए नंबर पर कॉल कराने का झांसा।
+  typical_channels: ["sms"]
+  severity: 3
+
+- id: 7
+  slug: remote_access_support
+  name_en: Customer Support / Remote Access App
+  name_hi: ग्राहक सेवा / स्क्रीन शेयर ऐप
+  summary_en: Fraudster poses as technical support and asks victim to install AnyDesk or TeamViewer to fix an issue.
+  summary_hi: कस्टमर केयर बनकर समस्या सुलझाने के नाम पर स्क्रीन-शेयरिंग ऐप डाउनलोड कराना।
+  typical_channels: ["call", "chat"]
+  severity: 5
+
+- id: 8
+  slug: investment_ponzi
+  name_en: High-Return Investment Groups
+  name_hi: अधिक मुनाफ़ा निवेश समूह
+  summary_en: Private chat groups claiming insider stock tips and guaranteed 500% returns on crypto or special schemes.
+  summary_hi: चैट ग्रुप्स में गारंटीड मुनाफ़े और शेयर बाज़ार की गुप्त जानकारी का लालच देकर निवेश कराना।
+  typical_channels: ["chat"]
+  severity: 4

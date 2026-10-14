@@ -1,0 +1,53 @@
+- id: 1
+  slug: urgency
+  name_en: Urgency
+  name_hi: जल्दबाज़ी
+  description_en: Creating a false sense of time pressure or tight deadlines so victims act without thinking.
+  description_hi: झूठी समय सीमा या जल्दबाज़ी बनाकर सोचने का मौका न देना।
+  counter_tip_en: Pause and breathe. Real institutions give you reasonable time to act.
+  counter_tip_hi: रुकें और सोचें। असली बैंक या संस्थाएं हमेशा सोचने का समय देती हैं।
+
+- id: 2
+  slug: authority
+  name_en: Authority
+  name_hi: अधिकार व पद
+  description_en: Impersonating officials, police, bank managers, or tax authorities to demand obedience.
+  description_hi: पुलिस, बैंक अधिकारी या सरकारी अफ़सर बनकर हुक्म चलाना।
+  counter_tip_en: Official badges and uniforms on video or phone calls can be faked. Verify independently.
+  counter_tip_hi: वीडियो या फ़ोन पर दिखाए गए पहचान पत्र नकली हो सकते हैं। स्वतंत्र रूप से पुष्टि करें।
+
+- id: 3
+  slug: fear
+  name_en: Fear
+  name_hi: डर व धमकी
+  description_en: Threatening account blockage, legal action, arrest, or family disgrace.
+  description_hi: खाता बंद होने, कानूनी कार्रवाई या गिरफ़्तारी की धमकी देना।
+  counter_tip_en: Law enforcement never demands money or passwords to clear accusations.
+  counter_tip_hi: पुलिस या कानून कभी भी आरोपों से बचने के लिए पैसे या पासवर्ड नहीं माँगते।
+
+- id: 4
+  slug: greed
+  name_en: Greed / Easy Money
+  name_hi: लालच / आसान कमाई
+  description_en: Promising unrealistic returns, lottery wins, task payouts, or free refunds.
+  description_hi: बहुत अधिक मुनाफ़ा, लॉटरी, टास्क कमाई या मुफ़्त रिफ़ंड का झांसा देना।
+  counter_tip_en: If an offer sounds too good to be true, it is almost certainly a scam.
+  counter_tip_hi: अगर कोई प्रस्ताव बहुत अच्छा और आसान लगे, तो वह पक्का धोखाधड़ी है।
+
+- id: 5
+  slug: trust
+  name_en: False Trust & Familiarity
+  name_hi: झूठा भरोसा
+  description_en: Using personal details, familiar logos, or friendly rapport to lower suspicion.
+  description_hi: आपकी निजी जानकारी या जानी-पहचानी बातों का हवाला देकर विश्वास जीतना।
+  counter_tip_en: Having your name or partial number does not prove someone is authorized.
+  counter_tip_hi: किसी के पास आपका नाम होने का मतलब यह नहीं कि वह असली अधिकारी है।
+
+- id: 6
+  slug: isolation
+  name_en: Isolation
+  name_hi: अकेला करना
+  description_en: Telling the victim not to hang up, not to discuss with family, or keeping it confidential.
+  description_hi: फ़ोन न काटने, किसी से बात न करने या बात गुप्त रखने का दबाव डालना।
+  counter_tip_en: Any demand for total secrecy is a massive red flag. Always consult someone you trust.
+  counter_tip_hi: बात गुप्त रखने का कोई भी दबाव बहुत बड़ा ख़तरा है। हमेशा किसी भरोसेमंद से सलाह लें।

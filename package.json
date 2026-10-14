@@ -1,0 +1,11 @@
+{
+  "name": "scam-dojo-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "make dev",
+    "build": "pnpm --filter web build",
+    "test": "make test",
+    "lint": "make lint"
+  }
+}

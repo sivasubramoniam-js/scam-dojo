@@ -1,0 +1,203 @@
+- id: r_1930
+  country: IN
+  category: helpline
+  name_en: National Cyber Crime Helpline (1930)
+  name_hi: राष्ट्रीय साइबर अपराध हेल्पलाइन (1930)
+  contact_type: phone
+  contact_value: "1930"
+  description_en: Dedicated 24/7 national helpline by the Ministry of Home Affairs to immediately freeze financial fraud transactions during the golden hour.
+  description_hi: गृह मंत्रालय की 24/7 राष्ट्रीय हेल्पलाइन, जो वित्तीय धोखाधड़ी के तुरंत बाद पैसे को ब्लॉक कराने में मदद करती है।
+  when_to_use_en: Call immediately (within 1-2 hours) if money has been deducted from your bank, UPI, or card.
+  when_to_use_hi: यदि आपके बैंक, UPI या कार्ड से धोखाधड़ी से पैसे कट गए हैं, तो तुरंत (1-2 घंटे के भीतर) कॉल करें।
+  triggers_json: '{"incident_any":["upi_payment","card_details_shared","bank_transfer"],"money_lost":true,"time_since_any":["just_now","within_1h","today"],"min_priority_bump":0}'
+  priority: 10
+  source_url: https://cybercrime.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_cybercrime_portal
+  country: IN
+  category: portal
+  name_en: National Cybercrime Reporting Portal
+  name_hi: राष्ट्रीय साइबर अपराध रिपोर्टिंग पोर्टल
+  contact_type: url
+  contact_value: https://cybercrime.gov.in
+  description_en: Official Government of India portal for filing formal complaints and lodging FIRs regarding online scams, financial fraud, and cyber harassment.
+  description_hi: भारत सरकार का आधिकारिक पोर्टल जहाँ ऑनलाइन ठगी और साइबर अपराध की औपचारिक शिकायत व FIR दर्ज की जाती है।
+  when_to_use_en: To file a formal police complaint with digital transaction receipts, phone numbers, and chat screenshots.
+  when_to_use_hi: डिजिटल रसीदों, फ़ोन नंबरों और चैट स्क्रीनशॉट के साथ औपचारिक पुलिस शिकायत दर्ज करने के लिए।
+  triggers_json: '{"incident_any":["upi_payment","card_details_shared","bank_transfer","otp_shared","remote_app_installed","purchase_scam","investment_or_job","threatened"],"money_lost":false,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 20
+  source_url: https://cybercrime.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_bank_official
+  country: IN
+  category: bank_guidance
+  name_en: Bank Official Fraud Hotline
+  name_hi: बैंक की आधिकारिक धोखाधड़ी हेल्पलाइन
+  contact_type: none
+  contact_value: ""
+  description_en: Dial the official customer care number printed strictly on the back of your debit/credit card or inside your official mobile banking app. Never use numbers from web search results or SMS messages.
+  description_hi: केवल अपने डेबिट/क्रेडिट कार्ड के पीछे छपे या आधिकारिक मोबाइल बैंकिंग ऐप में दिए गए नंबर पर ही कॉल करें। इंटरनेट सर्च या SMS के नंबरों पर कभी भरोसा न करें।
+  when_to_use_en: Immediately block your compromised cards, net banking, or UPI handle, and report unauthorized debits.
+  when_to_use_hi: तुरंत अपने प्रभावित कार्ड, नेट बैंकिंग या UPI को ब्लॉक करने और अनधिकृत लेनदेन दर्ज कराने के लिए।
+  triggers_json: '{"incident_any":["upi_payment","card_details_shared","bank_transfer","otp_shared","remote_app_installed"],"money_lost":true,"time_since_any":["just_now","within_1h","today"],"min_priority_bump":0}'
+  priority: 15
+  source_url: https://www.rbi.org.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_npci_upi
+  country: IN
+  category: portal
+  name_en: NPCI UPI Dispute Redressal Mechanism
+  name_hi: NPCI UPI विवाद निवारण तंत्र
+  contact_type: url
+  contact_value: https://www.npci.org.in
+  description_en: Official grievance mechanism provided by National Payments Corporation of India to raise and track dispute status for failed, fraudulent, or disputed UPI transfers.
+  description_hi: NPCI का आधिकारिक पोर्टल जहाँ धोखाधड़ी या विवादित UPI लेनदेन के लिए शिकायत दर्ज और ट्रैक की जा सकती है।
+  when_to_use_en: If an unauthorized UPI transaction occurred and your bank has initiated a chargeback/dispute reference.
+  when_to_use_hi: जब अनधिकृत UPI लेनदेन हुआ हो और आपको बैंक से डिस्प्यूट दर्ज करने के बाद शिकायत आगे बढ़ानी हो।
+  triggers_json: '{"incident_any":["upi_payment"],"money_lost":true,"time_since_any":["just_now","within_1h","today","1_3_days"],"min_priority_bump":0}'
+  priority: 30
+  source_url: https://www.npci.org.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_rbi_cms
+  country: IN
+  category: portal
+  name_en: RBI Complaint Management System (CMS)
+  name_hi: RBI शिकायत प्रबंधन प्रणाली (CMS)
+  contact_type: url
+  contact_value: https://cms.rbi.org.in
+  description_en: Reserve Bank of India portal to lodge complaints against banks, NBFCs, or payment system operators if your grievance is unresolved within 30 days.
+  description_hi: यदि बैंक या वित्तीय संस्था 30 दिनों में आपकी शिकायत का समाधान न करे, तो RBI लोकपाल में शिकायत दर्ज करने का पोर्टल।
+  when_to_use_en: When your bank refuses to help or exceeds 30 days without resolving an unauthorized transaction claim.
+  when_to_use_hi: जब बैंक अनधिकृत लेनदेन की शिकायत पर सहयोग न करे या 30 दिनों में समाधान न दे।
+  triggers_json: '{"incident_any":["upi_payment","card_details_shared","bank_transfer"],"money_lost":true,"time_since_any":["1_3_days","longer"],"min_priority_bump":0}'
+  priority: 45
+  source_url: https://cms.rbi.org.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_rbi_helpline
+  country: IN
+  category: helpline
+  name_en: RBI Contact Centre (14448)
+  name_hi: RBI संपर्क केंद्र (14448)
+  contact_type: phone
+  contact_value: "14448"
+  description_en: Toll-free contact centre by RBI to clarify questions on banking regulations, limited liability rules, and Integrated Ombudsman filing.
+  description_hi: बैंकिंग नियमों, सीमित देयता (Limited Liability) और लोकपाल शिकायत की जानकारी के लिए RBI का टोल-फ्री नंबर।
+  when_to_use_en: Call for guidance on your consumer rights regarding unauthorized digital banking transactions.
+  when_to_use_hi: अनधिकृत डिजिटल बैंकिंग लेनदेन पर अपने उपभोक्ता अधिकारों और नियमों की जानकारी के लिए।
+  triggers_json: '{"incident_any":["upi_payment","card_details_shared","bank_transfer"],"money_lost":true,"time_since_any":["1_3_days","longer"],"min_priority_bump":0}'
+  priority: 50
+  source_url: https://www.rbi.org.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_sanchar_saathi
+  country: IN
+  category: telecom
+  name_en: Sanchar Saathi (Chakshu & TAFCOP)
+  name_hi: संचार साथी (चक्षु एवं टैफ़कॉप)
+  contact_type: url
+  contact_value: https://sancharsaathi.gov.in
+  description_en: Department of Telecommunications portal to report suspicious phone calls, SMS, WhatsApp fraud, and verify mobile numbers registered in your name.
+  description_hi: दूरसंचार विभाग का पोर्टल जहाँ संदिग्ध कॉल, SMS, WhatsApp फ्रॉड की रिपोर्ट करें और अपने नाम पर पंजीकृत सिम कार्ड जांचें।
+  when_to_use_en: When fraudsters contact you via mobile numbers, threatening calls, fake SMS, or if you suspect SIM duplication.
+  when_to_use_hi: जब ठगों ने मोबाइल नंबर, फ़र्ज़ी SMS या WhatsApp से संपर्क किया हो, या नाम पर फ़र्ज़ी सिम का शक हो।
+  triggers_json: '{"incident_any":["otp_shared","link_clicked","threatened"],"money_lost":false,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 35
+  source_url: https://sancharsaathi.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_uidai
+  country: IN
+  category: identity
+  name_en: UIDAI myAadhaar Portal
+  name_hi: UIDAI मायआधार पोर्टल
+  contact_type: url
+  contact_value: https://myaadhaar.uidai.gov.in
+  description_en: Official portal to immediately lock your biometric credentials, generate Virtual ID (VID), and review your Aadhaar authentication history.
+  description_hi: अपनी बायोमेट्रिक जानकारी को तुरंत लॉक करने, वर्चुअल ID (VID) बनाने और आधार प्रमाणीकरण इतिहास देखने का पोर्टल।
+  when_to_use_en: If you disclosed your Aadhaar number, OTP, or uploaded copies of your Aadhaar card to an unknown party.
+  when_to_use_hi: यदि आपने किसी अनजान व्यक्ति को अपना आधार नंबर, OTP दिया हो या आधार कार्ड की कॉपी भेजी हो।
+  triggers_json: '{"incident_any":["aadhaar_pan_shared"],"money_lost":false,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 25
+  source_url: https://myaadhaar.uidai.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_uidai_helpline
+  country: IN
+  category: helpline
+  name_en: UIDAI Helpline (1947)
+  name_hi: UIDAI हेल्पलाइन (1947)
+  contact_type: phone
+  contact_value: "1947"
+  description_en: Toll-free Aadhaar contact centre for assistance with biometric locking, grievance redressal, and suspected misuse.
+  description_hi: बायोमेट्रिक्स लॉक करने और आधार के दुरुपयोग की शिकायत दर्ज कराने के लिए 24/7 टोल-फ्री हेल्पलाइन।
+  when_to_use_en: Call for urgent guidance on locking your Aadhaar credentials or disputing fraudulent authentications.
+  when_to_use_hi: आधार विवरण लॉक करने या अनधिकृत प्रमाणीकरण की शिकायत दर्ज कराने के लिए तुरंत संपर्क करें।
+  triggers_json: '{"incident_any":["aadhaar_pan_shared"],"money_lost":false,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 28
+  source_url: https://uidai.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_emergency
+  country: IN
+  category: emergency
+  name_en: Emergency Police Service (112)
+  name_hi: राष्ट्रीय आपातकालीन सेवा (112)
+  contact_type: phone
+  contact_value: "112"
+  description_en: All-in-one national emergency response helpline for immediate police dispatch in cases of physical intimidation, extortion, or extortion threats.
+  description_hi: शारीरिक ख़तरे, जबरन वसूली या तत्काल पुलिस सहायता के लिए एकीकृत राष्ट्रीय आपातकालीन नंबर।
+  when_to_use_en: Call immediately if fraudsters are threatening physical harm, showing up at your address, or blackmailing you.
+  when_to_use_hi: जब ठग शारीरिक नुक़सान पहुँचाने, घर पहुँचने की धमकी दे रहे हों या गंभीर ब्लैकमेल कर रहे हों।
+  triggers_json: '{"incident_any":["threatened"],"money_lost":false,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 5
+  source_url: https://112.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_telemanas
+  country: IN
+  category: emotional_support
+  name_en: Tele-MANAS Mental Health Support (14416)
+  name_hi: टेली-मानस मानसिक स्वास्थ्य सहायता (14416)
+  contact_type: phone
+  contact_value: "14416"
+  description_en: Free, 24/7 national tele-mental health counseling service run by the Ministry of Health and Family Welfare. Confidential and non-judgmental.
+  description_hi: स्वास्थ्य एवं परिवार कल्याण मंत्रालय की 24/7 मुफ़्त एवं गोपनीय मानसिक स्वास्थ्य परामर्श सेवा।
+  when_to_use_en: If experiencing acute shock, depression, shame, or despair following financial loss or cyber extortion.
+  when_to_use_hi: धोखाधड़ी या पैसे गँवाने के बाद अत्यधिक तनाव, घबराहट या निराशा महसूस होने पर बेझिझक संपर्क करें।
+  triggers_json: '{"incident_any":["threatened","investment_or_job","upi_payment"],"money_lost":true,"time_since_any":["just_now","within_1h","today","1_3_days","longer"],"min_priority_bump":0}'
+  priority: 60
+  source_url: https://telemanas.mohfw.gov.in
+  verified_on: "2026-10-14"
+  active: 1
+
+- id: r_selfhelp_credentials
+  country: IN
+  category: identity
+  name_en: Immediate Account Lockdown Guide
+  name_hi: त्वरित खाता सुरक्षा निर्देश
+  contact_type: none
+  contact_value: ""
+  description_en: "Step-by-step actions: (1) Uninstall remote management apps (AnyDesk, TeamViewer); (2) Turn on Airplane mode temporarily if phone was compromised; (3) Reset main email and banking passwords from another trusted device; (4) Revoke active sessions."
+  description_hi: "आवश्यक सुरक्षा कदम: (1) स्क्रीन शेयरिंग ऐप तुरंत हटाएँ; (2) यदि फ़ोन पर नियंत्रण का शक हो तो अस्थायी रूप से एयरप्लेन मोड लगाएँ; (3) किसी अन्य सुरक्षित डिवाइस से ईमेल और बैंक पासवर्ड बदलें।"
+  when_to_use_en: Essential self-protection whenever remote access apps were installed or passwords/OTPs were leaked.
+  when_to_use_hi: जब भी कोई रिमोट एक्सेस ऐप इंस्टॉल किया गया हो या पासवर्ड/OTP लीक हो गया हो।
+  triggers_json: '{"incident_any":["otp_shared","remote_app_installed"],"money_lost":false,"time_since_any":["just_now","within_1h","today"],"min_priority_bump":0}'
+  priority: 12
+  source_url: https://cybercrime.gov.in
+  verified_on: "2026-10-14"
+  active: 1

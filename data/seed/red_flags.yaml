@@ -1,0 +1,83 @@
+- id: 1
+  scam_type_id: 1
+  tactic_slug: urgency
+  text_en: Request must be accepted within a short countdown window.
+  text_hi: थोड़े ही समय में रिक्वेस्ट स्वीकार करने का दबाव।
+  weight: 2
+
+- id: 2
+  scam_type_id: 1
+  tactic_slug: authority
+  text_en: Asks you to enter your UPI PIN to receive money or get a refund.
+  text_hi: पैसे प्राप्त करने या रिफ़ंड के लिए UPI पिन डालने को कहना।
+  weight: 3
+
+- id: 3
+  scam_type_id: 1
+  tactic_slug: trust
+  text_en: Collect request sent from an unfamiliar or fake merchant ID.
+  text_hi: अनजान या संदिग्ध मर्चेंट ID से कलेक्ट रिक्वेस्ट भेजना।
+  weight: 2
+
+- id: 4
+  scam_type_id: 2
+  tactic_slug: fear
+  text_en: Account or SIM card will be blocked immediately or within 24 hours.
+  text_hi: खाता या सिम कार्ड तुरंत या 24 घंटे में ब्लॉक होने की धमकी।
+  weight: 3
+
+- id: 5
+  scam_type_id: 2
+  tactic_slug: authority
+  text_en: Demands OTP, full card number, or CVV over call or SMS link.
+  text_hi: कॉल या SMS लिंक के माध्यम से OTP, कार्ड नंबर या CVV माँगना।
+  weight: 3
+
+- id: 6
+  scam_type_id: 2
+  tactic_slug: trust
+  text_en: Domain in the link does not match official bank or service website.
+  text_hi: लिंक का डोमेन बैंक या सेवा प्रदाता की आधिकारिक वेबसाइट से मेल नहीं खाता।
+  weight: 2
+
+- id: 7
+  scam_type_id: 3
+  tactic_slug: greed
+  text_en: Unrealistic high payout for simple social media or rating tasks.
+  text_hi: आसान रेटिंग या लाइक करने के काम के लिए अवास्तविक ज़्यादा पैसे का वादा।
+  weight: 2
+
+- id: 8
+  scam_type_id: 3
+  tactic_slug: greed
+  text_en: Demands advance deposit or recharge to unlock withdrawal of earned funds.
+  text_hi: कमाई निकालने के लिए पहले खुद पैसे या सिक्योरिटी डिपॉजिट जमा करने की शर्त।
+  weight: 3
+
+- id: 9
+  scam_type_id: 4
+  tactic_slug: authority
+  text_en: Police or government authority questioning you over a video call.
+  text_hi: पुलिस या सरकारी एजेंसी द्वारा वीडियो कॉल पर पूछताछ या जांच करना।
+  weight: 3
+
+- id: 10
+  scam_type_id: 4
+  tactic_slug: isolation
+  text_en: Strictly forbidden from disconnecting call or talking to family members.
+  text_hi: कॉल काटने या परिवार के किसी सदस्य से बात करने पर सख्त मनाही।
+  weight: 3
+
+- id: 11
+  scam_type_id: 4
+  tactic_slug: fear
+  text_en: Demanding transfer of your savings into a 'government safe account'.
+  text_hi: जमा पूंजी को 'सरकारी सुरक्षित खाते' में ट्रांसफर करने का निर्देश।
+  weight: 3
+
+- id: 12
+  scam_type_id: 7
+  tactic_slug: authority
+  text_en: Asking you to install screen sharing tools like AnyDesk, TeamViewer, or RustDesk.
+  text_hi: एनीडेस्क, टीमव्यूअर या रस्टडेस्क जैसे स्क्रीन शेयरिंग ऐप इंस्टॉल करने को कहना।
+  weight: 3

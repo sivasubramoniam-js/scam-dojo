@@ -1,0 +1,76 @@
+slug: fake_kyc
+title:
+  en: "Fake KYC Call"
+  hi: "नकली KYC कॉल"
+blurb:
+  en: "A 'bank officer' says your account will be blocked unless you verify your identity right now."
+  hi: "एक 'बैंक अधिकारी' कहता है कि तुरंत पहचान सत्यापित न करने पर आपका खाता बंद हो जाएगा।"
+scam_type: kyc_fraud
+channel: phone_sms
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: white
+difficulty_range: [1, 5]
+est_minutes: 6
+persona:
+  name: "Rakesh Verma"
+  role: "Customer Care Officer, Orion Bank (fictional)"
+  voice: "Polite, hurried, official"
+fake_entities:
+  org: "Orion Bank"
+  phone: "+91 00000 00000"
+  link: "orion-kyc.example/update"
+  upi: "kyc.desk@fakebank"
+  employee_id: "ORN-4471"
+objective: "Get the user to share the OTP, full card number or CVV, or install a remote-access app."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - urgency
+  - authority
+  - fear
+ground_truth_flags:
+  - id: urgency_deadline
+    text: "Account will be blocked within minutes"
+    tactic: urgency
+    weight: 2
+  - id: asks_otp
+    text: "Asks you to share an OTP or card details"
+    tactic: authority
+    weight: 3
+  - id: unofficial_link
+    text: "Link is not an official bank domain"
+    tactic: trust
+    weight: 2
+  - id: discourages_verification
+    text: "Tells you not to hang up or call the bank"
+    tactic: isolation
+    weight: 3
+  - id: caller_initiated
+    text: "Bank contacted you first about a sensitive matter"
+    tactic: authority
+    weight: 1
+verification_actions:
+  - "says they will call the bank using the number on their card or official app"
+  - "refuses to share OTP and ends the contact"
+  - "asks to verify identity via an official offline branch or secure banking app"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Sir, this is Rakesh from Orion Bank Customer Support. Your KYC document expired today and your savings account is scheduled for immediate suspension. Are you available for 2 minutes to update it?"
+  hi: "Sir, main Rakesh bol raha hoon Orion Bank Support se. Aapka KYC document aaj expire ho gaya hai aur account suspension scheduled hai. 2 minute baat kar sakte hain ise update karne ke liye?"
+fallback_lines:
+  urgency: "Sir, if we do not update this right now, all outgoing transactions will be frozen by 5 PM."
+  pressure: "Please do not disconnect. As per RBI guidelines, offline branch reactivation takes up to 7 working days."
+  extraction: "I have triggered the verification code to your registered mobile. Kindly read out the 6-digit OTP to unblock your account."

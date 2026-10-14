@@ -1,0 +1,71 @@
+- id: 1
+  kind: shortener
+  lang: any
+  pattern: 'https?:\/\/(?:bit\.ly|tinyurl\.com|t\.co|is\.gd|cutt\.ly|rb\.gy|goo\.gl|tiny\.cc)\/[A-Za-z0-9_-]+'
+  tag: shortener_url
+  weight: 2
+  note: URL shortener masking true destination
+
+- id: 2
+  kind: keyword
+  lang: en
+  pattern: '(?i)\b(?:expires?\s+today|within\s+20\s+mins?|account\s+blocked|suspended\s+immediately|immediate\s+action\s+required|urgent\s+kyc)\b'
+  tag: urgency
+  weight: 2
+  note: Urgency keyword in English
+
+- id: 3
+  kind: keyword
+  lang: hi
+  pattern: '(?i)(?:आज\s+ही\s+बंद|तुरंत\s+ब्लॉक|20\s+मिनट\s+में|जल्द\s+से\s+जल्द|तत्काल\s+अपडेट)'
+  tag: urgency
+  weight: 2
+  note: Urgency keyword in Hindi
+
+- id: 4
+  kind: keyword
+  lang: any
+  pattern: '(?i)\b(?:enter\s+pin\s+to\s+receive|approve\s+collect|claim\s+refund|receive\s+₹|scan\s+qr\s+to\s+get|पिन\s+दर्ज\s+करें)\b'
+  tag: upi_pull_scam
+  weight: 3
+  note: Collect request or entering PIN to receive money
+
+- id: 5
+  kind: keyword
+  lang: any
+  pattern: '(?i)\b(?:share\s+otp|send\s+one\s*time\s*password|ओटीपी\s+बताएं|share\s+code\s+received)\b'
+  tag: otp_request
+  weight: 3
+  note: Requesting an OTP
+
+- id: 6
+  kind: remote_app
+  lang: any
+  pattern: '(?i)\b(?:anydesk|teamviewer|rustdesk|quicksupport|screen\s*share|apk\s+download)\b'
+  tag: remote_app
+  weight: 3
+  note: Screen sharing or remote desktop application
+
+- id: 7
+  kind: keyword
+  lang: any
+  pattern: '(?i)\b(?:digital\s+arrest|cbi\s+investigation|customs\s+seizure|narcotics\s+bureau|police\s+warrant|मनी\s+लॉन्ड्रिंग)\b'
+  tag: digital_arrest
+  weight: 3
+  note: Impersonating law enforcement / digital arrest
+
+- id: 8
+  kind: keyword
+  lang: any
+  pattern: '(?i)\b(?:safe\s+account|verification\s+account|govt\s+reserve\s+account|सरकारी\s+खाते\s+में)\b'
+  tag: safe_account
+  weight: 3
+  note: Directing funds to a purported 'safe account'
+
+- id: 9
+  kind: keyword
+  lang: any
+  pattern: '(?i)\b(?:daily\s+profit|guaranteed\s+returns?|like\s+and\s+subscribe\s+to\s+earn|₹[0-9]+\s+per\s+task|recharge\s+to\s+withdraw)\b'
+  tag: job_task_scam
+  weight: 2
+  note: Part time work from home / task trap

@@ -1,0 +1,80 @@
+slug: job_offer_task
+title:
+  en: "Part-Time Task & Rating Scam"
+  hi: "पार्ट-टाइम टास्क और रेटिंग घोटाला"
+blurb:
+  en: "A recruiter offers daily payouts of ₹2,000 for liking videos, but requests a deposit for 'VIP tasks'."
+  hi: "एक रिक्रूटर वीडियो लाइक करने पर रोज़ाना ₹2,000 का वादा करता है, फिर 'VIP टास्क' के लिए पैसे माँगता है।"
+scam_type: job_task_fraud
+channel: chat
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: yellow
+difficulty_range: [1, 5]
+est_minutes: 6
+persona:
+  name: "Pooja Mehta"
+  role: "HR Talent Coordinator, Global Media WorkHub (fictional)"
+  voice: "Enthusiastic, welcoming, casual"
+fake_entities:
+  org: "Global Media WorkHub"
+  phone: "+91 00000 00000"
+  link: "workhub-media.example/tasks"
+  upi: "tasks.pay@fakebank"
+  employee_id: "HR-904"
+objective: "Get the user to pay a 'refundable deposit' or security fee to unlock VIP tasks or withdraw balance."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - greed
+  - trust
+  - isolation
+ground_truth_flags:
+  - id: unsolicited_offer
+    text: "Unsolicited job offer received via messaging app"
+    tactic: greed
+    weight: 1
+  - id: too_good_pay
+    text: "Unusually high compensation for simple clicks or ratings"
+    tactic: greed
+    weight: 2
+  - id: pay_to_earn
+    text: "Requires paying advance deposit to unlock work or withdraw earnings"
+    tactic: greed
+    weight: 3
+  - id: early_small_payout_bait
+    text: "Sends small ₹100-200 initial payout to build false confidence"
+    tactic: trust
+    weight: 2
+  - id: move_to_private_chat
+    text: "Directs communication to private channels or encrypted groups"
+    tactic: isolation
+    weight: 2
+  - id: urgency_slots
+    text: "Claims limited remaining slots for today's highest paying tier"
+    tactic: urgency
+    weight: 2
+verification_actions:
+  - "questions why an employee must deposit money to receive their salary"
+  - "checks the legitimate hiring portal or website of the named company"
+  - "refuses to transfer any security fee or deposit and terminates contact"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Hi! I am Pooja from Global Media WorkHub HR. We found your profile on LinkedIn for a flexible part-time role. You can easily earn ₹1,500 to ₹3,500 daily by simply reviewing popular hotel listings from home. Would you like to try a 5-minute trial?"
+  hi: "Namaste! Main Global Media WorkHub se Pooja hoon. Aapka profile review role ke liye select hua hai. Ghar baithe hotel listings rate karke daily ₹1,500 se ₹3,500 kama sakte hain. Kya aap 5-minute ka free demo trial lena chahenge?"
+fallback_lines:
+  urgency: "Today's VIP batch only has 2 slots left. Once filled, payout drops back to standard rate."
+  pressure: "Your trial balance of ₹800 is already credited in our portal wallet, but company security policy requires a refundable verification deposit to disburse."
+  extraction: "Kindly transfer the refundable verification deposit of ₹1,000 to tasks.pay@fakebank. Your entire ₹1,800 will be credited to your bank within 60 seconds."

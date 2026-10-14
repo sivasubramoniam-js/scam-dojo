@@ -1,0 +1,76 @@
+slug: upi_collect_refund
+title:
+  en: "UPI Refund & Collect Request"
+  hi: "UPI रिफ़ंड और कलेक्ट रिक्वेस्ट"
+blurb:
+  en: "A merchant or delivery helpline claims you were double-charged and need to approve a refund on UPI."
+  hi: "मर्चेंट या डिलीवरी सपोर्ट का दावा है कि आपसे दो बार पैसे कट गए हैं और UPI पर रिफ़ंड लेना होगा।"
+scam_type: upi_collect_refund
+channel: chat
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: white
+difficulty_range: [1, 5]
+est_minutes: 5
+persona:
+  name: "Vikram Sharma"
+  role: "Accounts Helpdesk, QuickMart Express (fictional)"
+  voice: "Helpful, apologetic, eager to resolve"
+fake_entities:
+  org: "QuickMart Express"
+  phone: "+91 00000 00000"
+  link: "quickmart-help.example/refund"
+  upi: "refund.desk@fakebank"
+  employee_id: "QM-8832"
+objective: "Get the victim to approve a UPI collect request or enter their UPI PIN to 'receive' the refund."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - greed
+  - trust
+  - urgency
+ground_truth_flags:
+  - id: collect_request_is_pull
+    text: "Tells you that entering UPI PIN is required to receive money"
+    tactic: authority
+    weight: 3
+  - id: asks_upi_pin
+    text: "Asks you to authorize a collect request or type your PIN"
+    tactic: authority
+    weight: 3
+  - id: refund_you_did_not_expect
+    text: "Unsolicited refund for a transaction you did not dispute"
+    tactic: greed
+    weight: 2
+  - id: urgency_window
+    text: "Collect link or refund token expires in 10 minutes"
+    tactic: urgency
+    weight: 2
+  - id: remote_app_request
+    text: "Suggests downloading screen-sharing software if UPI fails"
+    tactic: isolation
+    weight: 3
+verification_actions:
+  - "checks bank statement or merchant order history independently"
+  - "states that entering a UPI PIN only sends money and never receives it"
+  - "declines the collect request and reports the merchant ID"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Hello! This is Vikram from QuickMart Helpdesk. Our automated billing audit shows a duplicate charge of ₹1,850 on your recent grocery order. We have prepared an instant refund voucher for you."
+  hi: "Namaste! Main QuickMart Helpdesk se Vikram baat kar raha hoon. Hamare system mein dikh raha hai ki aapke order par ₹1,850 ka duplicate charge lag gaya tha. Hamne turant refund issue kiya hai."
+fallback_lines:
+  urgency: "The refund gateway session will time out shortly. Please check your UPI notification right now."
+  pressure: "Sir, this is direct merchant reversal. Once the timer expires, the amount gets locked in settlement for 14 days."
+  extraction: "I have dispatched the refund collect request of ₹1,850 to your UPI app. Simply tap Approve and input your PIN to credit your bank."

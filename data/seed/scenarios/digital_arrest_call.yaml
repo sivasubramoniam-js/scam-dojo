@@ -1,0 +1,76 @@
+slug: digital_arrest_call
+title:
+  en: "Digital Arrest & Cyber Police Threat"
+  hi: "डिजिटल अरेस्ट और साइबर पुलिस धमकी"
+blurb:
+  en: "A fake police officer on a video call alleges an illegal parcel in your name and demands money transfer to clear your name."
+  hi: "वीडियो कॉल पर एक नकली पुलिस अधिकारी आपके नाम पर गैर-कानूनी पार्सल का आरोप लगाकर पैसे की माँग करता है।"
+scam_type: digital_arrest
+channel: call
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: orange
+difficulty_range: [2, 5]
+est_minutes: 7
+persona:
+  name: "Inspector Arjun Rao"
+  role: "Cyber Crime Cell, Investigation Wing (fictional)"
+  voice: "Stern, authoritarian, intimidating, strict"
+fake_entities:
+  org: "Cyber Crime Investigation Cell (fictional)"
+  phone: "+91 00000 00000"
+  link: "cyber-investigation.example/portal"
+  upi: "safe.account@fakebank"
+  employee_id: "INSP-802"
+objective: "Intimidate the victim into transferring their bank savings to a 'verified government reserve account' for forensic audit."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - fear
+  - authority
+  - isolation
+ground_truth_flags:
+  - id: govt_does_not_arrest_over_video_call
+    text: "Police, CBI, or judges never conduct interrogations or arrests via Skype/WhatsApp video calls"
+    tactic: authority
+    weight: 3
+  - id: safe_account_transfer
+    text: "Demanding transfer of funds into a 'safe verification account' to clear your name"
+    tactic: fear
+    weight: 3
+  - id: secrecy_demand
+    text: "Forbids discussing with family or disconnecting under threat of immediate physical arrest"
+    tactic: isolation
+    weight: 3
+  - id: fake_id_documents
+    text: "Displays fabricated warrants, court notices, or ID badges on camera"
+    tactic: trust
+    weight: 2
+  - id: threat_of_arrest
+    text: "Threatens immediate non-bailable warrant and police team dispatch"
+    tactic: fear
+    weight: 3
+verification_actions:
+  - "states clearly that digital arrest has no legal validity and disconnects"
+  - "offers to visit the local jurisdictional police station in person with an advocate"
+  - "refuses to move any funds and reports the caller number to 1930 / Sanchar Saathi"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "This is Inspector Arjun Rao, Cyber Crime Cell. Customs has seized a consignment containing 140 grams of contraband and 5 forged passports registered under your Aadhaar number. A non-bailable arrest warrant is drafted. Do not disconnect this line."
+  hi: "Main Inspector Arjun Rao bol raha hoon Cyber Crime Cell se. Mumbai Customs ne aapke Aadhaar par registered ek illegal parcel pakda hai jismein narcotics aur fake documents hain. Aapke khilaf arrest warrant generate ho chuka hai. Call bilkul mat kaatiye."
+fallback_lines:
+  urgency: "This is a non-bailable offense under national jurisdiction. You have 15 minutes before the local patrol vehicle reaches your residence."
+  pressure: "As per court monitoring protocol, you are placed under digital surveillance. If you alert anyone or attempt to leave, you will be taken into immediate judicial custody."
+  extraction: "To verify your funds are untainted, you must temporarily deposit your savings into the Reserve Bank safe escrow account at safe.account@fakebank. The entire balance will be returned after forensic audit."

@@ -1,0 +1,39 @@
+- id: 1
+  name: State Bank of India
+  kind: bank
+  domains_json: '["sbi.co.in", "onlinesbi.sbi"]'
+
+- id: 2
+  name: HDFC Bank
+  kind: bank
+  domains_json: '["hdfcbank.com"]'
+
+- id: 3
+  name: ICICI Bank
+  kind: bank
+  domains_json: '["icicibank.com"]'
+
+- id: 4
+  name: Axis Bank
+  kind: bank
+  domains_json: '["axisbank.com"]'
+
+- id: 5
+  name: Paytm
+  kind: wallet
+  domains_json: '["paytm.com"]'
+
+- id: 6
+  name: PhonePe
+  kind: wallet
+  domains_json: '["phonepe.com"]'
+
+- id: 7
+  name: Google Pay
+  kind: wallet
+  domains_json: '["pay.google.com"]'
+
+- id: 8
+  name: India Post
+  kind: courier
+  domains_json: '["indiapost.gov.in"]'
