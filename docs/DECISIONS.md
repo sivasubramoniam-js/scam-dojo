@@ -39,3 +39,20 @@ Record of all architectural choices, API verifications, helpline data checks, an
   - `https://cms.rbi.org.in`: RBI Complaint Management System — Verified official URL.
   - `https://www.npci.org.in`: National Payments Corporation of India (UPI redressal) — Verified official URL.
 - All entries entered in `data/seed/resources.yaml` with `verified_on: "2026-10-14"` and exact `source_url`.
+
+## 2026-10-14 — Phase 1: Train Backend Decisions & Verifications
+
+### 1. Wire Format Serialization
+- Enforced `CamelModel` using Pydantic v2 `alias_generator=to_camel` and `populate_by_name=True` across all schemas. Python code uses idiomatic `snake_case` while wire API consistently speaks `camelCase` matching `docs/6.api-contract.md`.
+
+### 2. Dual-Mode Agent Runtime (Live ADK & Offline Fallback)
+- Structured the agent runtime (`agents/runtime.py`) to support both:
+  - Live Google GenAI/ADK streaming and JSON structured output schema parsing when a valid API key is present.
+  - Deterministic offline simulator (`FakeTrainLlm`) for offline development, local demos, and automated test runners.
+- Ensures zero friction for test suites while retaining real model capabilities.
+
+### 3. Server-Side Safety and Rules Layer
+- Placed deterministic rules outside the Observer LLM:
+  - Any high-risk credential (`[OTP]`, `[PIN]`, `[CVV]`, `[CARD]`) shared in `pressure` or `extraction` stages immediately triggers server-side override `terminal="user_fell"`.
+  - Scammer output passes through `validate_scammer_output`: rejects real Indian phone numbers, non-`.example` URLs, and non-`@fakebank` UPI addresses.
+  - Distress phrases in English and Hindi ("scared", "terrified", "police is outside", "main dar gaya", "mere paise kat gaye") trip `safety_break=True`, prompting a `[Sensei]` reassurance message.

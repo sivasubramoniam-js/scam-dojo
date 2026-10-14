@@ -12,7 +12,7 @@ from app.deps import _local_repo
 from app.errors import AppError, app_error_handler, generic_error_handler
 from app.logging import logger, setup_logging
 from app.middleware import setup_middleware
-from app.routers import health
+from app.routers import health, me, resources, scenarios, train
 from app.services.kb import kb_service
 
 
@@ -75,6 +75,10 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(health.router)
+    app.include_router(scenarios.router)
+    app.include_router(train.router)
+    app.include_router(me.router)
+    app.include_router(resources.router)
 
     return app
 

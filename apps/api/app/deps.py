@@ -1,7 +1,7 @@
 """FastAPI dependency providers for Auth, Database, KB, and Localization."""
 
 from dataclasses import dataclass
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import Header, Query, Request
 
@@ -58,6 +58,35 @@ async def get_user(
         )
     except Exception as e:
         raise UnauthenticatedError(f"Invalid authentication token: {e}") from e
+
+
+async def get_current_user(
+    request: Request,
+    authorization: Annotated[str | None, Header()] = None,
+    x_dev_user: Annotated[str | None, Header()] = None,
+) -> Any:
+    # Avoid circular import by importing Me lazily or at top
+    from app.schemas.user import Me
+
+    user = await get_user(request, authorization=authorization, x_dev_user=x_dev_user)
+    repo = await get_repo()
+    defaults = {
+        "uid": user.uid,
+        "displayName": user.display_name,
+        "isAnonymous": user.is_anonymous,
+        "language": "en",
+        "timezone": "Asia/Kolkata",
+        "resilience": 0,
+        "belt": "white",
+        "beltProgress": 0.0,
+        "nextBelt": "yellow",
+        "streak": {"current": 0, "best": 0, "lastActiveDate": None},
+        "counts": {"train": 0, "check": 0, "recover": 0},
+        "recommendedDifficulty": 1,
+        "settings": {"hideHints": False, "traceDefault": False},
+    }
+    user_doc = await repo.get_or_create_user(user.uid, defaults)
+    return Me.model_validate(user_doc)
 
 
 def get_lang(

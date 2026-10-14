@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     GOOGLE_CLOUD_PROJECT: str | None = None
     GOOGLE_CLOUD_LOCATION: str = "asia-south1"
     GOOGLE_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
 
     MODEL_LITE: str = "gemini-2.5-flash-lite"
     MODEL_FAST: str = "gemini-2.5-flash"

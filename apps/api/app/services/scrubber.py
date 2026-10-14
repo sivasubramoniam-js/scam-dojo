@@ -13,6 +13,10 @@ class ScrubResult:
     found: list[str]
     redactions: int
 
+    @property
+    def found_types(self) -> list[str]:
+        return self.found
+
 
 def luhn_checksum_valid(card_number_str: str) -> bool:
     digits = [int(c) for c in card_number_str if c.isdigit()]
