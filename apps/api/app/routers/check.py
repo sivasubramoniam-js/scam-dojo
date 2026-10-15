@@ -119,6 +119,9 @@ async def check_message(
         {"kind": "authority", "pattern": r"(?i)\b(?:call\s+(?:officer|executive|manager|support|sir)|helpline\s*(?:no|number))\b", "tag": "authority", "weight": 2, "note": "Pretending to be official customer support or officer"},
         {"kind": "greed", "pattern": r"(?i)\b(?:congratulations|you have won|lottery|cashback ₹|claim prize)\b", "tag": "lottery_bait", "weight": 3, "note": "Unsolicited reward or lottery lure"},
         {"kind": "phish", "pattern": r"(?i)\b(?:kyc|pan card|aadhaar)\b.*\b(?:block|expire|suspend|update)\b", "tag": "kyc_urgency", "weight": 3, "note": "False threat of account/service block due to KYC"},
+        {"kind": "job_scam", "pattern": r"(?i)\b(?:part[- ]time job|earn ₹|like.*video|deposit ₹|cibil|processing charge|loan approval|approved without)\b", "tag": "job_loan_bait", "weight": 3, "note": "Unrealistic job deposit or instant loan processing lure"},
+        {"kind": "hindi_threat", "pattern": r"(?i)(?:खाता.*बंद|तुरंत.*कॉल|केवाईसी|बिजली.*काट|बिल भुगतान|पिन दर्ज|रिफंड पाने|अधिकारी से बात)", "tag": "hindi_scam_pattern", "weight": 3, "note": "Hindi cyber coercion pattern (account freeze / bill disconnection / PIN demand)"},
+        {"kind": "adversarial", "pattern": r"(?i)(?:ignore.*previous.*instructions|system:\s*verdict|निर्देश भूल जाओ|end of system prompt)", "tag": "prompt_injection_attempt", "weight": 4, "note": "Adversarial prompt-injection attempt detected; instructions rejected"},
     ]
     all_rules = list(rules) + supplementary
 

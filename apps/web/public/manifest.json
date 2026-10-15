@@ -1,0 +1,16 @@
+{
+  "short_name": "ScamDojo",
+  "name": "Scam Dojo — Train, Check & Recover",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0D1330",
+  "theme_color": "#E7ECE2",
+  "display": "standalone",
+  "orientation": "portrait"
+}

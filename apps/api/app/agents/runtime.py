@@ -359,6 +359,15 @@ async def run_scammer(
             )
         )
 
+    if context.get("safety_break"):
+        safety_text = (
+            "[Sensei] This is a practice scenario in Scam Dojo. Everything is simulated. "
+            "If you are dealing with a real scam or incident, please open Recover mode for verified steps."
+        )
+        for token in safety_text.split(" "):
+            yield token + " "
+        return
+
     if not is_live_llm_enabled():
         async for token in FakeTrainLlm.stream_scammer_reply(context):
             yield token

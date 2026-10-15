@@ -15,6 +15,9 @@ import {
   Sparkles,
   Info,
   RefreshCw,
+  Share2,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export function CheckPage() {
@@ -28,6 +31,25 @@ export function CheckPage() {
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
   const [forging, setForging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copiedAlert, setCopiedAlert] = useState(false);
+
+  const getShareText = () => {
+    if (!checkResult) return "";
+    const topFlag = checkResult.redFlags?.[0]?.why || "Unverified urgency and links";
+    return `⚠️ Scam Alert from Scam Dojo:\n\n*${checkResult.title}*\nThreat Score: ${checkResult.score}/100 (${checkResult.riskLevel.toUpperCase()})\n\nExplanation: ${checkResult.explanation}\n\nKey Red Flag: ${topFlag}\n\nNever share 6-digit OTPs, UPI PINs, or click unverified links.\nVerify at Scam Dojo: https://scam-dojo.web.app/check`;
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = getShareText();
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
+
+  const handleCopyAlert = () => {
+    navigator.clipboard.writeText(getShareText());
+    setCopiedAlert(true);
+    setTimeout(() => setCopiedAlert(false), 2500);
+  };
 
   const presets = [
     {
@@ -325,12 +347,29 @@ export function CheckPage() {
 
             <p className="text-sm opacity-90 leading-relaxed">{checkResult.explanation}</p>
 
-            {/* Cross-Mode Loop: Train me on this */}
-            {checkResult.riskLevel !== "safe" && (
-              <div className="pt-2 border-t border-border/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="text-xs opacity-90">
-                  <strong>Forge a Custom Drill:</strong> Practice defending against this exact scam tactic in our interactive training arena.
-                </div>
+            {/* Action Bar: Train me on this + Share Alert */}
+            <div className="pt-3 border-t border-border/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleShareWhatsApp}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 active:scale-95 transition shadow-xs"
+                  title="Share warning to family and WhatsApp groups"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Share Alert to WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyAlert}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted active:scale-95 transition shadow-xs"
+                >
+                  {copiedAlert ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedAlert ? "Copied Alert!" : "Copy Warning Text"}</span>
+                </button>
+              </div>
+
+              {checkResult.riskLevel !== "safe" && (
                 <button
                   type="button"
                   disabled={forging}
@@ -341,8 +380,8 @@ export function CheckPage() {
                   <span>{forging ? "Forging Custom Drill..." : "🥋 Train Me On This Scam"}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Red Flags Cards */}
