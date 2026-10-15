@@ -50,18 +50,23 @@ from app.services.kb import kb_service
 router = APIRouter(prefix="/v1/train", tags=["train"])
 
 
+async def resolve_scenario(repo: Repo, uid: str, slug: str) -> dict[str, Any] | None:
+    """Resolve scenario definition from custom user repo or seed knowledge base."""
+    if slug.startswith("custom:"):
+        custom_id = slug.split(":", 1)[1]
+        raw = await repo.get_custom_scenario(uid, custom_id)
+        if raw:
+            return raw
+    return kb_service.get_scenario(slug)
+
+
 @router.post("/sessions", response_model=CreateSessionResponse, status_code=status.HTTP_201_CREATED)
 async def create_session(
     req: CreateSessionRequest,
     user: Me = Depends(get_current_user),
     repo: Repo = Depends(get_repo),
 ) -> CreateSessionResponse:
-    raw_scenario = None
-    if req.scenario_slug.startswith("custom:"):
-        custom_id = req.scenario_slug.split(":", 1)[1]
-        raw_scenario = await repo.get_custom_scenario(user.uid, custom_id)
-    if not raw_scenario:
-        raw_scenario = kb_service.get_scenario(req.scenario_slug)
+    raw_scenario = await resolve_scenario(repo, user.uid, req.scenario_slug)
 
     if not raw_scenario:
         raise ApiError(
@@ -175,7 +180,7 @@ async def send_message(
         )
 
     scen_slug = sess.get("scenario", {}).get("slug", "")
-    raw_scen = kb_service.get_scenario(scen_slug)
+    raw_scen = await resolve_scenario(repo, user.uid, scen_slug)
     if not raw_scen:
         raise ApiError(
             code="not_found",
@@ -294,7 +299,7 @@ async def end_session(
         return EndSessionResponse.model_validate(sess["endResponse"])
 
     scen_slug = sess.get("scenario", {}).get("slug", "")
-    raw_scen = kb_service.get_scenario(scen_slug)
+    raw_scen = await resolve_scenario(repo, user.uid, scen_slug)
     if not raw_scen:
         raise ApiError(
             code="not_found",
