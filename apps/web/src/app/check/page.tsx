@@ -19,6 +19,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import { ScamScoreCard } from "@/components/check/ScamScoreCard";
 
 export function CheckPage() {
   const navigate = useNavigate();
@@ -435,6 +436,9 @@ export function CheckPage() {
               )}
             </div>
           </div>
+
+          {/* Multi-Pillar ScamScore™ Breakdown & Vector Badges */}
+          <ScamScoreCard checkResult={checkResult} />
 
           {/* Red Flags Cards */}
           {checkResult.redFlags && checkResult.redFlags.length > 0 && (

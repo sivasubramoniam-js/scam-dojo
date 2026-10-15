@@ -122,6 +122,13 @@ export interface RedFlagItem {
   source: string;
 }
 
+export interface ScamScoreBreakdown {
+  coercion: number;
+  financialRisk: number;
+  senderSpoof: number;
+  remoteAccess: number;
+}
+
 export interface CheckResult {
   checkId: string;
   createdAt: string;
@@ -143,6 +150,8 @@ export interface CheckResult {
   alreadyActedHint?: boolean;
   inputTypes: string[];
   resources: ResourceItem[];
+  scoreBreakdown?: ScamScoreBreakdown;
+  vectorBadges?: string[];
 }
 
 export interface ForgeDrillResult {

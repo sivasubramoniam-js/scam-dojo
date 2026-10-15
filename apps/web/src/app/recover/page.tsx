@@ -23,6 +23,9 @@ import {
   FileText,
   Lock,
 } from "lucide-react";
+import { EvidenceDossierModal } from "@/components/recover/EvidenceDossierModal";
+import { BankFreezeDirectory } from "@/components/recover/BankFreezeDirectory";
+import { AntiRecoveryScamShield } from "@/components/recover/AntiRecoveryScamShield";
 
 export function RecoverPage() {
   // Wizard state
@@ -34,6 +37,7 @@ export function RecoverPage() {
   const [bank, setBank] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDossierModal, setShowDossierModal] = useState(false);
 
   // Active Plan state
   const [plan, setPlan] = useState<PlanResult | null>(null);
@@ -182,18 +186,46 @@ export function RecoverPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold uppercase tracking-wider">
-          <Clock className="w-3.5 h-3.5" />
-          Golden-Hour Fraud Triage & Recovery
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold uppercase tracking-wider">
+            <Clock className="w-3.5 h-3.5" />
+            Golden-Hour Fraud Triage & Recovery
+          </div>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+            I was targeted or lost money. What now?
+          </h1>
+          <p className="text-muted-foreground text-sm max-w-2xl">
+            Do not panic. Follow this step-by-step incident response plan. The first 2 hours are the "Golden Hour" where banks and Helpline 1930 have the highest chance to freeze funds.
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-          I was targeted or lost money. What now?
-        </h1>
-        <p className="text-muted-foreground text-sm max-w-2xl">
-          Do not panic. Follow this step-by-step incident response plan. The first 2 hours are the "Golden Hour" where banks and Helpline 1930 have the highest chance to freeze funds.
-        </p>
+
+        {/* Immediate Action Buttons Bar */}
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <a
+            href="tel:1930"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm"
+          >
+            <PhoneCall className="w-4 h-4" />
+            <span>Call 1930 Cyber Helpline</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={() => setShowDossierModal(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-bold transition shadow-sm"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Build Official Police & Bank Evidence Dossier</span>
+          </button>
+        </div>
       </div>
+
+      {/* Anti-Recovery Scam Shield Advisory */}
+      <AntiRecoveryScamShield />
+
+      {/* Emergency Bank Freeze Directory */}
+      <BankFreezeDirectory />
 
       {/* Guided Intake Wizard */}
       {inWizard ? (
@@ -353,13 +385,24 @@ export function RecoverPage() {
                   </div>
                 </div>
 
-                <a
-                  href="tel:1930"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition shadow whitespace-nowrap self-start sm:self-auto"
-                >
-                  <PhoneCall className="w-4 h-4" />
-                  <span>Call 1930 Helpline Now</span>
-                </a>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <a
+                    href="tel:1930"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition shadow whitespace-nowrap"
+                  >
+                    <PhoneCall className="w-4 h-4" />
+                    <span>Call 1930</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowDossierModal(true)}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition shadow whitespace-nowrap"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Generate Evidence Dossier</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -570,6 +613,13 @@ export function RecoverPage() {
           </div>
         )
       )}
+
+      {/* Evidence Dossier & Case Builder Modal */}
+      <EvidenceDossierModal
+        isOpen={showDossierModal}
+        onClose={() => setShowDossierModal(false)}
+        defaultBank={bank}
+      />
     </div>
   );
 }

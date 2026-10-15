@@ -42,7 +42,19 @@ export function TrainPage() {
   const [traces, setTraces] = useState<string[]>([]);
   const [isDone, setIsDone] = useState(false);
   const [debriefInfo, setDebriefInfo] = useState<any | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "family" | "jobs" | "urgency">("all");
   const logRef = useRef<HTMLDivElement>(null);
+
+  const familySlugs = ["remote_access_support", "digital_arrest_call", "electricity_bill", "fake_kyc"];
+  const jobSlugs = ["job_offer_task", "investment_ponzi"];
+  const urgencySlugs = ["digital_arrest_call", "courier_customs", "electricity_bill"];
+
+  const filteredScenarios = scenarios.filter((s) => {
+    if (categoryFilter === "family") return familySlugs.includes(s.slug);
+    if (categoryFilter === "jobs") return jobSlugs.includes(s.slug);
+    if (categoryFilter === "urgency") return urgencySlugs.includes(s.slug);
+    return true;
+  });
 
   // Load scenarios from live backend
   useEffect(() => {
@@ -329,11 +341,40 @@ export function TrainPage() {
       {/* Scenario Picker Carousel / Select */}
       {!started && (
         <div className="mb-6">
-          <label className="text-xs font-bold uppercase tracking-wider text-[var(--mut)] block mb-2">
-            Select Live Threat Scenario:
-          </label>
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--mut)]">
+              Select Live Threat Scenario:
+            </label>
+            <span className="text-[11px] font-semibold text-[var(--mut)]">
+              Showing {filteredScenarios.length} scenarios
+            </span>
+          </div>
+
+          {/* Category Filter Chips */}
+          <div className="flex items-center gap-1.5 flex-wrap mb-3 text-xs">
+            {[
+              { id: "all", label: "All Scenarios" },
+              { id: "family", label: "👨‍👩‍👧 Family & Senior Safety" },
+              { id: "jobs", label: "💼 Job & Investment" },
+              { id: "urgency", label: "🚨 Urgent Extortion" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setCategoryFilter(f.id as any)}
+                className={`px-3 py-1.5 rounded-full font-bold transition text-xs cursor-pointer ${
+                  categoryFilter === f.id
+                    ? "bg-[var(--act)] text-white shadow-xs"
+                    : "bg-[var(--sf2)] text-[var(--mut)] hover:text-[var(--ink)]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {scenarios.map((scen) => {
+            {filteredScenarios.map((scen) => {
               const isSelected = scen.slug === selectedSlug;
               const isLocked = Boolean(scen.locked);
               return (
@@ -358,6 +399,11 @@ export function TrainPage() {
                     <span className="font-bold text-[var(--act)] capitalize flex items-center gap-1">
                       {isLocked && <span className="material-symbols-outlined text-[14px]">lock</span>}
                       {scen.channel?.replace("_", " ")}
+                      {familySlugs.includes(scen.slug) && (
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">
+                          👨‍👩‍👧 Family
+                        </span>
+                      )}
                     </span>
                     <span className={`font-semibold text-[11px] px-1.5 py-0.5 rounded ${
                       isLocked ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold" : "text-[var(--mut)]"
@@ -597,7 +643,18 @@ export function TrainPage() {
                   Session recorded in SQLite. Resilience updated on profile.
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                  title="Share this drill with family or elderly parents"
+                >
+                  <span>Share Drill with Family</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setStarted(false)}
