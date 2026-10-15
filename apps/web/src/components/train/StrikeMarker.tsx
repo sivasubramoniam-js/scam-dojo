@@ -1,35 +1,39 @@
-"use client";
-
 import React from "react";
-import { ShieldCheck, AlertTriangle, Minus } from "lucide-react";
 
 interface StrikeMarkerProps {
-  result: "landed" | "blocked" | "neutral";
+  result: "blocked" | "landed" | "neutral";
+  className?: string;
 }
 
-export function StrikeMarker({ result }: StrikeMarkerProps) {
-  if (result === "blocked") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-        <ShieldCheck className="w-3.5 h-3.5" />
-        <span>Blocked</span>
-      </span>
-    );
-  }
+export function StrikeMarker({ result, className = "" }: StrikeMarkerProps) {
+  const configs = {
+    blocked: {
+      label: "Blocked",
+      icon: "shield",
+      color: "text-safe-matcha bg-safe-matcha/10 border-safe-matcha/30",
+    },
+    landed: {
+      label: "Landed",
+      icon: "close",
+      color: "text-danger-beni bg-danger-beni/10 border-danger-beni/30",
+    },
+    neutral: {
+      label: "Neutral",
+      icon: "remove",
+      color: "text-ink-sumi bg-surface-hanshi border-line-ito/50",
+    },
+  };
 
-  if (result === "landed") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-        <AlertTriangle className="w-3.5 h-3.5" />
-        <span>Landed</span>
-      </span>
-    );
-  }
+  const c = configs[result] || configs.neutral;
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--surface-muted)] text-[var(--text-muted)] border border-[var(--border)]">
-      <Minus className="w-3.5 h-3.5" />
-      <span>Neutral</span>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${c.color} ${className}`}
+    >
+      <span className="material-symbols-outlined text-[15px]">{c.icon}</span>
+      <span>{c.label}</span>
     </span>
   );
 }
+
+export default StrikeMarker;

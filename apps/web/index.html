@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <title>Scam Dojo — Practice getting scammed. Safely.</title>
+    <meta
+      name="description"
+      content="Calm, disciplined martial-arts cyber defense against real-world scams. Practice real-time strikes, master defensive stances, and advance your cyber belt."
+    />
+
+    <!-- Google Fonts: Anek Latin, Anek Devanagari, Plus Jakarta Sans, Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,100..800&family=Anek+Devanagari:wdth,wght@75..125,100..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Google Material Symbols Outlined -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+
+    <!-- Force light theme by default -->
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("dojo_theme") || "light";
+          document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+          var lang = localStorage.getItem("dojo_lang") || "en";
+          document.documentElement.setAttribute("lang", lang);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-bg-igusa font-body-md text-ink-aizome min-h-screen antialiased selection:bg-action-ai selection:text-action-ink">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -32,3 +32,28 @@ Tracking the implementation phases against acceptance criteria.
   - Replay Debrief (`/train/debrief?sid=`): Replay headline, score count-up, animated `Belt` component with knot pulse, `ReplayList` with `ReplayItem`s ("A stronger reply" collapsible suggestions), `StrikeMarker` badges (Blocked/Landed/Neutral with icon + text), `TacticBars` breakdown, and Sensei lessons to remember.
   - Responsive Verification: Verified in live browser subagent on mobile 360x640 viewport with zero horizontal overflow.
   - Quality: Static export build (`next build`) produces all 7 static pages; 16 vitest web unit tests and 42 pytest backend tests pass green; 0 lint/typecheck errors.
+
+## Phase 3: Check Mode & Scenario Forge
+- Status: Complete
+- Verification:
+  - Backend: `POST /v1/check` combines fast heuristic matching from SQLite `pattern_rules` table with Google Gemini multimodal analysis. Returns diagnostic title, risk level, threat score (0-100), red flags with exact quoted snippets, and prioritized do/don't actions.
+  - Cross-Mode Loop (Scenario Forge): `POST /v1/check/{cid}/to-drill` turns detected scam into an interactive custom drill (`custom:<id>`), auto-loaded by `train.py` and `scenarios.py`.
+  - Frontend: Interactive drag-and-drop / screenshot upload with instant preview, animated 3-step threat pipeline progress, authoritative verdict badge, red flag detail cards, and direct "🥋 Train me on this scam" forge button routing into the training stage.
+  - Tested: `apps/api/tests/test_check_api.py` green (safe, scam, and forge paths).
+
+## Phase 4: Recover Mode & Golden-Hour Triage
+- Status: Complete
+- Verification:
+  - Backend: `POST /v1/recover/plans` creates personalized golden-hour triage plans strictly grounded in verified Indian emergency authorities (National Cyber Fraud Helpline 1930, cybercrime.gov.in, DoT Sanchar Saathi Chakshu, RBI Ombudsman).
+  - Persistence & Toggles: `PATCH /v1/recover/plans/{pid}/steps/{stepId}` saves step completion states; `POST /v1/recover/plans/{pid}/chat` provides grounded follow-up assistance.
+  - Frontend: 30-second guided intake wizard (fraud vector, time elapsed, amount, bank), instant 1930 direct dial button, copy-ready dispute letters with pre-filled transaction parameters, evidence checklist, and in-page AI Recovery Assistant.
+  - Tested: `apps/api/tests/test_recover_api.py` green (golden hour creation, step toggle, and assistant chat).
+
+## Phase 5: Dashboard, Unified History & Live Agent Trace
+- Status: Complete
+- Verification:
+  - Backend: `GET /v1/dashboard` aggregates user profile, score progression trend, tactic weakness profile (Urgency, Authority, Fear, Greed, Trust, Isolation), recommended next drill, and unified activity history across Train, Check, and Recover.
+  - Frontend: `/dashboard` displays animated belt knot graphic (`BeltGraphic`), resilience numeral, streak count, sensitivity breakdown bars, and recent activity feed.
+  - Live Trace Panel: Collapsible floating drawer (`TracePanel`) demonstrating real-time handoffs between the 7 ADK agents for hackathon judges (`?trace=1`).
+  - Web & API Green: 47 pytest backend tests and 16 vitest web tests pass 100% green; Vite production build succeeds cleanly.
+

@@ -1,0 +1,8 @@
+ENV: "local"
+STORE: "sqlite"
+SQLITE_PATH: "/app/.local/dojo.sqlite"
+KB_PATH: "/app/data/knowledge.sqlite"
+GOOGLE_CLOUD_PROJECT: "scam-dojo"
+GOOGLE_CLOUD_LOCATION: "asia-south1"
+FIREBASE_PROJECT_ID: "scam-dojo-v2"
+CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,https://scam-dojo-v2.web.app,https://scam-dojo-v2.firebaseapp.com"

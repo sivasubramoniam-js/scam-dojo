@@ -1,44 +1,29 @@
 import React from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link
-      href="/"
-      className={`inline-flex items-center gap-2.5 font-bold tracking-tight text-[var(--ink)] hover:opacity-90 transition-opacity ${className}`}
-    >
-      {/* Belt Knot SVG mark */}
-      <svg
-        width="26"
-        height="26"
-        viewBox="0 0 28 28"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="text-[var(--action)] shrink-0"
-        aria-hidden="true"
-      >
-        <rect
-          x="3"
-          y="7"
-          width="18"
-          height="6"
-          rx="3"
-          transform="rotate(15 3 7)"
-          fill="currentColor"
-        />
-        <rect
-          x="7"
-          y="19"
-          width="18"
-          height="6"
-          rx="3"
-          transform="rotate(-25 7 19)"
-          fill="currentColor"
-          fillOpacity="0.8"
-        />
-        <circle cx="14" cy="14" r="3.5" fill="var(--bg)" stroke="currentColor" strokeWidth="1.5" />
-      </svg>
-      <span className="text-xl font-extrabold tracking-tight">Scam Dojo</span>
+    <Link to="/" className={`inline-flex items-center gap-2.5 group ${className}`}>
+      <div className="w-8 h-8 rounded-lg bg-surface-hanshi border border-line-ito/50 flex items-center justify-center shrink-0 text-ink-aizome transition-transform group-hover:scale-105">
+        {/* Belt knot glyph */}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-action-ai">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M7 12H3a2 2 0 0 0-2 2v2" />
+          <path d="M17 12h4a2 2 0 0 1 2 2v2" />
+          <path d="M10 15l-3 6" />
+          <path d="M14 15l3 6" />
+        </svg>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="font-headline-sm text-lg font-bold text-ink-aizome tracking-tight">
+          Scam Dojo
+        </span>
+        <span className="text-[11px] font-semibold text-ink-sumi bg-surface-hanshi border border-line-ito/40 px-1.5 py-0.5 rounded-full">
+          道場
+        </span>
+      </div>
     </Link>
   );
 }
+
+export default Logo;

@@ -55,8 +55,23 @@ def render_prompt(template_name: str, context: dict[str, Any]) -> str:
 
 
 def is_live_llm_enabled() -> bool:
-    key = settings.GEMINI_API_KEY
+    if settings.GOOGLE_GENAI_USE_VERTEXAI and settings.GOOGLE_CLOUD_PROJECT:
+        return True
+    key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY
     return bool(key and key not in ("test-api-key", "dummy", "fake", ""))
+
+
+def get_genai_client():
+    from google import genai
+
+    if settings.GOOGLE_GENAI_USE_VERTEXAI and settings.GOOGLE_CLOUD_PROJECT:
+        return genai.Client(
+            vertexai=True,
+            project=settings.GOOGLE_CLOUD_PROJECT,
+            location=settings.GOOGLE_CLOUD_LOCATION,
+        )
+    key = settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY or ""
+    return genai.Client(api_key=key)
 
 
 class FakeTrainLlm:
@@ -287,10 +302,9 @@ async def run_observer(
 
     # Live Gemini call via google-genai
     try:
-        from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY or "")
+        client = get_genai_client()
         prompt_text = render_prompt("observer.md.j2", context)
 
         config = types.GenerateContentConfig(
@@ -365,10 +379,9 @@ async def run_scammer(
 
     # Live streaming Gemini call
     try:
-        from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY or "")
+        client = get_genai_client()
         prompt_text = render_prompt("scammer.md.j2", context)
 
         config = types.GenerateContentConfig(
@@ -442,10 +455,9 @@ async def run_coach(
 
     # Live Gemini call
     try:
-        from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY or settings.GOOGLE_API_KEY or "")
+        client = get_genai_client()
         prompt_text = render_prompt("coach.md.j2", context)
 
         config = types.GenerateContentConfig(

@@ -1,5 +1,6 @@
 """Train mode schemas and domain models."""
 
+import uuid
 from typing import Literal
 
 from pydantic import Field
@@ -116,7 +117,7 @@ class CreateSessionResponse(CamelModel):
 
 class SendMessageRequest(CamelModel):
     text: str = Field(max_length=500)
-    client_msg_id: str
+    client_msg_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
 
 class AckData(CamelModel):

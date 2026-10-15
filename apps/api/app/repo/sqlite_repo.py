@@ -315,6 +315,12 @@ class SqliteRepo(Repo):
             res: dict[str, Any] = json.loads(row[0])
             return res
 
+    async def list_custom_scenarios(self, uid: str) -> list[dict[str, Any]]:
+        async with aiosqlite.connect(self.db_path) as db, db.execute(
+            "SELECT doc FROM custom_scenarios WHERE uid = ?", (uid,)
+        ) as cur:
+            return [json.loads(r[0]) async for r in cur]
+
     async def incr_usage(self, uid: str, kind: str, n: int = 1) -> int:
         import datetime
         date_str = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")

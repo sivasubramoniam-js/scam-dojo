@@ -23,9 +23,9 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
 
-    MODEL_LITE: str = "gemini-2.5-flash-lite"
+    MODEL_LITE: str = "gemini-2.5-flash"
     MODEL_FAST: str = "gemini-2.5-flash"
-    MODEL_PRO: str = "gemini-2.5-pro"
+    MODEL_PRO: str = "gemini-2.5-flash"
     MODEL_FALLBACK: str = "gemini-2.5-flash"
 
     # Storage

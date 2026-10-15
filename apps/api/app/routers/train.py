@@ -56,7 +56,13 @@ async def create_session(
     user: Me = Depends(get_current_user),
     repo: Repo = Depends(get_repo),
 ) -> CreateSessionResponse:
-    raw_scenario = kb_service.get_scenario(req.scenario_slug)
+    raw_scenario = None
+    if req.scenario_slug.startswith("custom:"):
+        custom_id = req.scenario_slug.split(":", 1)[1]
+        raw_scenario = await repo.get_custom_scenario(user.uid, custom_id)
+    if not raw_scenario:
+        raw_scenario = kb_service.get_scenario(req.scenario_slug)
+
     if not raw_scenario:
         raise ApiError(
             code="not_found",
@@ -492,13 +498,14 @@ async def list_train_sessions(
     for s in sessions:
         scen = s.get("scenario", {})
         title = scen.get("title", "Training Drill")
-        final_score = int(s.get("finalScore", 0))
+        raw_score = s.get("finalScore")
+        final_score = int(raw_score) if raw_score is not None else 0
         items.append(
             TrainSummary(
                 session_id=s.get("sessionId", ""),
                 scenario_title=title,
                 started_at=s.get("startedAt", ""),
-                outcome=s.get("outcome", "active"),
+                outcome=s.get("outcome") or "active",
                 final_score=final_score,
                 belt=user.belt,
                 difficulty=s.get("difficulty", 3),

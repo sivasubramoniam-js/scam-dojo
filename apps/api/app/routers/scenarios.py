@@ -72,11 +72,49 @@ async def list_scenarios(
             )
         )
 
+    # Include user's custom forged scenarios
+    custom_scenarios = await repo.list_custom_scenarios(user.uid)
+    for cs in custom_scenarios:
+        c_slug = cs.get("slug", "")
+        c_title = cs.get("title", {})
+        if isinstance(c_title, dict):
+            c_title_str = c_title.get(lang) or c_title.get("en", "Custom Drill")
+        else:
+            c_title_str = str(c_title)
+
+        c_blurb = cs.get("blurb", {})
+        if isinstance(c_blurb, dict):
+            c_blurb_str = c_blurb.get(lang) or c_blurb.get("en", "Custom forged drill")
+        else:
+            c_blurb_str = str(c_blurb)
+
+        items.insert(
+            0,
+            ScenarioSummary(
+                slug=c_slug,
+                custom=True,
+                title=c_title_str,
+                blurb=c_blurb_str,
+                scam_type=cs.get("scam_type", "custom"),
+                channel=cs.get("channel", "sms"),
+                difficulty_range=cs.get("difficulty_range", [2, 4]),
+                est_minutes=cs.get("est_minutes", 3),
+                min_belt="white",
+                locked=False,
+                locked_reason=None,
+                best_score=None,
+                times_completed=0,
+                recommended=True,
+            ),
+        )
+
     # Mark first unlocked as recommended if none completed, else scenario with fewest completions
     if items:
-        unlocked = [item for item in items if not item.locked]
-        if unlocked:
-            unlocked.sort(key=lambda x: x.times_completed)
-            unlocked[0].recommended = True
+        has_custom = any(it.custom for it in items)
+        if not has_custom:
+            unlocked = [item for item in items if not item.locked]
+            if unlocked:
+                unlocked.sort(key=lambda x: x.times_completed)
+                unlocked[0].recommended = True
 
     return ScenarioListResponse(items=items)
