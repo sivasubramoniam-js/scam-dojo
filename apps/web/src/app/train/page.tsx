@@ -4,6 +4,7 @@ import {
   fetchScenarios,
   createTrainSession,
   sendTrainMessage,
+  streamTrainMessage,
   endTrainSession,
   ScenarioItem,
 } from "@/lib/api";
@@ -35,6 +36,8 @@ export function TrainPage() {
   const [inputVal, setInputVal] = useState("");
   const [tension, setTension] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [aiStatus, setAiStatus] = useState<string | null>(null);
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const [showTrace, setShowTrace] = useState(true);
   const [traces, setTraces] = useState<string[]>([]);
   const [isDone, setIsDone] = useState(false);
@@ -53,7 +56,7 @@ export function TrainPage() {
           if (targetSlug && res.items.some((s) => s.slug === targetSlug)) {
             setSelectedSlug(targetSlug);
           } else {
-            const defaultScen = res.items.find((s) => s.recommended) || res.items[0];
+            const defaultScen = res.items.find((s) => s.recommended && !s.locked) || res.items.find((s) => !s.locked) || res.items[0];
             setSelectedSlug(defaultScen.slug);
           }
         }
@@ -70,12 +73,20 @@ export function TrainPage() {
 
   const startDrill = async (slugToStart?: string) => {
     const slug = slugToStart || selectedSlug;
+    const scen = scenarios.find((s) => s.slug === slug);
+    if (scen?.locked) {
+      setSessionError(`Scenario is locked: ${scen.lockedReason || `Requires ${scen.minBelt} Belt`}. Please select an unlocked drill.`);
+      return;
+    }
+
+    setSessionError(null);
     setStarted(true);
     setIsDone(false);
     setDebriefInfo(null);
     setTension(0);
     setIsTyping(true);
-    setTraces(["Live Backend Pipeline: connecting to /v1/train/sessions..."]);
+    setAiStatus("Connecting to Gemini 3.8 Flash live pipeline...");
+    setTraces(["Live Pipeline: initializing session on /v1/train/sessions..."]);
 
     try {
       const sess = await createTrainSession(slug);
@@ -100,22 +111,16 @@ export function TrainPage() {
           `Scenario: ${sess.scenario?.title} · Difficulty: ${sess.difficulty}`,
           `Persona: ${sess.scenario?.personaName} (${sess.scenario?.orgLabel})`,
           `Initial stage: ${sess.stage || "hook"} · tension: ${sess.tension || 0}`,
+          `Live AI Engine: Gemini 3.8 Flash on Google Cloud Vertex AI (global)`,
         ]);
       }
-    } catch {
-      // Fallback in case of network issue
-      const fallbackMsg =
-        "Sir, this is Rakesh from Orion Bank Customer Support. Your KYC document expired today and your savings account is scheduled for immediate suspension. Are you available for 2 minutes to update it?";
-      setMessages([
-        {
-          id: `init-${Date.now()}`,
-          role: "scammer",
-          text: fallbackMsg,
-        },
-      ]);
-      setTraces(["Fallback mode: local simulator active"]);
+    } catch (err: any) {
+      setStarted(false);
+      setSessionId(null);
+      setSessionError(`Unable to start drill: ${err.message || "Connection error"}`);
     } finally {
       setIsTyping(false);
+      setAiStatus(null);
     }
   };
 
@@ -123,6 +128,7 @@ export function TrainPage() {
     const raw = (textToSend || inputVal).trim();
     if (!raw || isDone) return;
     setInputVal("");
+    setSessionError(null);
 
     // Client-side PII check
     const scrubbed = scrubPii(raw);
@@ -145,42 +151,84 @@ export function TrainPage() {
       ]);
     }
 
+    if (!sessionId) {
+      setSessionError("No active drill session. Please select an unlocked drill scenario above.");
+      return;
+    }
+
     setIsTyping(true);
+    setAiStatus("Observer Agent (Gemini 3.8) evaluating your defense & tactics...");
 
-    if (sessionId) {
-      try {
-        const res = await sendTrainMessage(sessionId, scrubbed.text);
+    const scammerMsgId = `scam-${Date.now()}`;
+    let messageCreated = false;
 
-        setIsTyping(false);
-
-        // Update tension from backend live state
-        if (typeof res?.state?.tension === "number") {
-          setTension(res.state.tension);
-        }
-
-        // Add backend agent trace
-        setTraces((t) => [
-          ...t,
-          `Turn ${res?.state?.turn ?? "?"} · Stage: ${res?.state?.stage ?? "active"} · Tension: ${res?.state?.tension ?? 0}/10 · Backend Status: ${res?.state?.status}`,
-        ]);
-
-        // Scammer reply from live LLM / state machine
-        if (res?.message?.text) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `scam-${Date.now()}`,
-              role: "scammer",
-              text: res.message.text,
-            },
+    try {
+      await streamTrainMessage(sessionId, scrubbed.text, {
+        onTrace: (tr) => {
+          if (tr.summary) {
+            setTraces((t) => [
+              ...t,
+              `[${tr.agent || "gemini"}] ${tr.summary} ${tr.latencyMs ? `(${tr.latencyMs}ms)` : ""} · Model: ${tr.model || "gemini-3.8-flash"}`,
+            ]);
+          }
+          if (tr.agent === "observer_agent") {
+            setAiStatus("Scammer Agent (Gemini 3.8) adapting psychological pressure...");
+          }
+        },
+        onState: (st) => {
+          if (typeof st?.tension === "number") {
+            setTension(st.tension);
+          }
+          setTraces((t) => [
+            ...t,
+            `Turn ${st.turn} · Stage: ${st.stage} · Tension: ${st.tension}/10 · Status: ${st.status}`,
           ]);
-        }
-
-        // Check if session has ended
-        if (res?.sessionEnd) {
+        },
+        onToken: (delta) => {
+          setAiStatus(null);
+          setIsTyping(false);
+          if (!messageCreated) {
+            messageCreated = true;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: scammerMsgId,
+                role: "scammer",
+                text: delta,
+              },
+            ]);
+          } else {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === scammerMsgId ? { ...m, text: m.text + delta } : m
+              )
+            );
+          }
+        },
+        onMessageEnd: (msg) => {
+          setIsTyping(false);
+          setAiStatus(null);
+          if (!messageCreated) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: scammerMsgId,
+                role: msg.role === "sensei" ? "sensei" : "scammer",
+                text: msg.text,
+              },
+            ]);
+          } else {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === scammerMsgId ? { ...m, text: msg.text } : m
+              )
+            );
+          }
+        },
+        onSessionEnd: (end) => {
           setIsDone(true);
-          setDebriefInfo(res.sessionEnd);
-          const outcome = res.sessionEnd.outcome;
+          setDebriefInfo(end);
+          const outcome = end.outcome;
           setMessages((prev) => [
             ...prev,
             {
@@ -194,27 +242,43 @@ export function TrainPage() {
                   : "Drill completed.",
             },
           ]);
+        },
+        onError: (err) => {
+          setIsTyping(false);
+          setAiStatus(null);
+          setTraces((t) => [...t, `Error: ${err.message}`]);
+        },
+      });
+    } catch (err: any) {
+      // Fallback to sync call if streaming fails
+      try {
+        const res = await sendTrainMessage(sessionId, scrubbed.text);
+        setIsTyping(false);
+        setAiStatus(null);
+        if (typeof res?.state?.tension === "number") {
+          setTension(res.state.tension);
         }
-        return;
-      } catch (err: any) {
-        // Fallback to local response if network error
-        setTraces((t) => [...t, `Backend note: ${err.message || "using local fallback"}`]);
+        if (res?.message?.text) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: scammerMsgId,
+              role: res.message.role || "scammer",
+              text: res.message.text,
+            },
+          ]);
+        }
+        if (res?.sessionEnd) {
+          setIsDone(true);
+          setDebriefInfo(res.sessionEnd);
+        }
+      } catch (syncErr: any) {
+        setIsTyping(false);
+        setAiStatus(null);
+        setSessionError(`Network error communicating with AI server: ${syncErr.message}`);
+        setTraces((t) => [...t, `Network error: ${syncErr.message}`]);
       }
     }
-
-    // Local fallback if no session or network error
-    setTimeout(() => {
-      setIsTyping(false);
-      setTension((t) => Math.min(10, t + 2));
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `fallback-${Date.now()}`,
-          role: "scammer",
-          text: "Sir, please do not disconnect. If you hang up, the account will be locked.",
-        },
-      ]);
-    }, 600);
   };
 
   const handleHangUp = async () => {
@@ -271,23 +335,34 @@ export function TrainPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {scenarios.map((scen) => {
               const isSelected = scen.slug === selectedSlug;
+              const isLocked = Boolean(scen.locked);
               return (
                 <button
                   key={scen.slug}
                   type="button"
-                  onClick={() => setSelectedSlug(scen.slug)}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30"
-                      : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50"
+                  onClick={() => {
+                    if (!isLocked) {
+                      setSelectedSlug(scen.slug);
+                      setSessionError(null);
+                    }
+                  }}
+                  className={`p-3.5 rounded-xl border text-left transition-all relative ${
+                    isLocked
+                      ? "opacity-60 bg-[var(--sf2)]/30 border-[var(--line)] cursor-not-allowed"
+                      : isSelected
+                      ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 cursor-pointer"
+                      : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 cursor-pointer"
                   }`}
                 >
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-[var(--act)] capitalize">
+                    <span className="font-bold text-[var(--act)] capitalize flex items-center gap-1">
+                      {isLocked && <span className="material-symbols-outlined text-[14px]">lock</span>}
                       {scen.channel?.replace("_", " ")}
                     </span>
-                    <span className="text-[var(--mut)] font-semibold">
-                      ~{scen.estMinutes} mins
+                    <span className={`font-semibold text-[11px] px-1.5 py-0.5 rounded ${
+                      isLocked ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold" : "text-[var(--mut)]"
+                    }`}>
+                      {isLocked ? (scen.lockedReason || `Requires ${scen.minBelt} Belt`) : `~${scen.estMinutes} mins`}
                     </span>
                   </div>
                   <b className="text-sm text-[var(--ink)] block mb-0.5">{scen.title}</b>
@@ -306,12 +381,18 @@ export function TrainPage() {
           <span>Zero-PII Active: Client & backend auto-redact Aadhaar, PAN, OTP, and cards.</span>
         </div>
         <span className="inline-flex items-center gap-1 font-bold text-[var(--safe)] bg-[var(--safe)]/10 px-2 py-0.5 rounded-full text-[11px]">
-          ● Live Backend
+          ● Gemini 3.8 Flash Online
         </span>
       </div>
 
       {!started ? (
         <div className="mt-4 flex flex-col items-center justify-center p-8 bg-[var(--sf)] border border-[var(--line)] rounded-2xl text-center shadow-dojo">
+          {sessionError && (
+            <div className="w-full max-w-md mb-4 p-3 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2 text-left">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span>{sessionError}</span>
+            </div>
+          )}
           <div className="w-14 h-14 rounded-full bg-[var(--sf2)] flex items-center justify-center text-[var(--act)] mb-3">
             <span className="material-symbols-outlined text-[28px]">sports_martial_arts</span>
           </div>
@@ -322,13 +403,25 @@ export function TrainPage() {
             {activeScenario?.blurb ||
               "A simulated scammer will use authority, fear, and tight deadlines to extract your credentials. Practice countering in real-time."}
           </p>
-          <button
-            type="button"
-            onClick={() => startDrill()}
-            className="dojo-btn px-8 text-base shadow-dojo"
-          >
-            Start live drill →
-          </button>
+          {activeScenario?.locked ? (
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs font-bold text-[var(--warn)] bg-[var(--warn)]/10 px-3 py-1.5 rounded-full flex items-center gap-1">
+                <span className="material-symbols-outlined text-[16px]">lock</span>
+                {activeScenario.lockedReason || `Requires ${activeScenario.minBelt} Belt`}
+              </span>
+              <p className="text-xs text-[var(--mut)]">
+                Train on White Belt scenarios to build resilience and unlock this threat simulation.
+              </p>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => startDrill()}
+              className="dojo-btn px-8 text-base shadow-dojo"
+            >
+              Start live drill →
+            </button>
+          )}
         </div>
       ) : (
         /* Stage */
@@ -336,10 +429,13 @@ export function TrainPage() {
           {/* Stage Header */}
           <div className="dojo-sh">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--bad)] animate-pulse"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--safe)] animate-pulse"></span>
               <div>
-                <b className="text-sm sm:text-base text-[var(--ink)] block leading-tight">
+                <b className="text-sm sm:text-base text-[var(--ink)] block leading-tight flex items-center gap-2">
                   {activeScenarioInfo.orgLabel}
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--sf2)] border border-[var(--line)] text-[var(--safe)] font-semibold hidden sm:inline">
+                    Gemini 3.8 Flash
+                  </span>
                 </b>
                 <span className="text-xs text-[var(--mut)]">
                   Caller: {activeScenarioInfo.personaName} · Session: {sessionId?.slice(0, 8)}…
@@ -350,9 +446,10 @@ export function TrainPage() {
               <button
                 type="button"
                 onClick={() => setShowTrace(!showTrace)}
-                className="text-xs px-2.5 py-1 rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--mut)] hover:text-[var(--ink)] cursor-pointer"
+                className="text-xs px-2.5 py-1 rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--mut)] hover:text-[var(--ink)] cursor-pointer flex items-center gap-1"
               >
-                {showTrace ? "Hide trace" : "Agent trace"}
+                <span className="material-symbols-outlined text-[14px]">psychology</span>
+                {showTrace ? "Hide AI trace" : "AI reasoning trace"}
               </button>
               <button
                 type="button"
@@ -364,6 +461,13 @@ export function TrainPage() {
               </button>
             </div>
           </div>
+
+          {sessionError && (
+            <div className="mx-4 mt-3 p-2.5 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px]">error</span>
+              <span>{sessionError}</span>
+            </div>
+          )}
 
           {/* 10-Bar Pressure Meter (Live Backend Tension) */}
           <div
@@ -415,12 +519,15 @@ export function TrainPage() {
               </div>
             ))}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex gap-1.5 px-3 py-2 self-start bg-[var(--sf2)] rounded-2xl rounded-tl-xs">
-                <i className="w-2 h-2 rounded-full bg-[var(--mut)] animate-bounce" />
-                <i className="w-2 h-2 rounded-full bg-[var(--mut)] animate-bounce [animation-delay:150ms]" />
-                <i className="w-2 h-2 rounded-full bg-[var(--mut)] animate-bounce [animation-delay:300ms]" />
+            {/* Live AI Status / Typing Indicator */}
+            {(isTyping || aiStatus) && (
+              <div className="flex flex-col gap-1.5 self-start">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[var(--sf2)] rounded-2xl rounded-tl-xs text-xs text-[var(--mut)] border border-[var(--line)]">
+                  <span className="material-symbols-outlined text-[16px] text-[var(--act)] animate-spin">
+                    progress_activity
+                  </span>
+                  <span>{aiStatus || "Gemini 3.8 Scammer is generating response…"}</span>
+                </div>
               </div>
             )}
           </div>

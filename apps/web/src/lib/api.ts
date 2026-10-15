@@ -288,6 +288,94 @@ export async function sendTrainMessage(sessionId: string, text: string): Promise
   });
 }
 
+export interface TrainStreamCallbacks {
+  onAck?: (ack: { i: number; text: string; piiRemoved: string[] }) => void;
+  onTrace?: (trace: { agent?: string; model?: string; summary?: string; kind?: string; latencyMs?: number; payload?: any }) => void;
+  onState?: (state: { turn: number; tension: number; stage: string; status: string }) => void;
+  onToken?: (delta: string) => void;
+  onMessageEnd?: (msg: { i: number; text: string; role: string }) => void;
+  onSessionEnd?: (end: { outcome: string; reason?: string }) => void;
+  onError?: (err: Error) => void;
+}
+
+export async function streamTrainMessage(
+  sessionId: string,
+  text: string,
+  callbacks: TrainStreamCallbacks
+): Promise<void> {
+  const lang = getLanguage();
+  const res = await fetch(`${API_BASE}/v1/train/sessions/${sessionId}/messages?stream=true&trace=1`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Language": lang,
+      "X-Dev-User": "guest",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!res.ok) {
+    let errJson: any = null;
+    try {
+      errJson = await res.json();
+    } catch {}
+    const msg = errJson?.error?.message || `Request failed with status ${res.status}`;
+    throw new ApiError(msg, errJson?.error?.code || "internal", res.status);
+  }
+
+  if (!res.body) {
+    throw new ApiError("Streaming unsupported by browser", "unsupported", 500);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n\n");
+    buffer = lines.pop() || "";
+
+    for (const block of lines) {
+      if (!block.trim()) continue;
+      const blockLines = block.split("\n");
+      let eventType = "message";
+      let dataStr = "";
+
+      for (const line of blockLines) {
+        if (line.startsWith("event: ")) {
+          eventType = line.slice(7).trim();
+        } else if (line.startsWith("data: ")) {
+          dataStr = line.slice(6).trim();
+        }
+      }
+
+      if (!dataStr) continue;
+      try {
+        const parsed = JSON.parse(dataStr);
+        if (eventType === "ack") {
+          callbacks.onAck?.(parsed);
+        } else if (eventType === "trace") {
+          callbacks.onTrace?.(parsed);
+        } else if (eventType === "state") {
+          callbacks.onState?.(parsed);
+        } else if (eventType === "token") {
+          callbacks.onToken?.(parsed.delta || "");
+        } else if (eventType === "message_end") {
+          callbacks.onMessageEnd?.(parsed);
+        } else if (eventType === "session_end") {
+          callbacks.onSessionEnd?.(parsed);
+        }
+      } catch (e) {
+        console.warn("Failed to parse SSE event data:", dataStr, e);
+      }
+    }
+  }
+}
+
 export async function endTrainSession(sessionId: string, outcome: string = "walked_away"): Promise<any> {
   return api(`/v1/train/sessions/${sessionId}/end`, {
     method: "POST",
