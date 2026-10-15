@@ -141,29 +141,29 @@ export function CheckPage() {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
           <ShieldAlert className="w-3.5 h-3.5" />
           AI Threat Inspector & Heuristic Scanner
         </div>
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-slate-50 tracking-tight">
           Am I being scammed right now?
         </h1>
-        <p className="text-muted-foreground text-sm max-w-2xl">
+        <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base max-w-2xl font-medium leading-relaxed">
           Paste any suspicious SMS, WhatsApp message, email, or upload a screenshot. Our dual-engine pipeline verifies against official Indian banking patterns and detects psychological coercion.
         </p>
       </div>
 
       {/* Main Input Form */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span>Suspicious Message or Transcript</span>
             </label>
             {(inputText || imagePreview) && (
               <button
                 onClick={clearForm}
-                className="text-xs text-muted-foreground hover:text-foreground underline"
+                className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 underline transition"
               >
                 Clear all
               </button>
@@ -174,7 +174,7 @@ export function CheckPage() {
             onChange={(e) => setInputText(e.target.value)}
             placeholder="e.g. 'Your SBI account is blocked due to KYC. Download AnyDesk or click http://bit.ly/... to verify immediately.'"
             rows={4}
-            className="w-full rounded-xl border border-border bg-background p-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition placeholder:text-muted-foreground/60 resize-y"
+            className="w-full rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-4 text-sm text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 transition placeholder:text-slate-500 dark:placeholder:text-slate-500 resize-y"
           />
         </div>
 
@@ -190,26 +190,26 @@ export function CheckPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-border hover:border-primary/60 bg-muted/30 hover:bg-muted text-xs font-medium text-foreground transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 dark:border-slate-700 dark:hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
           >
-            <Upload className="w-4 h-4 text-muted-foreground" />
+            <Upload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
             <span>Upload Screenshot / Image</span>
           </button>
 
           {imagePreview && (
-            <div className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg border border-border text-xs">
+            <div className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-700 text-xs">
               <img
                 src={imagePreview}
                 alt="Uploaded preview"
                 className="w-6 h-6 rounded object-cover"
               />
-              <span className="text-foreground font-medium truncate max-w-[150px]">
+              <span className="text-slate-900 dark:text-slate-100 font-bold truncate max-w-[150px]">
                 Screenshot Attached
               </span>
               <button
                 type="button"
                 onClick={() => setImagePreview(null)}
-                className="text-muted-foreground hover:text-destructive text-sm font-bold ml-1"
+                className="text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 text-sm font-black ml-1"
               >
                 ×
               </button>
@@ -218,8 +218,8 @@ export function CheckPage() {
         </div>
 
         {/* Quick Presets */}
-        <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">
+        <div className="space-y-2">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
             Try a real-world sample:
           </span>
           <div className="flex flex-wrap gap-2">
@@ -231,7 +231,7 @@ export function CheckPage() {
                   setInputText(p.text);
                   handleRunAnalysis(p.text);
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 transition font-medium text-left"
+                className="text-xs px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border-2 border-slate-200 dark:border-slate-700 transition font-bold text-left shadow-2xs"
               >
                 {p.label}
               </button>
@@ -240,8 +240,8 @@ export function CheckPage() {
         </div>
 
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          <div className="p-3.5 rounded-xl bg-rose-50 border-2 border-rose-300 dark:bg-rose-950/60 dark:border-rose-800 text-rose-900 dark:text-rose-200 text-xs font-bold flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600 dark:text-rose-400" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -252,7 +252,7 @@ export function CheckPage() {
             type="button"
             disabled={loading || (!inputText.trim() && !imagePreview)}
             onClick={() => handleRunAnalysis()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-95 active:scale-[0.99] transition disabled:opacity-50 disabled:pointer-events-none shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-black text-sm shadow-md transition disabled:opacity-50 disabled:pointer-events-none"
           >
             {loading ? (
               <>
@@ -261,7 +261,7 @@ export function CheckPage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>Inspect Message Now</span>
               </>
             )}
@@ -271,22 +271,22 @@ export function CheckPage() {
 
       {/* Loading Steps Animation */}
       {loading && (
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4 animate-pulse">
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-primary" />
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
             <span>Dojo Threat Pipeline Active</span>
           </h3>
           <div className="space-y-3">
-            <div className={`flex items-center gap-3 text-xs transition-opacity ${stepIndex >= 1 ? "opacity-100 text-foreground" : "opacity-40"}`}>
-              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 1 ? "text-emerald-500" : "text-muted-foreground"}`} />
+            <div className={`flex items-center gap-3 text-xs font-semibold transition-opacity ${stepIndex >= 1 ? "opacity-100 text-slate-900 dark:text-slate-100" : "opacity-40 text-slate-500"}`}>
+              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 1 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
               <span>1. Extracting links, Shorteners, Phone Numbers, and Urgency Patterns...</span>
             </div>
-            <div className={`flex items-center gap-3 text-xs transition-opacity ${stepIndex >= 2 ? "opacity-100 text-foreground" : "opacity-40"}`}>
-              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 2 ? "text-emerald-500" : "text-muted-foreground"}`} />
+            <div className={`flex items-center gap-3 text-xs font-semibold transition-opacity ${stepIndex >= 2 ? "opacity-100 text-slate-900 dark:text-slate-100" : "opacity-40 text-slate-500"}`}>
+              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 2 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
               <span>2. Matching against Indian Cybercrime (I4C) & NPCI fraud playbooks...</span>
             </div>
-            <div className={`flex items-center gap-3 text-xs transition-opacity ${stepIndex >= 3 ? "opacity-100 text-foreground" : "opacity-40"}`}>
-              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 3 ? "text-emerald-500" : "text-muted-foreground"}`} />
+            <div className={`flex items-center gap-3 text-xs font-semibold transition-opacity ${stepIndex >= 3 ? "opacity-100 text-slate-900 dark:text-slate-100" : "opacity-40 text-slate-500"}`}>
+              <CheckCircle2 className={`w-4 h-4 ${stepIndex >= 3 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
               <span>3. Synthesizing Gemini GenAI threat analysis and defense steps...</span>
             </div>
           </div>
@@ -298,73 +298,125 @@ export function CheckPage() {
         <div className="space-y-6">
           {/* Verdict Banner */}
           <div
-            className={`border rounded-2xl p-6 shadow-sm space-y-4 ${
+            className={`border-2 rounded-2xl p-6 shadow-md space-y-5 ${
               checkResult.riskLevel === "high"
-                ? "bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-100"
+                ? "bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800"
                 : checkResult.riskLevel === "caution"
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-100"
-                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-100"
+                ? "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800"
+                : "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800"
             }`}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3">
+              <div className="flex items-start sm:items-center gap-3.5">
                 {checkResult.riskLevel === "high" ? (
-                  <div className="p-2.5 rounded-xl bg-rose-500 text-white">
-                    <ShieldAlert className="w-7 h-7" />
+                  <div className="p-3 rounded-xl bg-rose-600 text-white shadow-sm shrink-0">
+                    <ShieldAlert className="w-8 h-8" />
                   </div>
                 ) : checkResult.riskLevel === "caution" ? (
-                  <div className="p-2.5 rounded-xl bg-amber-500 text-white">
-                    <AlertTriangle className="w-7 h-7" />
+                  <div className="p-3 rounded-xl bg-amber-600 text-white shadow-sm shrink-0">
+                    <AlertTriangle className="w-8 h-8" />
                   </div>
                 ) : (
-                  <div className="p-2.5 rounded-xl bg-emerald-600 text-white">
-                    <ShieldCheck className="w-7 h-7" />
+                  <div className="p-3 rounded-xl bg-emerald-600 text-white shadow-sm shrink-0">
+                    <ShieldCheck className="w-8 h-8" />
                   </div>
                 )}
                 <div>
-                  <div className="text-xs uppercase tracking-wider font-bold opacity-80">
+                  <div
+                    className={`text-xs uppercase tracking-wider font-extrabold ${
+                      checkResult.riskLevel === "high"
+                        ? "text-rose-900 dark:text-rose-300"
+                        : checkResult.riskLevel === "caution"
+                        ? "text-amber-900 dark:text-amber-300"
+                        : "text-emerald-900 dark:text-emerald-300"
+                    }`}
+                  >
                     {checkResult.riskLevel === "high"
                       ? "High Danger — Active Threat"
                       : checkResult.riskLevel === "caution"
                       ? "Caution Advised — Suspicious"
                       : "Verified Safe"}
                   </div>
-                  <h2 className="text-xl font-bold leading-tight">{checkResult.title}</h2>
+                  <h2
+                    className={`text-2xl font-black leading-tight ${
+                      checkResult.riskLevel === "high"
+                        ? "text-rose-950 dark:text-rose-50"
+                        : checkResult.riskLevel === "caution"
+                        ? "text-amber-950 dark:text-amber-50"
+                        : "text-emerald-950 dark:text-emerald-50"
+                    }`}
+                  >
+                    {checkResult.title}
+                  </h2>
                 </div>
               </div>
 
               {/* Score Meter */}
-              <div className="flex items-center gap-3 bg-card/60 backdrop-blur border border-border/40 px-4 py-2.5 rounded-xl self-start sm:self-auto">
+              <div
+                className={`flex items-center gap-3 px-5 py-3 rounded-xl self-start sm:self-auto shadow-xs border-2 ${
+                  checkResult.riskLevel === "high"
+                    ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800"
+                    : checkResult.riskLevel === "caution"
+                    ? "bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-800"
+                    : "bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800"
+                }`}
+              >
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-muted-foreground">Threat Score</div>
-                  <div className="text-2xl font-black text-foreground">
+                  <div className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400">Threat Score</div>
+                  <div
+                    className={`text-3xl font-black ${
+                      checkResult.riskLevel === "high"
+                        ? "text-rose-600 dark:text-rose-400"
+                        : checkResult.riskLevel === "caution"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-emerald-600 dark:text-emerald-400"
+                    }`}
+                  >
                     {checkResult.score}
-                    <span className="text-xs font-normal text-muted-foreground">/100</span>
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-0.5">/100</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="text-sm opacity-90 leading-relaxed">{checkResult.explanation}</p>
+            <p
+              className={`text-sm sm:text-base leading-relaxed font-semibold ${
+                checkResult.riskLevel === "high"
+                  ? "text-rose-950 dark:text-rose-100"
+                  : checkResult.riskLevel === "caution"
+                  ? "text-amber-950 dark:text-amber-100"
+                  : "text-emerald-950 dark:text-emerald-100"
+              }`}
+            >
+              {checkResult.explanation}
+            </p>
 
             {/* Action Bar: Train me on this + Share Alert */}
-            <div className="pt-3 border-t border-border/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2">
+            <div
+              className={`pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap ${
+                checkResult.riskLevel === "high"
+                  ? "border-rose-200 dark:border-rose-800/80"
+                  : checkResult.riskLevel === "caution"
+                  ? "border-amber-200 dark:border-amber-800/80"
+                  : "border-emerald-200 dark:border-emerald-800/80"
+              }`}
+            >
+              <div className="flex items-center gap-2.5 flex-wrap">
                 <button
                   type="button"
                   onClick={handleShareWhatsApp}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 active:scale-95 transition shadow-xs"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white text-xs font-black transition shadow-sm"
                   title="Share warning to family and WhatsApp groups"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-4 h-4" />
                   <span>Share Alert to WhatsApp</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyAlert}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-muted active:scale-95 transition shadow-xs"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition shadow-xs"
                 >
-                  {copiedAlert ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedAlert ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-700 dark:text-slate-300" />}
                   <span>{copiedAlert ? "Copied Alert!" : "Copy Warning Text"}</span>
                 </button>
               </div>
@@ -374,11 +426,11 @@ export function CheckPage() {
                   type="button"
                   disabled={forging}
                   onClick={handleForgeDrill}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-xs font-bold hover:opacity-90 active:scale-95 transition shadow whitespace-nowrap self-start sm:self-auto"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 active:scale-95 text-white dark:text-slate-950 text-xs font-black transition shadow-md whitespace-nowrap self-start sm:self-auto"
                 >
-                  <Flame className="w-4 h-4 text-amber-400" />
-                  <span>{forging ? "Forging Custom Drill..." : "🥋 Train Me On This Scam"}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <Flame className="w-4 h-4 text-amber-400 dark:text-amber-500 fill-amber-400 dark:fill-amber-500" />
+                  <span>{forging ? "Forging Custom Drill..." : "Train Me On This Scam"}</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -386,35 +438,35 @@ export function CheckPage() {
 
           {/* Red Flags Cards */}
           {checkResult.redFlags && checkResult.redFlags.length > 0 && (
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="text-base font-black text-slate-950 dark:text-slate-50 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-500" />
                 <span>Detected Manipulation Indicators & Red Flags ({checkResult.redFlags.length})</span>
               </h3>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3.5 sm:grid-cols-2">
                 {checkResult.redFlags.map((flag) => (
                   <div
                     key={flag.id}
-                    className="p-4 rounded-xl border border-border bg-muted/30 space-y-2 text-xs"
+                    className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 space-y-2.5 text-xs shadow-2xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-foreground">Indicator #{flag.id}</span>
+                      <span className="font-black text-slate-900 dark:text-slate-100 text-xs">Indicator #{flag.id}</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
                           flag.severity === "high"
-                            ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
-                            : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-800"
+                            : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-800"
                         }`}
                       >
                         {flag.severity} Risk
                       </span>
                     </div>
                     {flag.quote && (
-                      <div className="font-mono text-muted-foreground bg-background px-2.5 py-1.5 rounded border border-border/40 truncate">
+                      <div className="font-mono font-bold text-amber-950 dark:text-amber-200 bg-amber-50 dark:bg-slate-900 px-3 py-2 rounded-lg border border-amber-300 dark:border-amber-800/80 break-all text-xs">
                         "{flag.quote}"
                       </div>
                     )}
-                    <p className="text-muted-foreground leading-normal">{flag.why}</p>
+                    <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">{flag.why}</p>
                   </div>
                 ))}
               </div>
@@ -424,31 +476,35 @@ export function CheckPage() {
           {/* Action Protocol Grid */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Do Right Now */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-800 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="text-sm font-black text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>What you must DO right now</span>
               </h3>
-              <ul className="space-y-2.5 text-xs text-muted-foreground">
+              <ul className="space-y-3 text-xs">
                 {(checkResult.doNow && checkResult.doNow.length > 0
                   ? checkResult.doNow
                   : checkResult.actions
                 ).map((act, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="font-bold text-foreground shrink-0">{i + 1}.</span>
-                    <span className="leading-relaxed">{act}</span>
+                    <span className="bg-emerald-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-slate-900 dark:text-slate-100 font-semibold leading-relaxed">
+                      {act}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Do NOT Do */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-                <XCircle className="w-4 h-4" />
+            <div className="bg-rose-50/70 dark:bg-rose-950/30 border-2 border-rose-300 dark:border-rose-800 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="text-sm font-black text-rose-900 dark:text-rose-300 flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                 <span>What you must NEVER do</span>
               </h3>
-              <ul className="space-y-2.5 text-xs text-muted-foreground">
+              <ul className="space-y-3 text-xs">
                 {(checkResult.dontDo && checkResult.dontDo.length > 0
                   ? checkResult.dontDo
                   : [
@@ -458,8 +514,12 @@ export function CheckPage() {
                     ]
                 ).map((dont, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-rose-500 font-bold shrink-0">✕</span>
-                    <span className="leading-relaxed">{dont}</span>
+                    <span className="bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[11px] font-black shrink-0 mt-0.5">
+                      ✕
+                    </span>
+                    <span className="text-slate-900 dark:text-slate-100 font-semibold leading-relaxed">
+                      {dont}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -468,26 +528,26 @@ export function CheckPage() {
 
           {/* Safe Verification Method */}
           {checkResult.verifyHow && (
-            <div className="bg-muted/40 border border-border rounded-2xl p-5 flex items-start gap-3 text-xs">
-              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-foreground">Official Verification Protocol: </strong>
-                <span className="text-muted-foreground">{checkResult.verifyHow}</span>
+            <div className="bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-300 dark:border-blue-800 rounded-2xl p-5 flex items-start gap-3.5 text-xs">
+              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <strong className="text-blue-950 dark:text-blue-200 font-black">Official Verification Protocol: </strong>
+                <span className="text-slate-800 dark:text-slate-200 font-medium">{checkResult.verifyHow}</span>
               </div>
             </div>
           )}
 
           {/* High Danger Emergency Helplines */}
           {checkResult.riskLevel === "high" && (
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <PhoneCall className="w-4 h-4 text-emerald-500" />
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-sm font-black text-slate-950 dark:text-slate-50 flex items-center gap-2">
+                  <PhoneCall className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Immediate Indian Cyber Fraud Helplines</span>
                 </h3>
                 <Link
                   to="/recover"
-                  className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                  className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
                 >
                   <span>Already lost funds? Open Recovery Plan</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -497,12 +557,12 @@ export function CheckPage() {
               <div className="grid gap-3 sm:grid-cols-3">
                 <a
                   href="tel:1930"
-                  className="p-4 rounded-xl border border-border bg-background hover:bg-muted/40 transition flex items-center gap-3 text-xs"
+                  className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:border-emerald-600 transition flex items-center gap-3.5 text-xs shadow-2xs"
                 >
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold">1930</div>
+                  <div className="p-2.5 rounded-lg bg-emerald-600 text-white font-black text-xs">1930</div>
                   <div>
-                    <div className="font-bold text-foreground">Cyber Helpline 1930</div>
-                    <div className="text-[11px] text-muted-foreground">National Fraud Desk (24/7)</div>
+                    <div className="font-black text-slate-950 dark:text-slate-50">Cyber Helpline 1930</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">National Fraud Desk (24/7)</div>
                   </div>
                 </a>
 
@@ -510,15 +570,15 @@ export function CheckPage() {
                   href="https://cybercrime.gov.in"
                   target="_blank"
                   rel="noreferrer"
-                  className="p-4 rounded-xl border border-border bg-background hover:bg-muted/40 transition flex items-center gap-3 text-xs"
+                  className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-indigo-500 hover:bg-indigo-50/30 dark:hover:border-indigo-600 transition flex items-center gap-3.5 text-xs shadow-2xs"
                 >
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary font-bold">Portal</div>
+                  <div className="p-2.5 rounded-lg bg-indigo-600 text-white font-black text-xs">Portal</div>
                   <div>
-                    <div className="font-bold text-foreground flex items-center gap-1">
+                    <div className="font-black text-slate-950 dark:text-slate-50 flex items-center gap-1">
                       <span>cybercrime.gov.in</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 text-slate-500" />
                     </div>
-                    <div className="text-[11px] text-muted-foreground">Official Crime Filing</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Official Crime Filing</div>
                   </div>
                 </a>
 
@@ -526,15 +586,15 @@ export function CheckPage() {
                   href="https://sancharsaathi.gov.in"
                   target="_blank"
                   rel="noreferrer"
-                  className="p-4 rounded-xl border border-border bg-background hover:bg-muted/40 transition flex items-center gap-3 text-xs"
+                  className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-indigo-500 hover:bg-indigo-50/30 dark:hover:border-indigo-600 transition flex items-center gap-3.5 text-xs shadow-2xs"
                 >
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary font-bold">Chakshu</div>
+                  <div className="p-2.5 rounded-lg bg-indigo-600 text-white font-black text-xs">Chakshu</div>
                   <div>
-                    <div className="font-bold text-foreground flex items-center gap-1">
+                    <div className="font-black text-slate-950 dark:text-slate-50 flex items-center gap-1">
                       <span>Sanchar Saathi</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 text-slate-500" />
                     </div>
-                    <div className="text-[11px] text-muted-foreground">Report Fraud Number</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Report Fraud Number</div>
                   </div>
                 </a>
               </div>
