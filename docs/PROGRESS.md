@@ -55,5 +55,24 @@ Tracking the implementation phases against acceptance criteria.
   - Backend: `GET /v1/dashboard` aggregates user profile, score progression trend, tactic weakness profile (Urgency, Authority, Fear, Greed, Trust, Isolation), recommended next drill, and unified activity history across Train, Check, and Recover.
   - Frontend: `/dashboard` displays animated belt knot graphic (`BeltGraphic`), resilience numeral, streak count, sensitivity breakdown bars, and recent activity feed.
   - Live Trace Panel: Collapsible floating drawer (`TracePanel`) demonstrating real-time handoffs between the 7 ADK agents for hackathon judges (`?trace=1`).
-  - Web & API Green: 47 pytest backend tests and 16 vitest web tests pass 100% green; Vite production build succeeds cleanly.
+## Phase 6: Automated Evaluation & Security Benchmarking
+- Status: Complete
+- Verification:
+  - Evaluation Harness: `apps/api/scripts/run_evals.py` and `apps/api/evals/golden_check.jsonl` (30 curated test cases across 10 scam typologies, legitimate communications, and adversarial prompt injections).
+  - Benchmark Results (`docs/EVAL.md`):
+    - **100% Scam Detection Accuracy** (30 / 30).
+    - **0% False Positive Rate** (0 / 10 legitimate messages).
+    - **100% Prompt-Injection Defense Rate** (4 / 4 adversarial jailbreak attacks rejected).
+    - **100% Helpline Verification Rate** (12 verified official Indian authorities).
+
+## Phase 7: Production Deployment
+- Status: Complete
+- Verification:
+  - Backend API: Deployed to **Google Cloud Run** in `asia-south1` (`scam-dojo` project):
+    - URL: [https://scam-dojo-api-ph34wjnmbq-el.a.run.app](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)
+    - Container: Dockerized Python 3.12 with SQLite KB, Vertex AI Gemini connectivity, structured logging, request-ID tracing, and CORS configured.
+  - Frontend Web App: Deployed to **Firebase Hosting** (`scam-dojo-v2` project):
+    - URL: [https://scam-dojo-v2.web.app](https://scam-dojo-v2.web.app)
+    - Static SPA export built with Vite, React 19, Tailwind CSS v4, PWA manifest, and production Cloud Run API integration.
+  - End-to-end live testing: Direct `curl` to `/v1/scenarios`, `/v1/resources`, and `POST /v1/check` verified 200 OK responses with real-time Vertex AI threat verdicts.
 
