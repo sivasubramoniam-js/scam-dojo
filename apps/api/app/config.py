@@ -19,13 +19,13 @@ class Settings(BaseSettings):
     # Gemini access
     GOOGLE_GENAI_USE_VERTEXAI: bool = False
     GOOGLE_CLOUD_PROJECT: str | None = None
-    GOOGLE_CLOUD_LOCATION: str = "asia-south1"
+    GOOGLE_CLOUD_LOCATION: str = "global"
     GOOGLE_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
 
-    MODEL_LITE: str = "gemini-2.5-flash"
-    MODEL_FAST: str = "gemini-2.5-flash"
-    MODEL_PRO: str = "gemini-2.5-flash"
+    MODEL_LITE: str = "gemini-3.8-flash"
+    MODEL_FAST: str = "gemini-3.8-flash"
+    MODEL_PRO: str = "gemini-3.8-flash"
     MODEL_FALLBACK: str = "gemini-2.5-flash"
 
     # Storage
