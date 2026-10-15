@@ -55,6 +55,9 @@ coverage/
 .env.test.local
 .env.production.local
 !.env.example
+*.env.yaml
+.cloudrun*
+.firebase/
 
 # OS files
 .DS_Store

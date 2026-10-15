@@ -4,6 +4,8 @@
 > *A full-spectrum defensive cybersecurity training simulator, real-time threat verifier, and golden-hour incident recovery copilot powered by Google Gemini and 7 specialized Google GenAI agents.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
+[![Live Web App: Firebase](https://img.shields.io/badge/Live_App-scam--dojo--v2.web.app-FFCA28?logo=firebase&logoColor=black)](https://scam-dojo-v2.web.app)
+[![Live Backend: Cloud Run](https://img.shields.io/badge/Live_API-Google_Cloud_Run-4285F4?logo=googlecloud&logoColor=white)](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 [![Frontend: React_19_+_Vite](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite-61DAFB.svg)](https://vitejs.dev/)
 [![Evaluation: 100% Accuracy](https://img.shields.io/badge/Eval_Accuracy-100%25-brightgreen.svg)](docs/EVAL.md)
@@ -177,25 +179,34 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌐 Production Deployment
+## 🌐 Production Deployments
 
-### Backend (Google Cloud Run)
+The entire system is deployed and active in production:
+
+| Component | Target Platform | Live Production URL | Region / Project | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| **Frontend Web App** | **Firebase Hosting** | **[https://scam-dojo-v2.web.app](https://scam-dojo-v2.web.app)** | `scam-dojo-v2` | 🟢 Live |
+| **Backend API** | **Google Cloud Run** | **[https://scam-dojo-api-ph34wjnmbq-el.a.run.app](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)** | `asia-south1` (`scam-dojo`) | 🟢 Live |
+
+### Deployment Commands
+
+#### 1. Backend (Google Cloud Run)
 ```bash
 gcloud run deploy scam-dojo-api \
-  --source apps/api \
+  --image asia-south1-docker.pkg.dev/scam-dojo/cloud-run-source-deploy/scam-dojo-api:latest \
   --project scam-dojo \
   --region asia-south1 \
   --allow-unauthenticated \
-  --set-env-vars GEMINI_API_KEY=YOUR_KEY,APP_ENV=production
+  --env-vars-file apps/api/env-cloudrun.yaml
 ```
 
-### Frontend (Firebase Hosting)
+#### 2. Frontend (Firebase Hosting)
 ```bash
-# Build web app pointing to Cloud Run backend
-VITE_API_URL=https://scam-dojo-api-<hash>-el.a.run.app pnpm --filter web build
+# Production build pointing to Cloud Run backend
+pnpm --filter web build
 
-# Deploy to Firebase
-firebase deploy --only hosting --project scam-dojo-v2
+# Deploy to Firebase Hosting
+npx firebase-tools deploy --only hosting --project scam-dojo-v2
 ```
 
 ---
