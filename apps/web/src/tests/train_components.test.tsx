@@ -6,6 +6,8 @@ import { StrikeMarker } from "@/components/train/StrikeMarker";
 import { Belt } from "@/components/train/Belt";
 import { ScoreNumeral } from "@/components/train/ScoreNumeral";
 import { PiiNotice } from "@/components/train/PiiNotice";
+import { AudioCallStage } from "@/components/train/AudioCallStage";
+import { VideoCallStage } from "@/components/train/VideoCallStage";
 import { I18nProvider } from "@/lib/i18n";
 
 describe("Train Mode UI Components", () => {
@@ -53,5 +55,54 @@ describe("Train Mode UI Components", () => {
       </I18nProvider>
     );
     expect(screen.getByText(/Privacy Shield Active/i)).toBeInTheDocument();
+  });
+
+  it("renders AudioCallStage with caller profile, waveform, and controls", () => {
+    render(
+      <AudioCallStage
+        callerName="Rakesh Verma"
+        callerOrg="Orion Bank Fraud Dept"
+        tension={5}
+        isSpeaking={false}
+        isListening={false}
+        isTyping={false}
+        aiStatus={null}
+        lastScammerText="Please confirm your card number immediately."
+        onSendMessage={() => {}}
+        onHangUp={() => {}}
+        onToggleMic={() => {}}
+        isDone={false}
+      />
+    );
+
+    expect(screen.getByText("Rakesh Verma")).toBeInTheDocument();
+    expect(screen.getByText("Orion Bank Fraud Dept")).toBeInTheDocument();
+    expect(screen.getByText(/VOIP PRI ENCRYPTED/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hang Up/i)).toBeInTheDocument();
+  });
+
+  it("renders VideoCallStage with officer persona, REC badge, and user PiP", () => {
+    render(
+      <VideoCallStage
+        callerName="Inspector D.A. Togav"
+        callerOrg="CBI Cyber Crime Cell"
+        tension={8}
+        isSpeaking={false}
+        isListening={false}
+        isTyping={false}
+        aiStatus={null}
+        lastScammerText="This is a legal summons for immediate digital arrest."
+        onSendMessage={() => {}}
+        onHangUp={() => {}}
+        onToggleMic={() => {}}
+        isDone={false}
+      />
+    );
+
+    expect(screen.getByText("Inspector D.A. Togav")).toBeInTheDocument();
+    expect(screen.getByText("CBI Cyber Crime Cell")).toBeInTheDocument();
+    expect(screen.getAllByText(/REC/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Camera Off/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/Hang Up/i)).toBeInTheDocument();
   });
 });

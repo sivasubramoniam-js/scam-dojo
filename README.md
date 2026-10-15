@@ -52,22 +52,27 @@ flowchart LR
 ```
 
 ### 1. 🥋 Mode: Train (The Dojo Arena)
-- **Stateful Adversarial Simulation**: Confronts the user in authentic messaging UI (WhatsApp, SMS, Email, Phone call simulator) against an LLM attacker.
+- **3-Modal Immersion Simulation Engine**: Switch seamlessly across three dedicated threat environments:
+  - 💬 **Chat Scam Mode**: Authentic SMS, WhatsApp, and Telegram messaging simulator with adaptive LLM psychological coercion and quick-reply defensive counters.
+  - 📞 **Audio Call Scam Mode**: Dedicated smartphone phone call interface with caller ID, live tension gauge, real-time audio waveform visualizer, and hands-free voice input via mic. Powered by Gemini text + Lyria audio engine. Zero chat distractions.
+  - 📹 **Video Call Scam Mode**: High-stress "Digital Arrest" & law-enforcement extortion simulation with official badges, legal warrant overlays, and dynamic visual states powered by Veo generative video (listening, interrogating, issuing threats). Includes optional, non-mandatory user webcam Picture-in-Picture (PiP). Zero chat distractions.
 - **Tactic Detection Engine**: Real-time identification of psychological tactics: *Authority Coercion*, *Artificial Urgency*, *Social Proof*, *Isolation*, *Greed / Bait*, *Sympathy / Guilt*, *FOMO*, and *Threat of Legal Action*.
 - **Belt Ranking Progression**: Martial arts progression from **White Belt (10th Kyu)** up to **5th Dan Black Belt** as users demonstrate vigilance, refuse credential disclosure, and deploy defensive counter-questions.
-- **Interactive Coaching**: Defensive hints that reveal the scammer's hidden objective without breaking simulation immersion.
+- **Family & Senior Safety Filter**: Curated drills targeting vulnerable demographics (seniors, parents) with 1-click post-drill WhatsApp sharing to warn family members.
 
 ### 2. 🔍 Mode: Check (Forensic Threat Scanner)
 - **Multimodal Message & Screenshot Analysis**: Paste suspicious text or upload screenshots of WhatsApp chats, SMS alerts, or payment receipts.
-- **Explainable Threat Score (0–100)**: Transparent risk categorization (`safe`, `low`, `medium`, `high`, `critical`) with highlighted red flags.
-- **1-Click WhatsApp Family Alert**: Formats an easy-to-read, pre-written advisory alert to instantly protect elderly parents or family groups.
+- **4-Pillar ScamScore™**: Explainable threat index (0–100) broken down across *Psychological Coercion & Urgency*, *Financial Risk Vector*, *Sender & Source Spoofing*, and *Malware & Remote Access Risk*.
+- **Indian Scam Taxonomy Tags**: Automated detection of vector badges: `🚨 Digital Arrest`, `⚡ Electricity Cutoff`, `💼 Fake Job Task`, `🖥️ Remote Desktop Trap`, `🏦 KYC Phishing`, and `📦 Customs Drug Trap`.
+- **1080x1080 Downloadable Warning Poster**: Instant HTML5 Canvas visual infographic generator formatted for WhatsApp group broadcasts and social feeds.
 - **Scenario Forge (Cross-Mode Bridge)**: Discovered a new scam variant? Click **"Train Me On This Scam"** to instantly compile the threat into a playable, adaptive training scenario!
 
 ### 3. 🛡️ Recover (Golden-Hour Emergency Playbook)
-- **Immediate Golden-Hour Direct Actions**: Instant click-to-call link for India's **1930 Cyber Fraud Helpline** and direct portals for **cybercrime.gov.in** and **Sanchar Saathi (CEIR / TAFCOP)**.
-- **Automated Bank Dispute Letters**: Instantly formats official RBI-compliant liability dispute letters pre-filled with transaction timestamps, UTR numbers, and bank details.
-- **Evidence Checklist**: Structured tracker for preserving forensic evidence (call logs, chat transcripts, payment slips).
-- **AI Recovery Copilot**: Dedicated chat assistant for reassurance, procedure guidance, and next steps.
+- **Golden-Hour Direct Triage (< 2 Hours)**: Interactive incident timer, direct 1-click dialer to India's **1930 Cyber Fraud Helpline**, and direct access to **cybercrime.gov.in** and **Sanchar Saathi (CEIR / TAFCOP)**.
+- **Official Evidence Dossier & Case Builder**: Structured generator creating dual standardized packets for police/1930 reporting (CFCFRMS transaction trail) and RBI-compliant zero-liability bank dispute letters (`DBR.No.Leg.BC.78/09.07.005/2017-18`).
+- **24x7 Bank Freeze Directory**: Instant block codes and fraud hotlines for major Indian banks (SBI, HDFC, ICICI, Axis, PNB, Kotak, Canara).
+- **Anti-Recovery-Scam Warning Shield**: Critical safeguard advising victims against secondary recovery scammers soliciting upfront fees or remote access.
+- **AI Recovery Copilot**: Dedicated chat assistant for procedural clarity, victim reassurance, and evidence preservation.
 
 ---
 

@@ -67,5 +67,16 @@
 - [x] **Emergency Offline Service Worker (`public/sw.js`)**:
   - Pre-caches emergency recovery routes, bank freeze directories, and icons for offline access during crisis or SIM cutoffs.
 
+### Phase 5: 3-Modal Scammer Simulation Architecture (Chat, Audio Call, Video Call)
+- [x] **Tabbed Mode Selector (`page.tsx`)**:
+  - `[ 💬 Chat Scam ]`: Classic SMS/WhatsApp roleplay with quick-reply defense chips and interactive composer.
+  - `[ 📞 Audio Scam ]`: Smartphone call screen with caller ID, pressure gauge, live audio waveform, and hands-free voice mic input. Zero chat distractions.
+  - `[ 📹 Video Scam ]`: Extortion/Digital arrest interrogation screen with simulated Veo generative video states, tension HUD, and optional non-mandatory user webcam PiP. Zero chat distractions.
+- [x] **Dedicated `AudioCallStage.tsx` Component**:
+  - Live call duration timer, dynamic waveform animation, tension meter HUD, voice synthesis trigger, and speech-to-text mic controls.
+- [x] **Dedicated `VideoCallStage.tsx` Component**:
+  - State-based suspect video stream switching between Listening, Speaking, and Coercive Threat states.
+  - User PiP webcam toggle with camera on/off and mic on/off controls.
+
 ---
 *Maintained on branch: `feat/anti-scam-suite-enhancements`*

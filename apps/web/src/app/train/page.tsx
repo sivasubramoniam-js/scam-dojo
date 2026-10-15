@@ -10,6 +10,8 @@ import {
 } from "@/lib/api";
 import { scrubPii } from "@/lib/pii";
 import { createSpeechSynthesizer, createVoiceRecognizer } from "@/lib/speech";
+import { AudioCallStage } from "@/components/train/AudioCallStage";
+import { VideoCallStage } from "@/components/train/VideoCallStage";
 
 interface ChatMessage {
   id: string;
@@ -44,12 +46,32 @@ export function TrainPage() {
   const [isDone, setIsDone] = useState(false);
   const [debriefInfo, setDebriefInfo] = useState<any | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<"all" | "family" | "jobs" | "urgency">("all");
+  const [simMode, setSimMode] = useState<"chat" | "audio" | "video">("chat");
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const synthRef = useRef(createSpeechSynthesizer());
   const recRef = useRef(createVoiceRecognizer());
   const logRef = useRef<HTMLDivElement>(null);
+
+  const toggleMic = () => {
+    if (isListening) {
+      recRef.current.stop();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      recRef.current.start(
+        (transcript) => {
+          setIsListening(false);
+          handleSend(transcript);
+        },
+        (err) => {
+          setIsListening(false);
+          setSessionError(`Voice recognition: ${err}`);
+        }
+      );
+    }
+  };
 
   const familySlugs = ["remote_access_support", "digital_arrest_call", "electricity_bill", "fake_kyc"];
   const jobSlugs = ["job_offer_task", "investment_ponzi"];
@@ -125,7 +147,7 @@ export function TrainPage() {
           },
         ]);
 
-        if (isVoiceMode) {
+        if (isVoiceMode || simMode === "audio" || simMode === "video") {
           synthRef.current.speak(initialMsg, () => setIsSpeaking(false));
           setIsSpeaking(true);
         }
@@ -251,7 +273,7 @@ export function TrainPage() {
             );
           }
 
-          if (isVoiceMode && msg.text && msg.role !== "sensei") {
+          if ((isVoiceMode || simMode === "audio" || simMode === "video") && msg.text && msg.role !== "sensei") {
             synthRef.current.speak(msg.text, () => setIsSpeaking(false));
             setIsSpeaking(true);
           }
@@ -299,7 +321,7 @@ export function TrainPage() {
             },
           ]);
 
-          if (isVoiceMode && res.message.role !== "sensei") {
+          if ((isVoiceMode || simMode === "audio" || simMode === "video") && res.message.role !== "sensei") {
             synthRef.current.speak(res.message.text, () => setIsSpeaking(false));
             setIsSpeaking(true);
           }
@@ -364,6 +386,71 @@ export function TrainPage() {
         <p className="text-[var(--mut)] text-sm sm:text-base">
           Connected to FastAPI backend with Google Cloud ADK & Gemini Agent orchestration.
         </p>
+      </div>
+
+      {/* 3 Dedicated Immersion Simulation Tabs */}
+      <div className="flex items-center gap-2 flex-wrap mb-5">
+        <span className="text-xs font-bold uppercase tracking-wider text-[var(--mut)] mr-1">
+          Immersion Mode:
+        </span>
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--sf2)] border border-[var(--line)]">
+          <button
+            type="button"
+            onClick={() => {
+              setSimMode("chat");
+              synthRef.current.stop();
+              recRef.current.stop();
+              setIsSpeaking(false);
+              setIsListening(false);
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              simMode === "chat"
+                ? "bg-[var(--act)] text-white shadow-xs"
+                : "text-[var(--mut)] hover:text-[var(--ink)]"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">chat</span>
+            <span>💬 Chat Scam</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSimMode("audio");
+              const lastScammer = [...messages].reverse().find((m) => m.role === "scammer");
+              if (lastScammer) {
+                synthRef.current.speak(lastScammer.text, () => setIsSpeaking(false));
+                setIsSpeaking(true);
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              simMode === "audio"
+                ? "bg-[var(--act)] text-white shadow-xs"
+                : "text-[var(--mut)] hover:text-[var(--ink)]"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">call</span>
+            <span>📞 Audio Scam</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSimMode("video");
+              const lastScammer = [...messages].reverse().find((m) => m.role === "scammer");
+              if (lastScammer) {
+                synthRef.current.speak(lastScammer.text, () => setIsSpeaking(false));
+                setIsSpeaking(true);
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              simMode === "video"
+                ? "bg-[var(--act)] text-white shadow-xs"
+                : "text-[var(--mut)] hover:text-[var(--ink)]"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">videocam</span>
+            <span>📹 Video Scam (Digital Arrest)</span>
+          </button>
+        </div>
       </div>
 
       {/* Scenario Picker Carousel / Select */}
@@ -473,6 +560,26 @@ export function TrainPage() {
           <h3 className="text-xl font-bold font-display text-[var(--ink)] mb-1">
             {activeScenario?.title || "Fake KYC Call"}
           </h3>
+          {/* Active Immersion Badge */}
+          <div className="mb-4">
+            {simMode === "audio" ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">
+                <span className="material-symbols-outlined text-[16px]">call</span>
+                Audio Scam Mode Active · Live Voice Call & Hands-Free Mic
+              </span>
+            ) : simMode === "video" ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">
+                <span className="material-symbols-outlined text-[16px]">videocam</span>
+                Video Scam Mode Active · "Digital Arrest" Interrogation & Optional Webcam
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs font-bold border border-blue-500/20">
+                <span className="material-symbols-outlined text-[16px]">chat</span>
+                Chat Scam Mode Active · Messaging & Phishing Drill
+              </span>
+            )}
+          </div>
+
           <p className="text-[var(--mut)] text-sm max-w-md mb-6 leading-relaxed">
             {activeScenario?.blurb ||
               "A simulated scammer will use authority, fear, and tight deadlines to extract your credentials. Practice countering in real-time."}
@@ -497,8 +604,122 @@ export function TrainPage() {
             </button>
           )}
         </div>
+      ) : simMode === "audio" ? (
+        <div className="mt-4">
+          <AudioCallStage
+            callerName={activeScenarioInfo.personaName}
+            callerOrg={activeScenarioInfo.orgLabel}
+            tension={tension}
+            isSpeaking={isSpeaking}
+            isListening={isListening}
+            isTyping={isTyping}
+            aiStatus={aiStatus}
+            lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
+            onSendMessage={handleSend}
+            onHangUp={handleHangUp}
+            onToggleMic={toggleMic}
+            isDone={isDone}
+          />
+          {/* Completion Action Bar */}
+          {isDone && (
+            <div className="max-w-xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-wrap items-center justify-between gap-3 animate-in fade-in shadow-dojo">
+              <div>
+                <b className="text-sm text-[var(--ink)] block">
+                  Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 30} pts
+                </b>
+                <span className="text-xs text-[var(--mut)]">
+                  Session recorded in SQLite. Resilience updated on profile.
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                  title="Share this drill with family or elderly parents"
+                >
+                  <span>Share Drill with Family</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStarted(false)}
+                  className="dojo-btn q min-h-[40px] px-4 text-xs"
+                >
+                  Choose another drill
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="dojo-btn min-h-[40px] px-4 text-xs"
+                >
+                  View your belt →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : simMode === "video" ? (
+        <div className="mt-4">
+          <VideoCallStage
+            callerName={activeScenarioInfo.personaName}
+            callerOrg={activeScenarioInfo.orgLabel}
+            tension={tension}
+            isSpeaking={isSpeaking}
+            isListening={isListening}
+            isTyping={isTyping}
+            aiStatus={aiStatus}
+            lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
+            onSendMessage={handleSend}
+            onHangUp={handleHangUp}
+            onToggleMic={toggleMic}
+            isDone={isDone}
+          />
+          {/* Completion Action Bar */}
+          {isDone && (
+            <div className="max-w-4xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-wrap items-center justify-between gap-3 animate-in fade-in shadow-dojo">
+              <div>
+                <b className="text-sm text-[var(--ink)] block">
+                  Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 30} pts
+                </b>
+                <span className="text-xs text-[var(--mut)]">
+                  Session recorded in SQLite. Resilience updated on profile.
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                  title="Share this drill with family or elderly parents"
+                >
+                  <span>Share Drill with Family</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStarted(false)}
+                  className="dojo-btn q min-h-[40px] px-4 text-xs"
+                >
+                  Choose another drill
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="dojo-btn min-h-[40px] px-4 text-xs"
+                >
+                  View your belt →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
-        /* Stage */
+        /* Chat Stage */
         <div className="dojo-stage mt-4 animate-in fade-in duration-200">
           {/* Stage Header */}
           <div className="dojo-sh">
