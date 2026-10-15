@@ -308,9 +308,11 @@ async def run_observer(
         prompt_text = render_prompt("observer.md.j2", context)
 
         config = types.GenerateContentConfig(
-            temperature=0.2,
+            temperature=0.1,
             response_mime_type="application/json",
             response_schema=TurnAssessment,
+            max_output_tokens=1000,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
 
         resp = await client.aio.models.generate_content(
@@ -394,9 +396,10 @@ async def run_scammer(
         prompt_text = render_prompt("scammer.md.j2", context)
 
         config = types.GenerateContentConfig(
-            temperature=0.9,
+            temperature=0.85,
             top_p=0.95,
-            max_output_tokens=160,
+            max_output_tokens=600,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
 
         response_stream = await client.aio.models.generate_content_stream(
