@@ -1,0 +1,63 @@
+name: Deploy Frontend (Firebase Hosting)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/web/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "firebase.json"
+      - ".firebaserc"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-web:
+    name: Build & Deploy to Firebase Hosting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Web Tests
+        run: pnpm --filter web test
+
+      - name: Build Web Application
+        run: pnpm --filter web build
+        env:
+          VITE_API_URL: https://scam-dojo-api-ph34wjnmbq-el.a.run.app
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/57898489793/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider
+          service_account: firebase-adminsdk-fbsvc@scam-dojo-v2.iam.gserviceaccount.com
+
+      - name: Deploy to Firebase Hosting
+        run: |
+          npx firebase-tools deploy --only hosting --project scam-dojo-v2

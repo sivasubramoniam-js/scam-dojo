@@ -1,0 +1,60 @@
+name: Deploy Backend (Cloud Run)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - "data/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-api:
+    name: Build & Deploy to Google Cloud Run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/140398471694/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider
+          service_account: scam-dojo-builder@scam-dojo.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: scam-dojo
+
+      - name: Build Container via Cloud Build
+        run: |
+          gcloud builds submit apps/api \
+            --tag asia-south1-docker.pkg.dev/scam-dojo/cloud-run-source-deploy/scam-dojo-api:latest \
+            --project scam-dojo
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy scam-dojo-api \
+            --image asia-south1-docker.pkg.dev/scam-dojo/cloud-run-source-deploy/scam-dojo-api:latest \
+            --project scam-dojo \
+            --region asia-south1 \
+            --allow-unauthenticated \
+            --env-vars-file apps/api/env-cloudrun.yaml
+
+      - name: Verify Health Check
+        run: |
+          SERVICE_URL=$(gcloud run services describe scam-dojo-api --project scam-dojo --region asia-south1 --format='value(status.url)')
+          echo "Deployed service URL: $SERVICE_URL"
+          curl -f "$SERVICE_URL/healthz" || exit 1
