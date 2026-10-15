@@ -41,6 +41,7 @@ jobs:
       - name: Build Container via Cloud Build
         run: |
           gcloud builds submit apps/api \
+            --region=asia-south1 \
             --tag asia-south1-docker.pkg.dev/scam-dojo/cloud-run-source-deploy/scam-dojo-api:latest \
             --project scam-dojo
 
