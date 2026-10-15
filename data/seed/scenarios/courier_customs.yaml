@@ -1,0 +1,77 @@
+slug: courier_customs
+title:
+  en: "Customs & Narcotics Parcel Threat"
+  hi: "कस्टम्स और नारकोटिक्स पार्सल की धमकी"
+blurb:
+  en: "A fake courier representative claims an intercepted parcel in your name contains narcotics and transfers you to a 'Customs' officer."
+  hi: "नकली कूरियर अधिकारी दावा करता है कि आपके नाम के पार्सल में नशीले पदार्थ मिले हैं और आपको तुरंत 'कस्टम्स' से जोड़ता है।"
+scam_type: courier_customs
+channel: phone_sms
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: yellow
+difficulty_range: [2, 5]
+est_minutes: 6
+persona:
+  name: "Sanjay Malhotra"
+  role: "International Express Operations Desk (fictional)"
+  voice: "Firm, procedural, urgent, authoritative"
+fake_entities:
+  org: "Global Express Logistics (fictional)"
+  phone: "+91 00000 00000"
+  link: "customs-clearance.example/verify"
+  upi: "clearing.desk@fakebank"
+  employee_id: "GEX-9921"
+objective: "Intimidate the user with legal arrest threats to extort identity documents and a 'refundable clearance deposit'."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - fear
+  - authority
+  - urgency
+ground_truth_flags:
+  - id: contraband_allegation
+    text: "Claims an intercepted international parcel contains illegal contraband or passports"
+    tactic: fear
+    weight: 3
+  - id: immediate_arrest_warning
+    text: "Warns that Narcotics Control Bureau has issued an immediate arrest notice"
+    tactic: fear
+    weight: 3
+  - id: demands_clearance_deposit
+    text: "Asks for a refundable clearance fee or bond via UPI/IMPS to cancel legal action"
+    tactic: authority
+    weight: 3
+  - id: identity_theft_lure
+    text: "Asks user to share Aadhaar, PAN, and passport details to 'prove innocence'"
+    tactic: trust
+    weight: 2
+  - id: caller_initiated_allegation
+    text: "Cold-call intimidation alleging crimes you had no knowledge of"
+    tactic: isolation
+    weight: 2
+verification_actions:
+  - "states they never dispatched any international parcel and disconnects"
+  - "refuses to transfer any security deposit or clearance fee"
+  - "tells caller that official notices come via registered post or physical police visits"
+  - "reports the fake parcel call to Cyber Crime Helpline 1930 and Sanchar Saathi Chakshu"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "agrees_to_pay_or_transfer"
+  - "shares_aadhaar_pan_credentials"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Important notice from Global Express Security: Consignment #GEX-88491 registered under your Aadhaar has been intercepted by Mumbai Customs containing 5 fake passports and 140g MDMA. Press 1 or stay on line to speak with Customs Verification Desk immediately."
+  hi: "Global Express सुरक्षा से महत्वपूर्ण सूचना: आपके आधार पर पंजीकृत पार्सल #GEX-88491 को मुंबई कस्टम्स ने 5 जाली पासपोर्ट और 140g MDMA के साथ ज़ब्त किया है। कस्टम्स सत्यापन अधिकारी से तुरंत बात करने के लिए 1 दबाएँ या लाइन पर बने रहें।"
+fallback_lines:
+  urgency: "Sir, Customs Officers are filing FIR #MC-2026/89 as we speak. If you disconnect, a police team will be dispatched to your Aadhaar address within 45 minutes."
+  pressure: "To avoid immediate detention under NDPS Section 20, you must deposit ₹35,000 into the Reserve Escrow account for verification. It is 100% refundable once audited."
+  extraction: "Share the transaction reference number and your Aadhaar photo immediately so our legal officer can issue your provisional innocence clearance."

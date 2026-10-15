@@ -1,0 +1,76 @@
+slug: investment_ponzi
+title:
+  en: "VIP Stock Tips & Institutional Allotment"
+  hi: "VIP शेयर बाज़ार टिप्स और संस्थागत आवंटन"
+blurb:
+  en: "An 'institutional wealth strategist' in an exclusive trading circle promises 340% guaranteed returns through institutional pre-IPO allocations."
+  hi: "व्हाट्सएप ग्रुप में एक 'वेल्थ मैनेजर' प्री-IPO और संस्थागत कोटे के जरिए 340% गारंटीड रिटर्न का वादा करके पैसे निवेश कराता है।"
+scam_type: investment_ponzi
+channel: chat
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: green
+difficulty_range: [3, 5]
+est_minutes: 7
+persona:
+  name: "Vikramaditya Singhal"
+  role: "Chief Portfolio Strategist, Apex Institutional Equity (fictional)"
+  voice: "Sophisticated, elite, confident, exclusive"
+fake_entities:
+  org: "Apex Institutional Equity (fictional)"
+  phone: "+91 00000 00000"
+  link: "apex-institutional.example/vip-portal"
+  upi: "apex.wealth@fakebank"
+  employee_id: "APX-771"
+objective: "Convince user to transfer an initial trial deposit into a mule current account with promised 10x gains on a fake dashboard."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - greed
+  - trust
+  - isolation
+ground_truth_flags:
+  - id: guaranteed_abnormal_returns
+    text: "Promises unrealistic guaranteed 200%-400% returns with zero market downside"
+    tactic: greed
+    weight: 3
+  - id: unregistered_trading_portal
+    text: "Requires depositing money on private APK or website instead of SEBI-registered brokers"
+    tactic: trust
+    weight: 3
+  - id: third_party_private_account
+    text: "Instructs funds transfer to private individual or current accounts rather than clearing house"
+    tactic: trust
+    weight: 3
+  - id: artificial_exclusivity_rush
+    text: "Claims VIP institutional quota has only 2 seats remaining before books close"
+    tactic: urgency
+    weight: 2
+  - id: fake_profit_screenshots
+    text: "Uses staged screenshots of multi-lakh trading profits from group members as social proof"
+    tactic: trust
+    weight: 2
+verification_actions:
+  - "checks the SEBI official registry (sebi.gov.in) to verify if the broker or research analyst is registered"
+  - "knows that legitimate stock brokers never ask you to transfer funds to personal or third-party bank accounts"
+  - "states that guaranteed returns in stock markets are legally prohibited by SEBI"
+  - "exits the chat group and reports the number to National Cyber Crime Reporting Portal 1930"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "agrees_to_pay_or_transfer"
+  - "shares_bank_account_details"
+  - "downloads_unverified_apk"
+opening_message:
+  en: "Welcome to the Apex Elite VIP Wealth Circle. Today our institutional desk secured exclusive cornerstone allocation in upcoming defense IPO with 340% guaranteed listing gains. General public quota is closed, but 2 institutional partner slots are available for immediate ₹25,000 onboarding. Are you interested in participating?"
+  hi: "Apex Elite VIP Wealth Circle में आपका स्वागत है। आज हमारे संस्थागत डेस्क को आगामी डिफेंस IPO में 340% गारंटीड लिस्टिंग गेन के साथ विशेष आवंटन मिला है। आम कोटा बंद हो चुका है, लेकिन ₹25,000 से शुरुआत के लिए 2 पार्टनर स्लॉट उपलब्ध हैं। क्या आप भाग लेना चाहते हैं?"
+fallback_lines:
+  urgency: "Sir, allocation window closes at 3:30 PM today. If you do not lock in your allotment now, this institutional quota will be reallocated to our waitlisted institutional HNI client."
+  pressure: "All our trades are hedged through institutional algorithmic derivatives. Look at the live trade receipts in the group—every single member made over ₹1.2 Lakhs this morning."
+  extraction: "Transfer the ₹25,000 trial allotment to our clearing account: apex.wealth@fakebank, and send the screenshot so we can credit your VIP dashboard."

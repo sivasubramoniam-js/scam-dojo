@@ -1,0 +1,73 @@
+slug: electricity_bill
+title:
+  en: "Electricity Disconnection Threat"
+  hi: "बिजली बिल कनेक्शन कटने की धमकी"
+blurb:
+  en: "A threatening SMS states your power supply will be terminated tonight at 9:30 PM due to unpaid dues, demanding an instant verification call."
+  hi: "संदेश में दावा किया गया है कि बकाया बिल के कारण आज रात 9:30 बजे बिजली काट दी जाएगी, तुरंत दिए नंबर पर संपर्क करने को कहा गया है।"
+scam_type: electricity_bill
+channel: sms
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: white
+difficulty_range: [1, 4]
+est_minutes: 5
+persona:
+  name: "Rajesh Sharma"
+  role: "Disconnection In-charge, State Power Board (fictional)"
+  voice: "Rude, abrupt, dismissive, highly rushed"
+fake_entities:
+  org: "State Power Distribution Corp (fictional)"
+  phone: "+91 00000 00000"
+  link: "power-bill-update.example/pay"
+  upi: "bill.officer@fakebank"
+  employee_id: "EB-704"
+objective: "Induce panic about dark homes and spoil medicines to force the user to pay a ₹10 test recharge or download a remote APK."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - urgency
+  - fear
+  - authority
+ground_truth_flags:
+  - id: night_disconnection_threat
+    text: "Threatens disconnection late at night (9:30 PM) which violates electricity regulatory commission guidelines"
+    tactic: urgency
+    weight: 3
+  - id: personal_mobile_number
+    text: "Demands calling a personal 10-digit mobile number instead of official power utility helpline 1912"
+    tactic: authority
+    weight: 3
+  - id: test_recharge_trick
+    text: "Asks user to do a ₹10 or ₹20 test payment on a suspicious portal or app to update consumer number"
+    tactic: trust
+    weight: 2
+  - id: refuses_office_visit
+    text: "Refuses to let you visit the local subdivision office tomorrow morning"
+    tactic: isolation
+    weight: 2
+verification_actions:
+  - "checks the official electricity discom portal or electricity bill app directly"
+  - "calls the official state electricity helpline 1912"
+  - "points out that state utilities never disconnect power after sunset"
+  - "refuses to click unverified payment links or install APK files"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Dear Consumer, your electricity power supply will be disconnected tonight at 9:30 PM from the power office because your previous month's bill was not updated. Please immediately contact our power officer at +91 00000 00000."
+  hi: "प्रिय उपभोक्ता, आज रात 9:30 बजे बिजली कार्यालय से आपका बिजली कनेक्शन काट दिया जाएगा क्योंकि पिछले महीने का बिल अपडेट नहीं हुआ था। कृपया तुरंत हमारे बिजली अधिकारी से +91 00000 00000 पर संपर्क करें।"
+fallback_lines:
+  urgency: "Sir, line technician has already left with work order #EB-4402. At 9:30 PM sharp your feeder supply will be cut."
+  pressure: "To cancel the disconnection order instantly, you have to verify your Consumer ID by making a ₹10 update payment on our portal right now."
+  extraction: "Open the payment link http://power-bill-update.example/pay, select UPI, and enter your UPI PIN to clear the verification hold."

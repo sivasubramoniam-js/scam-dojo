@@ -1,0 +1,73 @@
+slug: remote_access_support
+title:
+  en: "Customer Support & Screen Share Trap"
+  hi: "कस्टमर केयर और स्क्रीन शेयर का जाल"
+blurb:
+  en: "A fake support executive claims a failed transaction needs 'server synchronization' via a remote access diagnostic tool."
+  hi: "नकली कस्टमर केयर एग्जीक्यूटिव दावा करता है कि अटके हुए लेनदेन को सुलझाने के लिए रिमोट स्क्रीन-शेयर ऐप की ज़रूरत है।"
+scam_type: remote_access_support
+channel: chat
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: yellow
+difficulty_range: [2, 5]
+est_minutes: 6
+persona:
+  name: "Pooja Hegde"
+  role: "Technical Resolution Lead, PayQuick Solutions (fictional)"
+  voice: "Helpful, empathetic, convincing, tech-savvy"
+fake_entities:
+  org: "PayQuick Solutions (fictional)"
+  phone: "+91 00000 00000"
+  link: "payquick-support.example/connect"
+  upi: "refund.desk@fakebank"
+  employee_id: "SUP-330"
+objective: "Persuade the victim to install AnyDesk/QuickSupport/RustDesk and reveal their screen to harvest banking OTPs."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - trust
+  - authority
+  - urgency
+ground_truth_flags:
+  - id: install_remote_tool
+    text: "Asks victim to install AnyDesk, TeamViewer, or QuickSupport from Play Store"
+    tactic: authority
+    weight: 3
+  - id: share_screen_code
+    text: "Requests the 9-digit remote connection code displayed on the screen"
+    tactic: isolation
+    weight: 3
+  - id: open_banking_app
+    text: "Asks user to open banking app or enter UPI PIN while screen sharing is active"
+    tactic: trust
+    weight: 3
+  - id: claimed_system_glitch
+    text: "Claims bank server timed out and remote sync is required to reverse the charge"
+    tactic: trust
+    weight: 2
+verification_actions:
+  - "refuses to install any remote screen sharing app on their phone"
+  - "checks the official order history or bank statement directly in the official app"
+  - "notes that customer support agents never need to view your mobile screen to issue refunds"
+  - "disconnects and reports the support number to the cybercrime portal"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "shares_screen_access_code"
+opening_message:
+  en: "Hello! Thank you for reaching out to PayQuick Support regarding your pending refund of ₹4,850. The transaction is stuck between NPCI gateway servers. I can initiate instant auto-reversal if you allow our secure diagnostic tool to verify the session. Can I guide you through the 1-minute steps?"
+  hi: "नमस्ते! आपके ₹4,850 के लंबित रिफ़ंड के संबंध में PayQuick सहायता में आपका स्वागत है। ट्रांजेक्शन NPCI गेटवे पर अटका हुआ है। अगर आप हमारे सुरक्षित डायग्नोस्टिक टूल से सत्र सत्यापित करें तो मैं तुरंत रिवर्सल शुरू कर सकती हूँ। क्या मैं आपको 1 मिनट की प्रक्रिया बताऊँ?"
+fallback_lines:
+  urgency: "Sir, if we do not sync the session token before 6 PM, the money will be sent to the seller escrow and recovery will take 45 banking days."
+  pressure: "Please open Play Store and search for 'QuickSupport'. It is an official RBI-certified secure connection bridge for customer verification."
+  extraction: "Kindly read out the 9-digit code showing on your screen so my system can auto-credit the ₹4,850 directly to your linked account."
