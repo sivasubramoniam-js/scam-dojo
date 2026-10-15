@@ -20,6 +20,7 @@ import {
   Check,
 } from "lucide-react";
 import { ScamScoreCard } from "@/components/check/ScamScoreCard";
+import { ShareableWarningCardModal } from "@/components/check/ShareableWarningCardModal";
 
 export function CheckPage() {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ export function CheckPage() {
   const [forging, setForging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedAlert, setCopiedAlert] = useState(false);
+  const [showCardModal, setShowCardModal] = useState(false);
 
   const getShareText = () => {
     if (!checkResult) return "";
@@ -414,6 +416,15 @@ export function CheckPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setShowCardModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-black transition shadow-sm"
+                  title="Generate high-res downloadable warning poster"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Generate Warning Poster</span>
+                </button>
+                <button
+                  type="button"
                   onClick={handleCopyAlert}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition shadow-xs"
                 >
@@ -605,6 +616,15 @@ export function CheckPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Shareable Warning Card Modal */}
+      {checkResult && (
+        <ShareableWarningCardModal
+          isOpen={showCardModal}
+          onClose={() => setShowCardModal(false)}
+          checkResult={checkResult}
+        />
       )}
     </div>
   );

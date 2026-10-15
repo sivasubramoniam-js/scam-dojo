@@ -55,7 +55,17 @@
 - [x] **Family & Senior Safety Filter**: In `/train`, added category filter tabs (`All Scenarios`, `👨‍👩‍👧 Family & Senior Safety`, `💼 Job & Investment`, `🚨 Urgent Extortion`).
 - [x] **Family Safety Essential Badges**: Clearly flags drills that are vital for vulnerable demographics (`👨‍👩‍👧 Family`).
 - [x] **WhatsApp Family Share Flow**: Debrief screen allows users who completed a drill to immediately share the simulation link with family or parents on WhatsApp.
-- [x] **Sticky Emergency Helpline**: Instant 1-tap dialer for 1930 preserved in top navigation.
+### Phase 4: Voice-Call Simulation, Warning Poster Generator & PWA
+- [x] **Live Phone Call Audio Simulation (`speech.ts`)**:
+  - Browser `window.speechSynthesis` speaks incoming scammer dialogue with urgent pacing.
+  - Native `webkitSpeechRecognition` mic button allows users to speak their replies aloud.
+  - Visual pulse indicators for speaking waveform and microphone listening state.
+- [x] **Shareable Scam Warning Poster Generator (`ShareableWarningCardModal.tsx`)**:
+  - 1080x1080 high-contrast HTML5 Canvas alert poster formatted for WhatsApp groups and social media.
+  - Renders threat score, threat classification, quoted scam snippet, red flags, and 1930 / cybercrime.gov.in emergency helplines.
+  - Instant one-click "Download Image (.png)", "Share to WhatsApp", and "Copy Image".
+- [x] **Emergency Offline Service Worker (`public/sw.js`)**:
+  - Pre-caches emergency recovery routes, bank freeze directories, and icons for offline access during crisis or SIM cutoffs.
 
 ---
 *Maintained on branch: `feat/anti-scam-suite-enhancements`*

@@ -9,6 +9,7 @@ import {
   ScenarioItem,
 } from "@/lib/api";
 import { scrubPii } from "@/lib/pii";
+import { createSpeechSynthesizer, createVoiceRecognizer } from "@/lib/speech";
 
 interface ChatMessage {
   id: string;
@@ -43,6 +44,11 @@ export function TrainPage() {
   const [isDone, setIsDone] = useState(false);
   const [debriefInfo, setDebriefInfo] = useState<any | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<"all" | "family" | "jobs" | "urgency">("all");
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const synthRef = useRef(createSpeechSynthesizer());
+  const recRef = useRef(createVoiceRecognizer());
   const logRef = useRef<HTMLDivElement>(null);
 
   const familySlugs = ["remote_access_support", "digital_arrest_call", "electricity_bill", "fake_kyc"];
@@ -118,6 +124,12 @@ export function TrainPage() {
             text: initialMsg,
           },
         ]);
+
+        if (isVoiceMode) {
+          synthRef.current.speak(initialMsg, () => setIsSpeaking(false));
+          setIsSpeaking(true);
+        }
+
         setTraces([
           `Session active: ${sess.sessionId} (Live Backend)`,
           `Scenario: ${sess.scenario?.title} · Difficulty: ${sess.difficulty}`,
@@ -141,6 +153,8 @@ export function TrainPage() {
     if (!raw || isDone) return;
     setInputVal("");
     setSessionError(null);
+    synthRef.current.stop();
+    setIsSpeaking(false);
 
     // Client-side PII check
     const scrubbed = scrubPii(raw);
@@ -236,6 +250,11 @@ export function TrainPage() {
               )
             );
           }
+
+          if (isVoiceMode && msg.text && msg.role !== "sensei") {
+            synthRef.current.speak(msg.text, () => setIsSpeaking(false));
+            setIsSpeaking(true);
+          }
         },
         onSessionEnd: (end) => {
           setIsDone(true);
@@ -279,6 +298,11 @@ export function TrainPage() {
               text: res.message.text,
             },
           ]);
+
+          if (isVoiceMode && res.message.role !== "sensei") {
+            synthRef.current.speak(res.message.text, () => setIsSpeaking(false));
+            setIsSpeaking(true);
+          }
         }
         if (res?.sessionEnd) {
           setIsDone(true);
@@ -295,6 +319,10 @@ export function TrainPage() {
 
   const handleHangUp = async () => {
     setIsDone(true);
+    synthRef.current.stop();
+    recRef.current.stop();
+    setIsSpeaking(false);
+    setIsListening(false);
     if (sessionId) {
       try {
         const res = await endTrainSession(sessionId, "walked_away");
@@ -488,7 +516,45 @@ export function TrainPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !isVoiceMode;
+                  setIsVoiceMode(next);
+                  if (!next) {
+                    synthRef.current.stop();
+                    recRef.current.stop();
+                    setIsSpeaking(false);
+                    setIsListening(false);
+                  } else if (messages.length > 0) {
+                    const lastMsg = messages[messages.length - 1];
+                    if (lastMsg.role === "scammer") {
+                      synthRef.current.speak(lastMsg.text, () => setIsSpeaking(false));
+                      setIsSpeaking(true);
+                    }
+                  }
+                }}
+                className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${
+                  isVoiceMode
+                    ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
+                    : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
+                }`}
+                title="Toggle Voice Call Mode"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  {isVoiceMode ? "volume_up" : "volume_off"}
+                </span>
+                <span>{isVoiceMode ? "Voice Call Active" : "Voice Call Off"}</span>
+                {isSpeaking && (
+                  <span className="inline-flex gap-0.5 items-center ml-0.5">
+                    <span className="w-1 h-3 bg-white animate-pulse"></span>
+                    <span className="w-1 h-2 bg-white animate-pulse delay-75"></span>
+                    <span className="w-1 h-3.5 bg-white animate-pulse delay-150"></span>
+                  </span>
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowTrace(!showTrace)}
@@ -596,13 +662,51 @@ export function TrainPage() {
 
           {/* Input Composer */}
           <div className="flex gap-2 p-3 border-t border-[var(--line)] bg-[var(--sf)]">
+            <button
+              type="button"
+              onClick={() => {
+                if (isListening) {
+                  recRef.current.stop();
+                  setIsListening(false);
+                } else {
+                  setIsListening(true);
+                  recRef.current.start(
+                    (transcript) => {
+                      setInputVal(transcript);
+                      setIsListening(false);
+                    },
+                    () => {
+                      setIsListening(false);
+                    }
+                  );
+                }
+              }}
+              disabled={isDone || isTyping}
+              className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer ${
+                isListening
+                  ? "bg-rose-500 text-white border-rose-500 animate-pulse"
+                  : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
+              }`}
+              title={isListening ? "Listening... click to stop" : "Speak reply using microphone"}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {isListening ? "mic" : "mic_none"}
+              </span>
+            </button>
+
             <input
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               disabled={isDone || isTyping}
-              placeholder={isDone ? "Drill completed." : "Type your reply to the caller…"}
+              placeholder={
+                isListening
+                  ? "Listening to your voice..."
+                  : isDone
+                  ? "Drill completed."
+                  : "Type or speak your reply to the caller…"
+              }
               maxLength={500}
               aria-label="Your reply"
               className="flex-1 min-h-[44px] rounded-lg border border-[var(--line)] bg-[var(--bg)] px-3 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--act)]"
