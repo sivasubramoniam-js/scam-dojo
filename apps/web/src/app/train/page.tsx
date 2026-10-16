@@ -613,6 +613,7 @@ export function TrainPage() {
             onHangUp={handleHangUp}
             onToggleMic={toggleMic}
             isDone={isDone}
+            sessionId={sessionId || undefined}
           />
           {/* Completion Action Bar */}
           {isDone && (
@@ -670,6 +671,7 @@ export function TrainPage() {
             onHangUp={handleHangUp}
             onToggleMic={toggleMic}
             isDone={isDone}
+            sessionId={sessionId || undefined}
           />
           {/* Completion Action Bar */}
           {isDone && (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { GeminiLiveClient } from "@/lib/geminiLive";
 
 interface VideoCallStageProps {
   callerName: string;
@@ -13,14 +14,16 @@ interface VideoCallStageProps {
   onHangUp: () => void;
   onToggleMic: () => void;
   isDone: boolean;
+  sessionId?: string;
+  enableLiveApi?: boolean;
 }
 
 export function VideoCallStage({
   callerName,
   callerOrg,
   tension,
-  isSpeaking,
-  isListening,
+  isSpeaking: externalIsSpeaking,
+  isListening: externalIsListening,
   isTyping,
   aiStatus,
   lastScammerText,
@@ -28,12 +31,20 @@ export function VideoCallStage({
   onHangUp,
   onToggleMic,
   isDone,
+  sessionId,
+  enableLiveApi = true,
 }: VideoCallStageProps) {
   const [callDuration, setCallDuration] = useState(0);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [manualInput, setManualInput] = useState("");
   const [showManualFallback, setShowManualFallback] = useState(false);
+
+  // Gemini Live State
+  const [liveConnected, setLiveConnected] = useState(false);
+  const [liveSpeaking, setLiveSpeaking] = useState(false);
+  const [liveCaptions, setLiveCaptions] = useState<string>("");
+  const liveClientRef = useRef<GeminiLiveClient | null>(null);
 
   const userVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -109,6 +120,71 @@ export function VideoCallStage({
   const talkingVideoRef = useRef<HTMLVideoElement | null>(null);
   const listeningVideoRef = useRef<HTMLVideoElement | null>(null);
 
+  // Unified Speaking State: Driven by Gemini Live audio streaming or external speech synthesis
+  const isSpeaking = liveSpeaking || externalIsSpeaking;
+  const isListening = externalIsListening;
+
+  // Initialize Gemini Live Client
+  useEffect(() => {
+    if (!enableLiveApi || typeof window === "undefined") return;
+
+    const liveClient = new GeminiLiveClient({
+      onSpeakingChange: (speaking) => {
+        setLiveSpeaking(speaking);
+      },
+      onTranscript: (text, role) => {
+        if (role === "scammer") {
+          setLiveCaptions((prev) => (prev ? `${prev} ${text}` : text));
+        }
+      },
+      onReady: () => {
+        setLiveConnected(true);
+      },
+      onConnected: () => {
+        setLiveConnected(true);
+      },
+      onInterrupted: () => {
+        setLiveSpeaking(false);
+      },
+      onError: (err) => {
+        console.warn("Gemini Live warning:", err);
+      },
+    });
+
+    liveClientRef.current = liveClient;
+    const targetSid = sessionId || `live_sim_${Date.now()}`;
+    liveClient.connect(targetSid).catch(() => {});
+
+    return () => {
+      liveClient.disconnect();
+      liveClientRef.current = null;
+    };
+  }, [sessionId, enableLiveApi]);
+
+  // Stream user camera frames to Gemini Live whenever camera is enabled
+  useEffect(() => {
+    const client = liveClientRef.current;
+    if (!client) return;
+
+    if (cameraEnabled && userVideoRef.current) {
+      client.startVideoCapture(userVideoRef.current, 1.5);
+    } else {
+      client.stopVideoCapture();
+    }
+  }, [cameraEnabled]);
+
+  // Stream user mic audio to Gemini Live when user toggles mic
+  useEffect(() => {
+    const client = liveClientRef.current;
+    if (!client) return;
+
+    if (isListening) {
+      client.startAudioCapture().catch(() => {});
+    } else {
+      client.stopAudioCapture();
+    }
+  }, [isListening]);
+
   const PERSONA_VIDEOS = {
     police: {
       name: "CBI Cyber Crime Cell",
@@ -146,7 +222,7 @@ export function VideoCallStage({
   // Control video playback:
   // - Talking video plays in 2x speed loop mode when scammer is speaking (isSpeaking === true)
   // - Listening video plays in loop mode when talking stops until user completes speech (isSpeaking === false)
-  // - Both videos are muted so simultaneous speech synthesis / voiceover audio plays crystal clear
+  // - Both videos are muted so simultaneous Gemini Live audio plays crystal clear
   useEffect(() => {
     const talkingEl = talkingVideoRef.current;
     const listeningEl = listeningVideoRef.current;
@@ -252,6 +328,15 @@ export function VideoCallStage({
 
           {/* Persona Feed Selector & Live Video State Badge */}
           <div className="flex items-center gap-2 pointer-events-auto">
+            {/* Gemini Live Indicator */}
+            {liveConnected && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/90 border border-purple-500/60 text-purple-200 text-[10px] font-mono font-bold shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+                <span className="hidden sm:inline">Gemini 3.8 Live</span>
+                <span>(Audio+Video)</span>
+              </div>
+            )}
+
             {/* Persona Switcher */}
             <div className="flex items-center bg-black/80 backdrop-blur-md p-1 rounded-xl border border-white/15 text-[10px] font-bold">
               <button
@@ -348,11 +433,11 @@ export function VideoCallStage({
       </div>
 
       {/* Subtitles & Spoken Dialogue CC Banner */}
-      {lastScammerText && (
+      {(liveCaptions || lastScammerText) && (
         <div className="bg-slate-950 px-6 py-2.5 border-t border-b border-slate-800 text-center">
           <p className="text-xs sm:text-sm text-slate-200 font-medium">
             <span className="text-amber-400 font-bold mr-1">Officer:</span>
-            "{lastScammerText}"
+            "{liveCaptions || lastScammerText}"
           </p>
         </div>
       )}
@@ -387,7 +472,12 @@ export function VideoCallStage({
                 <button
                   key={i}
                   type="button"
-                  onClick={() => onSendMessage(phrase)}
+                  onClick={() => {
+                    if (liveClientRef.current) {
+                      liveClientRef.current.sendText(phrase);
+                    }
+                    onSendMessage(phrase);
+                  }}
                   disabled={isSpeaking || isTyping}
                   className="text-left text-xs p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-850 text-slate-300 hover:text-white transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group"
                 >
@@ -405,6 +495,9 @@ export function VideoCallStage({
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (manualInput.trim()) {
+                    if (liveClientRef.current) {
+                      liveClientRef.current.sendText(manualInput.trim());
+                    }
                     onSendMessage(manualInput.trim());
                     setManualInput("");
                   }
@@ -468,7 +561,10 @@ export function VideoCallStage({
           {/* Red Disconnect Video Call Button */}
           <button
             type="button"
-            onClick={onHangUp}
+            onClick={() => {
+              liveClientRef.current?.disconnect();
+              onHangUp();
+            }}
             disabled={isDone}
             className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-lg shadow-red-600/40"
             title="Disconnect Video Call"

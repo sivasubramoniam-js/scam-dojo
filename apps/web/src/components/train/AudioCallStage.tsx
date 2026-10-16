@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { GeminiLiveClient } from "@/lib/geminiLive";
 
 interface AudioCallStageProps {
   callerName: string;
@@ -13,14 +14,16 @@ interface AudioCallStageProps {
   onHangUp: () => void;
   onToggleMic: () => void;
   isDone: boolean;
+  sessionId?: string;
+  enableLiveApi?: boolean;
 }
 
 export function AudioCallStage({
   callerName,
   callerOrg,
   tension,
-  isSpeaking,
-  isListening,
+  isSpeaking: externalIsSpeaking,
+  isListening: externalIsListening,
   isTyping,
   aiStatus,
   lastScammerText,
@@ -28,12 +31,72 @@ export function AudioCallStage({
   onHangUp,
   onToggleMic,
   isDone,
+  sessionId,
+  enableLiveApi = true,
 }: AudioCallStageProps) {
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(true);
   const [manualInput, setManualInput] = useState("");
   const [showManualFallback, setShowManualFallback] = useState(false);
+
+  // Gemini Live State
+  const [liveConnected, setLiveConnected] = useState(false);
+  const [liveSpeaking, setLiveSpeaking] = useState(false);
+  const [liveCaptions, setLiveCaptions] = useState<string>("");
+  const liveClientRef = useRef<GeminiLiveClient | null>(null);
+
+  const isSpeaking = liveSpeaking || externalIsSpeaking;
+  const isListening = externalIsListening;
+
+  // Initialize Gemini Live Client
+  useEffect(() => {
+    if (!enableLiveApi || typeof window === "undefined") return;
+
+    const liveClient = new GeminiLiveClient({
+      onSpeakingChange: (speaking) => {
+        setLiveSpeaking(speaking);
+      },
+      onTranscript: (text, role) => {
+        if (role === "scammer") {
+          setLiveCaptions((prev) => (prev ? `${prev} ${text}` : text));
+        }
+      },
+      onReady: () => {
+        setLiveConnected(true);
+      },
+      onConnected: () => {
+        setLiveConnected(true);
+      },
+      onInterrupted: () => {
+        setLiveSpeaking(false);
+      },
+      onError: (err) => {
+        console.warn("Gemini Live warning:", err);
+      },
+    });
+
+    liveClientRef.current = liveClient;
+    const targetSid = sessionId || `live_audio_${Date.now()}`;
+    liveClient.connect(targetSid).catch(() => {});
+
+    return () => {
+      liveClient.disconnect();
+      liveClientRef.current = null;
+    };
+  }, [sessionId, enableLiveApi]);
+
+  // Stream user mic audio to Gemini Live when user toggles mic
+  useEffect(() => {
+    const client = liveClientRef.current;
+    if (!client) return;
+
+    if (isListening && !isMuted) {
+      client.startAudioCapture().catch(() => {});
+    } else {
+      client.stopAudioCapture();
+    }
+  }, [isListening, isMuted]);
 
   // Call timer
   useEffect(() => {
@@ -78,9 +141,17 @@ export function AudioCallStage({
             VOIP PRI ENCRYPTED
           </span>
         </div>
-        <div className="flex items-center gap-1.5 font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/40">
-          <span className="material-symbols-outlined text-[14px]">call</span>
-          <span>{formatTime(callDuration)}</span>
+        <div className="flex items-center gap-2">
+          {liveConnected && (
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-purple-300 bg-purple-950/70 border border-purple-500/50 px-2.5 py-0.5 rounded-full shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+              <span>Gemini 3.8 Live</span>
+            </span>
+          )}
+          <div className="flex items-center gap-1.5 font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/40">
+            <span className="material-symbols-outlined text-[14px]">call</span>
+            <span>{formatTime(callDuration)}</span>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           <span className="text-[10px] font-mono uppercase bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
@@ -181,10 +252,10 @@ export function AudioCallStage({
       </div>
 
       {/* Scammer Last Spoken Closed Caption (Subtle / Audio Subtitle) */}
-      {lastScammerText && (
+      {(liveCaptions || lastScammerText) && (
         <div className="relative z-10 my-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
           <p className="text-xs text-slate-300 italic line-clamp-2">
-            "{lastScammerText}"
+            "{liveCaptions || lastScammerText}"
           </p>
         </div>
       )}
@@ -246,7 +317,12 @@ export function AudioCallStage({
               <button
                 key={i}
                 type="button"
-                onClick={() => onSendMessage(phrase)}
+                onClick={() => {
+                  if (liveClientRef.current) {
+                    liveClientRef.current.sendText(phrase);
+                  }
+                  onSendMessage(phrase);
+                }}
                 disabled={isSpeaking || isTyping}
                 className="text-left text-xs p-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-800/80 transition-all text-slate-300 hover:text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group"
               >
@@ -264,6 +340,9 @@ export function AudioCallStage({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (manualInput.trim()) {
+                  if (liveClientRef.current) {
+                    liveClientRef.current.sendText(manualInput.trim());
+                  }
                   onSendMessage(manualInput.trim());
                   setManualInput("");
                 }
@@ -344,7 +423,10 @@ export function AudioCallStage({
         {/* Big Red Hang Up Button */}
         <button
           type="button"
-          onClick={onHangUp}
+          onClick={() => {
+            liveClientRef.current?.disconnect();
+            onHangUp();
+          }}
           disabled={isDone}
           className="flex flex-col items-center gap-1 p-3 rounded-full bg-red-600 hover:bg-red-500 text-white transition cursor-pointer disabled:opacity-50 shadow-lg shadow-red-600/40"
           title="Hang Up / Disconnect"
