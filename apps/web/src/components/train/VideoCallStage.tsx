@@ -99,30 +99,100 @@ export function VideoCallStage({
     };
   }, []);
 
-  // Determine active Veo video state
-  const getVideoState = () => {
+  const isCustomsDetected = /customs|fedex|parcel|narcotics|dhl|courier/i.test(
+    (callerOrg || "") + " " + (callerName || "")
+  );
+  const [videoPersona, setVideoPersona] = useState<"police" | "customs">(
+    isCustomsDetected ? "customs" : "police"
+  );
+
+  const talkingVideoRef = useRef<HTMLVideoElement | null>(null);
+  const listeningVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const PERSONA_VIDEOS = {
+    police: {
+      name: "CBI Cyber Crime Cell",
+      casePrefix: "CBI/E-CYBER/2026/8942",
+      talking: "/assets/video/Police-talking.mp4",
+      listening: "/assets/video/Police-listening.mp4",
+    },
+    customs: {
+      name: "Customs & Narcotics Interdiction",
+      casePrefix: "CUSTOMS/NARCO/BOM-7741",
+      talking: "/assets/video/Customs-talking.mp4",
+      listening: "/assets/video/Customs-listening.mp4",
+    },
+  };
+
+  const activePersona = PERSONA_VIDEOS[videoPersona];
+
+  const safePlay = (el: HTMLVideoElement | null) => {
+    if (!el || typeof el.play !== "function") return;
+    try {
+      const res = el.play();
+      if (res && typeof res.catch === "function") {
+        res.catch(() => { });
+      }
+    } catch { }
+  };
+
+  const safePause = (el: HTMLVideoElement | null) => {
+    if (!el || typeof el.pause !== "function") return;
+    try {
+      el.pause();
+    } catch { }
+  };
+
+  // Control video playback:
+  // - Talking video plays in 2x speed loop mode when scammer is speaking (isSpeaking === true)
+  // - Listening video plays in loop mode when talking stops until user completes speech (isSpeaking === false)
+  // - Both videos are muted so simultaneous speech synthesis / voiceover audio plays crystal clear
+  useEffect(() => {
+    const talkingEl = talkingVideoRef.current;
+    const listeningEl = listeningVideoRef.current;
+
+    if (isSpeaking) {
+      if (talkingEl) {
+        talkingEl.playbackRate = 1.0;
+        safePlay(talkingEl);
+      }
+      safePause(listeningEl);
+    } else {
+      if (listeningEl) {
+        listeningEl.playbackRate = 1.0;
+        safePlay(listeningEl);
+      }
+      safePause(talkingEl);
+    }
+  }, [isSpeaking, videoPersona]);
+
+  // Video State Badge
+  const getVideoBadge = () => {
     if (tension >= 7) {
       return {
-        src: "/assets/simulation/officer_threat.jpg",
-        label: "COERCIVE THREAT / WARRANT ISSUANCE",
-        badgeColor: "bg-red-600 text-white",
+        label: isSpeaking ? "🔴 COERCIVE WARRANT (2X LOOP)" : "🔴 CITIZEN UNDER ARREST (LOOP)",
+        badgeColor: "bg-red-600/90 text-white animate-pulse border-red-500",
       };
     }
     if (isSpeaking) {
       return {
-        src: "/assets/simulation/officer_speaking.jpg",
-        label: "OFFICER INTERROGATING (LIVE)",
-        badgeColor: "bg-amber-600 text-white",
+        label: "🔴 OFFICER TALKING (2X SPEED LOOP)",
+        badgeColor: "bg-rose-600/90 text-white animate-pulse border-rose-400",
+      };
+    }
+    if (isListening) {
+      return {
+        label: "🟢 OFFICER LISTENING · SPEAK NOW (LOOP)",
+        badgeColor: "bg-emerald-600/90 text-white animate-pulse border-emerald-400",
       };
     }
     return {
-      src: "/assets/simulation/officer_listening.jpg",
-      label: "OFFICER OBSERVING / RECORDING",
-      badgeColor: "bg-slate-800 text-slate-300",
+      label: "🟡 OFFICER OBSERVING (AWAITING SPEECH)",
+      badgeColor: "bg-slate-800/90 text-slate-200 border-slate-600",
     };
   };
 
-  const activeVideo = getVideoState();
+  const videoBadge = getVideoBadge();
 
   const verbalCounters = [
     "I will verify with my local police station in person.",
@@ -135,41 +205,85 @@ export function VideoCallStage({
     <div className="relative w-full max-w-4xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-black text-white shadow-2xl flex flex-col justify-between animate-in fade-in duration-300">
       {/* Central Scammer Video Stream Window */}
       <div className="relative w-full aspect-video sm:aspect-16/10 bg-slate-950 overflow-hidden flex items-center justify-center">
-        {/* Dynamic Video State Image */}
-        <img
-          src={activeVideo.src}
-          alt="Simulated Interrogator Video Stream"
-          className={`w-full h-full object-cover transition-all duration-500 ${
-            tension >= 7 ? "contrast-110 brightness-95" : ""
-          }`}
+        {/* Scammer Talking Video (2x Speed Loop Mode, Muted for voiceover clarity) */}
+        <video
+          ref={talkingVideoRef}
+          src={activePersona.talking}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isSpeaking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+            } ${tension >= 7 ? "contrast-110 brightness-95" : ""}`}
+        />
+
+        {/* Scammer Listening Video (1x Speed Loop Mode, Muted, Waits until user completes speech) */}
+        <video
+          ref={listeningVideoRef}
+          src={activePersona.listening}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isSpeaking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+            } ${tension >= 7 ? "contrast-110 brightness-95" : ""}`}
         />
 
         {/* Dynamic Scanline & CRT Effect for High-Tech Extortion Realism */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none z-15" />
 
         {/* Coercion Tension Red Border Pulse */}
         {tension >= 7 && (
-          <div className="absolute inset-0 border-4 border-red-600/80 animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 border-4 border-red-600/80 animate-pulse pointer-events-none z-15" />
         )}
 
         {/* Top Video Overlay Bar */}
-        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs pointer-events-none">
+        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs pointer-events-none z-20">
           {/* Agency Badge & Case ID */}
-          <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+          <div className="flex items-center gap-2 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
             <span className="font-mono font-bold tracking-wider text-red-400">
               ● REC {formatTime(callDuration)}
             </span>
             <span className="text-slate-400 font-mono text-[11px] hidden sm:inline">
-              | CBI/E-CYBER/2026/8942
+              | {activePersona.casePrefix}
             </span>
           </div>
 
-          {/* Video State Badge */}
-          <div
-            className={`font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/15 ${activeVideo.badgeColor}`}
-          >
-            {activeVideo.label}
+          {/* Persona Feed Selector & Live Video State Badge */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {/* Persona Switcher */}
+            <div className="flex items-center bg-black/80 backdrop-blur-md p-1 rounded-xl border border-white/15 text-[10px] font-bold">
+              <button
+                type="button"
+                onClick={() => setVideoPersona("police")}
+                className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${videoPersona === "police"
+                  ? "bg-blue-600 text-white font-black shadow-xs"
+                  : "text-slate-400 hover:text-white"
+                  }`}
+                title="Switch to Police / CBI Feed"
+              >
+                👮 Police Feed
+              </button>
+              <button
+                type="button"
+                onClick={() => setVideoPersona("customs")}
+                className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${videoPersona === "customs"
+                  ? "bg-amber-600 text-white font-black shadow-xs"
+                  : "text-slate-400 hover:text-white"
+                  }`}
+                title="Switch to Customs / Narcotics Feed"
+              >
+                🛃 Customs Feed
+              </button>
+            </div>
+
+            {/* Video State Badge */}
+            <div
+              className={`font-mono text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-xl backdrop-blur-md border ${videoBadge.badgeColor}`}
+            >
+              {videoBadge.label}
+            </div>
           </div>
         </div>
 
@@ -193,9 +307,8 @@ export function VideoCallStage({
               Urgency Gauge
             </span>
             <span
-              className={`text-sm font-mono font-extrabold ${
-                tension >= 7 ? "text-red-400" : tension >= 4 ? "text-amber-400" : "text-emerald-400"
-              }`}
+              className={`text-sm font-mono font-extrabold ${tension >= 7 ? "text-red-400" : tension >= 4 ? "text-amber-400" : "text-emerald-400"
+                }`}
             >
               {tension}/10 ({tension >= 7 ? "MAX PRESSURE" : "ACTIVE"})
             </span>
@@ -323,11 +436,10 @@ export function VideoCallStage({
           <button
             type="button"
             onClick={toggleCamera}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
-              cameraEnabled
-                ? "bg-slate-800 text-white border border-slate-700"
-                : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${cameraEnabled
+              ? "bg-slate-800 text-white border border-slate-700"
+              : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+              }`}
             title="Toggle User Camera (Webcam is optional)"
           >
             <span className="material-symbols-outlined text-[18px]">
@@ -341,11 +453,10 @@ export function VideoCallStage({
             type="button"
             onClick={onToggleMic}
             disabled={isDone}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md ${
-              isListening
-                ? "bg-emerald-500 text-black ring-4 ring-emerald-400/40"
-                : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
-            }`}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md ${isListening
+              ? "bg-emerald-500 text-black ring-4 ring-emerald-400/40"
+              : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
+              }`}
             title={isListening ? "Listening... click to stop" : "Click to speak your reply"}
           >
             <span className="material-symbols-outlined text-[18px]">

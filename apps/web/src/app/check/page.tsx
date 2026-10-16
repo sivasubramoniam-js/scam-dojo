@@ -91,7 +91,7 @@ export function CheckPage() {
       const b64 = reader.result as string;
       setImagePreview(b64);
       if (!inputText) {
-        setInputText("Scam check: Analyzing screenshot uploaded from device...");
+        setInputText("Scam check: Analyze the screenshot uploaded");
       }
     };
     reader.readAsDataURL(file);
@@ -305,13 +305,12 @@ export function CheckPage() {
         <div className="space-y-6">
           {/* Verdict Banner */}
           <div
-            className={`border-2 rounded-2xl p-6 shadow-md space-y-5 ${
-              checkResult.riskLevel === "high"
-                ? "bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800"
-                : checkResult.riskLevel === "caution"
+            className={`border-2 rounded-2xl p-6 shadow-md space-y-5 ${checkResult.riskLevel === "high"
+              ? "bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800"
+              : checkResult.riskLevel === "caution"
                 ? "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-800"
                 : "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800"
-            }`}
+              }`}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3.5">
@@ -330,28 +329,26 @@ export function CheckPage() {
                 )}
                 <div>
                   <div
-                    className={`text-xs uppercase tracking-wider font-extrabold ${
-                      checkResult.riskLevel === "high"
-                        ? "text-rose-900 dark:text-rose-300"
-                        : checkResult.riskLevel === "caution"
+                    className={`text-xs uppercase tracking-wider font-extrabold ${checkResult.riskLevel === "high"
+                      ? "text-rose-900 dark:text-rose-300"
+                      : checkResult.riskLevel === "caution"
                         ? "text-amber-900 dark:text-amber-300"
                         : "text-emerald-900 dark:text-emerald-300"
-                    }`}
+                      }`}
                   >
                     {checkResult.riskLevel === "high"
                       ? "High Danger — Active Threat"
                       : checkResult.riskLevel === "caution"
-                      ? "Caution Advised — Suspicious"
-                      : "Verified Safe"}
+                        ? "Caution Advised — Suspicious"
+                        : "Verified Safe"}
                   </div>
                   <h2
-                    className={`text-2xl font-black leading-tight ${
-                      checkResult.riskLevel === "high"
-                        ? "text-rose-950 dark:text-rose-50"
-                        : checkResult.riskLevel === "caution"
+                    className={`text-2xl font-black leading-tight ${checkResult.riskLevel === "high"
+                      ? "text-rose-950 dark:text-rose-50"
+                      : checkResult.riskLevel === "caution"
                         ? "text-amber-950 dark:text-amber-50"
                         : "text-emerald-950 dark:text-emerald-50"
-                    }`}
+                      }`}
                   >
                     {checkResult.title}
                   </h2>
@@ -360,24 +357,22 @@ export function CheckPage() {
 
               {/* Score Meter */}
               <div
-                className={`flex items-center gap-3 px-5 py-3 rounded-xl self-start sm:self-auto shadow-xs border-2 ${
-                  checkResult.riskLevel === "high"
-                    ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800"
-                    : checkResult.riskLevel === "caution"
+                className={`flex items-center gap-3 px-5 py-3 rounded-xl self-start sm:self-auto shadow-xs border-2 ${checkResult.riskLevel === "high"
+                  ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800"
+                  : checkResult.riskLevel === "caution"
                     ? "bg-white dark:bg-slate-900 border-amber-300 dark:border-amber-800"
                     : "bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800"
-                }`}
+                  }`}
               >
                 <div>
                   <div className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400">Threat Score</div>
                   <div
-                    className={`text-3xl font-black ${
-                      checkResult.riskLevel === "high"
-                        ? "text-rose-600 dark:text-rose-400"
-                        : checkResult.riskLevel === "caution"
+                    className={`text-3xl font-black ${checkResult.riskLevel === "high"
+                      ? "text-rose-600 dark:text-rose-400"
+                      : checkResult.riskLevel === "caution"
                         ? "text-amber-600 dark:text-amber-400"
                         : "text-emerald-600 dark:text-emerald-400"
-                    }`}
+                      }`}
                   >
                     {checkResult.score}
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-0.5">/100</span>
@@ -387,26 +382,24 @@ export function CheckPage() {
             </div>
 
             <p
-              className={`text-sm sm:text-base leading-relaxed font-semibold ${
-                checkResult.riskLevel === "high"
-                  ? "text-rose-950 dark:text-rose-100"
-                  : checkResult.riskLevel === "caution"
+              className={`text-sm sm:text-base leading-relaxed font-semibold ${checkResult.riskLevel === "high"
+                ? "text-rose-950 dark:text-rose-100"
+                : checkResult.riskLevel === "caution"
                   ? "text-amber-950 dark:text-amber-100"
                   : "text-emerald-950 dark:text-emerald-100"
-              }`}
+                }`}
             >
               {checkResult.explanation}
             </p>
 
             {/* Action Bar: Train me on this + Share Alert */}
             <div
-              className={`pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap ${
-                checkResult.riskLevel === "high"
-                  ? "border-rose-200 dark:border-rose-800/80"
-                  : checkResult.riskLevel === "caution"
+              className={`pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap ${checkResult.riskLevel === "high"
+                ? "border-rose-200 dark:border-rose-800/80"
+                : checkResult.riskLevel === "caution"
                   ? "border-amber-200 dark:border-amber-800/80"
                   : "border-emerald-200 dark:border-emerald-800/80"
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5 flex-wrap">
                 <button
@@ -471,11 +464,10 @@ export function CheckPage() {
                     <div className="flex items-center justify-between">
                       <span className="font-black text-slate-900 dark:text-slate-100 text-xs">Indicator #{flag.id}</span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
-                          flag.severity === "high"
-                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-800"
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-800"
-                        }`}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${flag.severity === "high"
+                          ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-300 dark:border-rose-800"
+                          : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-800"
+                          }`}
                       >
                         {flag.severity} Risk
                       </span>
@@ -527,10 +519,10 @@ export function CheckPage() {
                 {(checkResult.dontDo && checkResult.dontDo.length > 0
                   ? checkResult.dontDo
                   : [
-                      "Do not click any links or scan QR codes provided in the message.",
-                      "Do not enter UPI PIN or share 6-digit OTP under any circumstances.",
-                      "Do not install apps like AnyDesk, TeamViewer, or unknown APK files.",
-                    ]
+                    "Do not click any links or scan QR codes provided in the message.",
+                    "Do not enter UPI PIN or share 6-digit OTP under any circumstances.",
+                    "Do not install apps like AnyDesk, TeamViewer, or unknown APK files.",
+                  ]
                 ).map((dont, i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <span className="bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[11px] font-black shrink-0 mt-0.5">

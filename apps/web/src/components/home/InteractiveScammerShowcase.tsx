@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "@/lib/navigation";
 import { RoughAnnotation } from "./RoughAnnotation";
 
@@ -27,6 +27,115 @@ export function InteractiveScammerShowcase() {
   const [activeModal, setActiveModal] = useState<"chat" | "voice" | "video">("chat");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [callTimer, setCallTimer] = useState(14);
+  const [videoPersona, setVideoPersona] = useState<"police" | "customs">("police");
+  const [isVideoTalking, setIsVideoTalking] = useState(true);
+  const [isVoiceoverPlaying, setIsVoiceoverPlaying] = useState(false);
+
+  const talkingVideoRef = useRef<HTMLVideoElement | null>(null);
+  const listeningVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const PERSONA_VIDEOS = {
+    police: {
+      name: "CBI Cyber Interrogation Cell",
+      agency: "CENTRAL BUREAU OF INVESTIGATION",
+      casePrefix: "CBI/FIR-ND/2026/0891-B",
+      talking: "/assets/video/Police-talking.mp4",
+      listening: "/assets/video/Police-listening.mp4",
+    },
+    customs: {
+      name: "Customs & Narcotics Interdiction",
+      agency: "INDIAN CUSTOMS & NARCOTICS BUREAU",
+      casePrefix: "CUSTOMS/NARCO/BOM-7741",
+      talking: "/assets/video/Customs-talking.mp4",
+      listening: "/assets/video/Customs-listening.mp4",
+    },
+  };
+
+  const safePlay = (el: HTMLVideoElement | null) => {
+    if (!el || typeof el.play !== "function") return;
+    try {
+      const res = el.play();
+      if (res && typeof res.catch === "function") {
+        res.catch(() => {});
+      }
+    } catch {}
+  };
+
+  const safePause = (el: HTMLVideoElement | null) => {
+    if (!el || typeof el.pause !== "function") return;
+    try {
+      el.pause();
+    } catch {}
+  };
+
+  // Synchronize 2x speed for talking video loop, 1x for listening video loop
+  // Videos are muted so simultaneous speech synthesis / voiceover audio plays clearly
+  useEffect(() => {
+    if (activeModal !== "video") return;
+    const talkingEl = talkingVideoRef.current;
+    const listeningEl = listeningVideoRef.current;
+
+    if (isVideoTalking) {
+      if (talkingEl) {
+        talkingEl.playbackRate = 2.0;
+        safePlay(talkingEl);
+      }
+      safePause(listeningEl);
+    } else {
+      if (listeningEl) {
+        listeningEl.playbackRate = 1.0;
+        safePlay(listeningEl);
+      }
+      safePause(talkingEl);
+    }
+  }, [isVideoTalking, videoPersona, activeModal]);
+
+  // Voiceover playback using Web Speech API with automatic transition to listening video
+  const toggleVoiceover = (textToSpeak: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (isVoiceoverPlaying) {
+      window.speechSynthesis.cancel();
+      setIsVoiceoverPlaying(false);
+      setIsVideoTalking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.rate = 1.05;
+    utterance.pitch = 0.95;
+
+    const voices = window.speechSynthesis.getVoices();
+    const inVoice = voices.find(
+      (v) => v.lang.includes("en-IN") || v.name.toLowerCase().includes("india")
+    );
+    if (inVoice) utterance.voice = inVoice;
+
+    utterance.onstart = () => {
+      setIsVoiceoverPlaying(true);
+      setIsVideoTalking(true);
+    };
+
+    utterance.onend = () => {
+      setIsVoiceoverPlaying(false);
+      setIsVideoTalking(false); // Once talking voiceover stops, seamlessly switch to listening video in loop!
+    };
+
+    utterance.onerror = () => {
+      setIsVoiceoverPlaying(false);
+      setIsVideoTalking(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Clean up voiceover when changing modals or slides
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsVoiceoverPlaying(false);
+  }, [activeModal, currentSlideIndex]);
 
   // Auto increment call timer for voice/video
   useEffect(() => {
@@ -644,59 +753,152 @@ export function InteractiveScammerShowcase() {
             </div>
           )}
 
-          {/* 3. VIDEO CALL UI (STOCK VIDEO SIMULATION) */}
+          {/* 3. VIDEO CALL UI (INTERACTIVE SCAMMER VIDEO SIMULATION) */}
           {activeModal === "video" && (
-            <div className="relative flex flex-col justify-between h-full rounded-2xl overflow-hidden border border-slate-800 animate-in fade-in duration-300">
-              {/* Stock Video Background Loop */}
+            <div className="relative flex flex-col justify-between h-full rounded-2xl overflow-hidden border border-slate-800 animate-in fade-in duration-300 bg-black">
+              {/* Talking Video (2x Speed Loop Mode, Muted so Voiceover Audio Plays Simultaneously) */}
               <video
-                src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+                ref={talkingVideoRef}
+                src={PERSONA_VIDEOS[videoPersona].talking}
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover filter brightness-[0.35] contrast-125"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                  isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
+              />
+
+              {/* Listening Video (1x Speed Loop Mode, Muted, Plays until User Completes Speech) */}
+              <video
+                ref={listeningVideoRef}
+                src={PERSONA_VIDEOS[videoPersona].listening}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                  !isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
               />
 
               {/* CCTV & Interrogation Overlay Grid */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none z-15" />
 
               {/* Top CCTV Status Bar */}
-              <div className="relative z-10 flex items-center justify-between p-3 text-[11px] font-mono text-slate-300 border-b border-white/10 bg-black/40 backdrop-blur-xs">
+              <div className="relative z-20 flex items-center justify-between p-3 text-[11px] font-mono text-slate-300 border-b border-white/10 bg-black/60 backdrop-blur-md">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
                   <span className="text-red-400 font-bold">REC 🔴 {formatTimer(callTimer)}</span>
-                  <span className="text-slate-400">FPS: 30.0</span>
+                  <span className="text-slate-400 hidden sm:inline">FPS: 30.0</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-amber-400 font-bold">ROOM 4 · INTERROGATION FEED</span>
-                  <span className="text-slate-400">{current.warrantRef}</span>
+
+                {/* Persona Feed Selector */}
+                <div className="flex items-center gap-1.5 bg-black/80 p-0.5 rounded-xl border border-white/15 text-[10px]">
+                  <button
+                    type="button"
+                    onClick={() => setVideoPersona("police")}
+                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${
+                      videoPersona === "police"
+                        ? "bg-blue-600 text-white font-black shadow-xs"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    👮 Police Feed
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVideoPersona("customs")}
+                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${
+                      videoPersona === "customs"
+                        ? "bg-amber-600 text-white font-black shadow-xs"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    🛃 Customs Feed
+                  </button>
                 </div>
               </div>
 
-              {/* Center Insignia Watermark */}
-              <div className="relative z-10 my-auto text-center pointer-events-none opacity-80">
-                <div className="w-14 h-14 rounded-full bg-red-950/80 border-2 border-red-500/50 mx-auto flex items-center justify-center text-2xl shadow-xl mb-1.5">
-                  👮
+              {/* Center Insignia Watermark (Subtle Overlay) */}
+              <div className="relative z-20 my-auto text-center pointer-events-none opacity-85">
+                <div className="w-12 h-12 rounded-full bg-red-950/80 border-2 border-red-500/50 mx-auto flex items-center justify-center text-xl shadow-xl mb-1">
+                  {videoPersona === "police" ? "👮‍♂️" : "🛃"}
                 </div>
-                <h4 className="text-xs sm:text-sm font-extrabold text-white tracking-widest uppercase">
-                  CENTRAL BUREAU OF INVESTIGATION
+                <h4 className="text-xs font-black text-white tracking-widest uppercase drop-shadow-md">
+                  {PERSONA_VIDEOS[videoPersona].agency}
                 </h4>
-                <p className="text-[10px] sm:text-[11px] text-red-400 font-mono tracking-wider">
-                  OFFICIAL VIDEO SURVEILLANCE WARRANT
+                <p className="text-[10px] text-red-400 font-mono tracking-wider">
+                  MANDATORY VIDEO INTERROGATION SUMMONS
                 </p>
               </div>
 
-              {/* Bottom Interrogation Banner */}
-              <div className="relative z-10 p-3 bg-black/80 backdrop-blur-md border-t border-white/10 text-xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-red-400 font-bold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">gavel</span>
-                    <span>Warrant Extortion Vector Active</span>
-                  </span>
-                  <span className="text-slate-400 font-mono text-[10px]">CASE: CR-2025-IN</span>
+              {/* Bottom Interactive Video Tactical Bar */}
+              <div className="relative z-20 p-3 bg-black/85 backdrop-blur-md border-t border-white/10 text-xs flex flex-col gap-2">
+                {/* Mode Controller & Voiceover Playback Trigger */}
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {/* Talking vs Listening Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setIsVideoTalking(true)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${
+                        isVideoTalking
+                          ? "bg-rose-600 text-white shadow-xs font-black animate-pulse"
+                          : "bg-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                      title="Play Talking Video in 2x Speed Loop"
+                    >
+                      <span>🗣️</span>
+                      <span>Talking (2x Loop)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+                          window.speechSynthesis.cancel();
+                        }
+                        setIsVoiceoverPlaying(false);
+                        setIsVideoTalking(false);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${
+                        !isVideoTalking
+                          ? "bg-emerald-600 text-white shadow-xs font-black animate-pulse"
+                          : "bg-slate-800 text-slate-300 hover:text-white"
+                      }`}
+                      title="Play Listening Video in Loop until speech completes"
+                    >
+                      <span>👂</span>
+                      <span>Listening (Loop)</span>
+                    </button>
+                  </div>
+
+                  {/* Simultaneous Voiceover Audio Button */}
+                  <button
+                    type="button"
+                    onClick={() => toggleVoiceover(current.voiceTranscript)}
+                    className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-md ${
+                      isVoiceoverPlaying
+                        ? "bg-red-600 text-white animate-pulse"
+                        : "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                    }`}
+                    title="Play voiceover simultaneously with 2x talking video loop"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">
+                      {isVoiceoverPlaying ? "volume_off" : "volume_up"}
+                    </span>
+                    <span>
+                      {isVoiceoverPlaying ? "Stop Voiceover" : "🔊 Play Scammer Voiceover"}
+                    </span>
+                  </button>
                 </div>
-                <p className="text-slate-200 text-xs leading-relaxed italic">
-                  "{current.videoCaption}"
+
+                {/* Subtitle Dialogue */}
+                <p className="text-slate-200 text-[11px] leading-relaxed italic border-t border-white/10 pt-1.5">
+                  <span className="text-amber-400 font-bold not-italic font-mono mr-1">
+                    {videoPersona === "police" ? "Officer:" : "Customs Agent:"}
+                  </span>
+                  "{current.voiceTranscript}"
                 </p>
               </div>
             </div>
