@@ -114,16 +114,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
-  max-width: 760px;
+  padding: 14px 20px;
+  max-width: 1280px;
   margin: auto;
   width: 100%;
 }
 
 .dojo-main {
-  max-width: 760px;
+  max-width: 1280px;
   margin: auto;
-  padding: 0 16px 120px;
+  padding: 0 20px 120px;
   width: 100%;
 }
 

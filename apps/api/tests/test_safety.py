@@ -55,3 +55,20 @@ def test_scammer_output_validation():
     ok, reason = validate_scammer_output(bad_ai)
     assert ok is False
     assert "simulation" in reason.lower() or "ai" in reason.lower()
+
+
+def test_scammer_output_validation_with_realistic_fake_entities():
+    fake_entities = {
+        "phone": "+91 98712 43901",
+        "link": "http://sbi-netbanking-verify.in/kyc",
+        "upi": "sbi.verification@gmall.com",
+        "email": "cbi.investigation-cell@gmall.com",
+        "employee_id": "Sub-Inspector Arjun Rao, Badge #DL-8842-CY",
+    }
+    realistic_text = (
+        "This is Sub-Inspector Arjun Rao, Badge #DL-8842-CY. Call +91 98712 43901 or "
+        "verify at http://sbi-netbanking-verify.in/kyc and transfer to sbi.verification@gmall.com."
+    )
+    ok, reason = validate_scammer_output(realistic_text, fake_entities=fake_entities)
+    assert ok is True
+    assert not reason

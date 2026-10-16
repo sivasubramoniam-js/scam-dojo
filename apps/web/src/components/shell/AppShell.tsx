@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "@/components/common/Logo";
 import TracePanel from "@/components/common/TracePanel";
 import { fetchMe, UserProfile } from "@/lib/api";
+import { fetchUserLocation } from "@/lib/location";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -37,6 +38,9 @@ export function AppShell({ children }: AppShellProps) {
         if (data) setUserProfile(data);
       })
       .catch(() => {});
+
+    // Fetch user location details via ip-api
+    fetchUserLocation().catch(() => {});
   }, []);
 
   const toggleTheme = () => {

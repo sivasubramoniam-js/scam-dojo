@@ -92,6 +92,73 @@ class ForgeDrillResponse(CamelModel):
     blurb: str
 
 
+def inspect_email_and_domains(text: str) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    # Match standard email addresses
+    email_pattern = r"\b([a-zA-Z0-9_.+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)\b"
+    popular_webmail = {
+        "gmail.com", "yahoo.com", "outlook.com", "hotmail.com",
+        "icloud.com", "rediffmail.com", "proton.me", "protonmail.com"
+    }
+
+    # Common typo-squats and lookalikes
+    typosquats: dict[str, str] = {
+        "gmall.com": "gmail.com",
+        "gmaill.com": "gmail.com",
+        "gmai1.com": "gmail.com",
+        "gamil.com": "gmail.com",
+        "gmali.com": "gmail.com",
+        "gmaik.com": "gmail.com",
+        "yaho0.com": "yahoo.com",
+        "yah00.com": "yahoo.com",
+        "yaho.com": "yahoo.com",
+        "hotmial.com": "hotmail.com",
+        "hotmaill.com": "hotmail.com",
+        "outl0ok.com": "outlook.com",
+        "out1ook.com": "outlook.com",
+        "paytmm.com": "paytm.com",
+        "sbi-verify.in": "onlinesbi.sbi",
+        "hdfc-bank.com": "hdfcbank.com",
+        "icic1bank.com": "icicibank.com",
+    }
+
+    bank_stems = [
+        "hdfc", "sbi", "icici", "axis", "kotak", "pnb", "bob", "canara",
+        "indusind", "yesbank", "bank", "rbi", "cbi", "police", "customs",
+        "incometax", "cybercell", "cybercrime"
+    ]
+
+    for m in re.finditer(email_pattern, text):
+        full_email = m.group(0)
+        local_part = m.group(1).lower()
+        domain = m.group(2).lower()
+
+        # 1. Typo-squatting detection
+        if domain in typosquats:
+            target = typosquats[domain]
+            findings.append({
+                "kind": "phish",
+                "pattern": full_email,
+                "tag": "typosquatting_domain",
+                "weight": 4,
+                "note": f"Typo-squatted domain detected: '{domain}' is a deceptive lookalike of '{target}'. Scammers intentionally misspell letters (e.g. 'gmall.com' instead of 'gmail.com') to trick victims.",
+            })
+
+        # 2. Bank / Authority impersonation on free webmail or typo-squatted domain
+        matched_bank = next((b for b in bank_stems if b in local_part), None)
+        if matched_bank:
+            if domain in popular_webmail or domain in typosquats or "mail" in domain:
+                findings.append({
+                    "kind": "authority",
+                    "pattern": full_email,
+                    "tag": "bank_public_webmail",
+                    "weight": 4,
+                    "note": f"Brand impersonation: Email '{full_email}' claims to represent '{matched_bank.upper()}' but uses a public or fake webmail service ('{domain}'). Legitimate banks exclusively communicate from official corporate domains (e.g. @{matched_bank}bank.com), never public webmail.",
+                })
+
+    return findings
+
+
 @router.post("/check", response_model=CheckResponse)
 async def check_message(
     req: CheckRequest,
@@ -114,6 +181,11 @@ async def check_message(
     conn.close()
 
     supplementary = [
+        {"kind": "phish", "pattern": r"(?i)\b(?:share|send|forward|give|provide|tell|enter|type|input|verify|submit|email)\b(?:\s+\w+){0,3}\s+\b(?:otp|one[- ]*time\s*password|pin|mpin|cvv|secret\s*code|passcode)\b|\b(?:ओटीपी|पिन)\s*(?:बताएं|शेयर|भेजें|दर्ज\s*करें)\b", "tag": "otp_request", "weight": 4, "note": "Requesting to share, forward, or enter sensitive OTP or authentication code"},
+        {"kind": "authority", "pattern": r"(?i)\b(?:hdfc|sbi|icici|axis|kotak|pnb|bob|canara|indusind|yesbank|rbi|cbi|police|customs|income[- ]*tax|cybercell|cybercrime)[a-z0-9._-]*@(?:gmail|yahoo|hotmail|outlook|rediffmail|proton|icloud|gmall|gmaill|yaho0)\.com\b", "tag": "bank_public_webmail", "weight": 4, "note": "Bank or government authority impersonation on public or typo-squatted webmail. Legitimate banks only communicate from official corporate domains."},
+        {"kind": "phish", "pattern": r"(?i)@(?:gmall|gmaill|gmai1|gamil|yaho0|yaho|hotmial|outl0ok|paytmm|sbi-verify|hdfc-bank|icic1)\.(?:com|in|org|net|online|site|top|work)\b|https?:\/\/[^\s]*(?:gmall|gmaill|yaho0|hotmial)\.com", "tag": "typosquatting_domain", "weight": 4, "note": "Typo-squatted lookalike domain detected ('gmall.com' instead of 'gmail.com'). Scammers misspell trusted service domains to deceive users."},
+        {"kind": "phish", "pattern": r"(?i)\b(?:otp|pin|credentials?|password)\b(?:\s+\w+){0,5}\s+(?:to\s+(?:this\s+)?(?:secured\s+)?email|via\s+email|to\s+email|on\s+email)\b", "tag": "credential_email_harvest", "weight": 4, "note": "Direct credential harvesting: asking to send an OTP or security code to an email address is fraud."},
+        {"kind": "trust", "pattern": r"(?i)\b(?:secured\s+email|official\s+verification\s+desk|safe\s+escrow|rbi\s+approved\s+server|anti[- ]fraud\s+portal)\b", "tag": "fake_security_assurance", "weight": 3, "note": "False claim of 'secured email' or 'official verification desk' designed to induce false trust."},
         {"kind": "threat", "pattern": r"(?i)\b(?:disconnect|electricity|power|bill unpaid|meter)\b", "tag": "utility_threat", "weight": 3, "note": "Threat of immediate utility/electricity disconnection"},
         {"kind": "urgency", "pattern": r"(?i)\b(?:urgent|immediately|right now|tonight at|before \d+)\b", "tag": "urgency", "weight": 2, "note": "Artificial deadline inducing panic and haste"},
         {"kind": "authority", "pattern": r"(?i)\b(?:call\s+(?:officer|executive|manager|support|sir)|helpline\s*(?:no|number))\b", "tag": "authority", "weight": 2, "note": "Pretending to be official customer support or officer"},
@@ -146,7 +218,7 @@ async def check_message(
                         weight=weight,
                     )
                 )
-                severity: Literal["low", "medium", "high"] = "high" if weight >= 25 else "medium"
+                severity: Literal["low", "medium", "high"] = "high" if weight >= 3 else "medium"
                 red_flags.append(
                     RedFlagItem(
                         id=idx,
@@ -160,12 +232,40 @@ async def check_message(
         except re.error:
             continue
 
+    # Domain and email typo-squatting inspection
+    domain_findings = inspect_email_and_domains(text)
+    for df in domain_findings:
+        if not any(m.tag == df["tag"] and m.note == df["note"] for m in matches):
+            weight = int(df["weight"])
+            total_weight += weight
+            matches.append(
+                RedFlagMatch(
+                    tag=df["tag"],
+                    kind=df["kind"],
+                    note=df["note"],
+                    weight=weight,
+                )
+            )
+            red_flags.append(
+                RedFlagItem(
+                    id=idx,
+                    quote=df["pattern"],
+                    why=df["note"],
+                    severity="high",
+                    source="indicator",
+                )
+            )
+            idx += 1
+
     # Heuristic baseline calculation
     has_urls = bool(re.search(r"https?://[^\s]+|\bbit\.ly/\S+", text))
     has_shortener = any(m.tag == "shortener_url" for m in matches)
-    has_otp = any(m.tag == "otp_request" or "otp" in m.kind.lower() for m in matches)
+    has_otp = any(m.tag == "otp_request" or "otp" in m.kind.lower() or "otp" in m.tag.lower() for m in matches)
     has_remote_app = any(m.tag == "remote_app" for m in matches)
     has_digital_arrest = any(m.tag == "digital_arrest" for m in matches)
+    has_typosquat = any(m.tag == "typosquatting_domain" or "typosquat" in m.tag for m in matches)
+    has_fake_bank_email = any(m.tag == "bank_public_webmail" for m in matches)
+    has_credential_email_harvest = any(m.tag == "credential_email_harvest" for m in matches)
     has_urgency = any(m.kind == "urgency" for m in matches)
 
     if not matches and not has_urls:
@@ -193,43 +293,74 @@ async def check_message(
         ]
     else:
         computed_score = min(98, 40 + total_weight * 12)
-        if has_shortener or has_otp or has_remote_app or has_digital_arrest:
+        if has_shortener or has_otp or has_remote_app or has_digital_arrest or has_typosquat or has_fake_bank_email or has_credential_email_harvest:
             computed_score = max(computed_score, 88)
+        if has_otp and (has_typosquat or has_fake_bank_email or has_credential_email_harvest):
+            computed_score = max(computed_score, 94)
 
         base_score = computed_score
         base_risk = "high" if base_score >= 75 else "caution"
         base_verdict = "likely_scam" if base_score >= 75 else "suspicious"
-        base_title = (
-            "High Danger — Confirmed Cyber Threat Patterns"
-            if base_score >= 75
-            else "Caution Advised — Suspicious Elements Detected"
-        )
-        base_one_line = (
-            "This communication shows characteristic marks of an active scam attempt."
-            if base_score >= 75
-            else "Be careful: several indicators suggest potential phishing or fraud."
-        )
-        base_explanation = (
-            "The message employs artificial urgency, untrusted links, or secret credential requests to manipulate you."
-        )
-        base_reasons = [m.note for m in matches] if matches else ["Suspicious message syntax and unverified links detected."]
-        base_actions = [
-            "Do NOT click any links, download APK files, or call provided numbers.",
-            "Verify the claim independently using the official app or customer portal.",
-            "Report the sender number or URL on Sanchar Saathi (Chakshu) and 1909.",
-        ]
-        do_now = [
-            "Stop all communication with the sender immediately.",
-            "If you opened any links or shared an OTP, call Cyber Helpline 1930 and inform your bank.",
-            "Block and report the number on WhatsApp / SMS.",
-        ]
-        dont_do = [
-            "Do not click any web links or scan QR codes provided.",
-            "Do not install apps like AnyDesk, TeamViewer, or unknown APK files.",
-            "Do not pay any 'urgent fees' or transfer funds to secure accounts.",
-        ]
-        verify_how = "Open your bank's verified mobile app directly or call the helpline number printed on the back of your card."
-        reassuring_signals = []
+
+        if has_otp and (has_typosquat or has_fake_bank_email or has_credential_email_harvest):
+            base_title = "High Danger — Fake Banking OTP Phishing via Typo-Squatted Email"
+            base_one_line = "Critical credential theft attack: Scammers are impersonating a bank using a typo-squatted email to steal your OTP."
+            base_explanation = "This message is a high-risk phishing attack. Legitimate banks strictly prohibit asking customers to email or share OTPs, and bank communications only originate from official corporate domains (e.g. @hdfcbank.com), never lookalikes like '@gmall.com'."
+            base_reasons = [
+                "Demanding OTP or authentication codes via email is a direct signature of credential harvesting.",
+                "The email uses a typo-squatted lookalike domain ('gmall.com' instead of 'gmail.com').",
+                "Banks and official institutions never use public or consumer webmail services for transactions.",
+                "Deceptive assurances like 'secured email' are deployed to disarm the victim's natural vigilance.",
+            ]
+            base_actions = [
+                "NEVER send or share your OTP, PIN, password, or card CVV with anyone.",
+                "Mark the email as phishing and block the sender immediately.",
+                "Report the phishing attempt on Cyber Crime Helpline 1930 and cybercrime.gov.in.",
+            ]
+            do_now = [
+                "Do not reply or send your OTP to this email under any circumstances.",
+                "If you already sent an OTP, immediately call your bank's emergency helpline to block your netbanking and debit cards.",
+                "Report the sender to the National Cyber Crime Reporting Portal (1930).",
+            ]
+            dont_do = [
+                "Never share OTPs, passwords, or PINs over email, SMS, or phone.",
+                "Do not trust emails claiming to be 'secured' while using free or misspelled domains.",
+                "Do not click any attachments or links from this sender.",
+            ]
+            verify_how = "Call the verified official customer support number printed on the back of your bank debit/credit card."
+            reassuring_signals = []
+        else:
+            base_title = (
+                "High Danger — Confirmed Cyber Threat Patterns"
+                if base_score >= 75
+                else "Caution Advised — Suspicious Elements Detected"
+            )
+            base_one_line = (
+                "This communication shows characteristic marks of an active scam attempt."
+                if base_score >= 75
+                else "Be careful: several indicators suggest potential phishing or fraud."
+            )
+            base_explanation = (
+                "The message employs artificial urgency, untrusted links, or secret credential requests to manipulate you."
+            )
+            base_reasons = [m.note for m in matches] if matches else ["Suspicious message syntax and unverified links detected."]
+            base_actions = [
+                "Do NOT click any links, download APK files, or call provided numbers.",
+                "Verify the claim independently using the official app or customer portal.",
+                "Report the sender number or URL on Sanchar Saathi (Chakshu) and 1909.",
+            ]
+            do_now = [
+                "Stop all communication with the sender immediately.",
+                "If you opened any links or shared an OTP, call Cyber Helpline 1930 and inform your bank.",
+                "Block and report the number on WhatsApp / SMS.",
+            ]
+            dont_do = [
+                "Do not click any web links or scan QR codes provided.",
+                "Do not install apps like AnyDesk, TeamViewer, or unknown APK files.",
+                "Do not pay any 'urgent fees' or transfer funds to secure accounts.",
+            ]
+            verify_how = "Open your bank's verified mobile app directly or call the helpline number printed on the back of your card."
+            reassuring_signals = []
 
     # 2. Analyze with Gemini LLM (multimodal if image present)
     if is_live_llm_enabled():
@@ -248,24 +379,31 @@ async def check_message(
             )
 
             prompt = f"""
-You are the Scam Dojo Chief Threat Intelligence Analyst.
-Analyze the following suspicious message, call transcript, or SMS.
-Finalize the threat assessment, evaluate psychological manipulation tactics (Urgency, Fear, Authority, Isolation, Greed), and provide precise defensive advice mapped to RBI, CERT-In, and Cyber Crime Helpline 1930 guidelines.
+You are the Scam Dojo Chief Threat Intelligence Analyst powered by Google Cloud & Gemini AI.
+Analyze the following suspicious message, call transcript, or SMS for fraud, impersonation, and psychological coercion.
+
+CRITICAL THREAT EVALUATION STANDARDS (RBI, CERT-In, & Cyber Crime 1930 Standards):
+1. OTP / CREDENTIAL REQUESTS: Banks, payment gateways, and government agencies NEVER ask customers to share, forward, or email OTPs, PINs, CVVs, or passwords. Any message requesting an OTP is an AUTOMATIC CRITICAL FRAUD THREAT (Score 88-100).
+2. DOMAIN & EMAIL AUTHENTICITY:
+   - Legitimate Indian banks only communicate from their official corporate domains (e.g. '@hdfcbank.com', '@sbi.co.in', '@icicibank.com'). They NEVER use public webmail (@gmail.com, @yahoo.com).
+   - Beware of TYPO-SQUATTED domains (e.g. 'gmall.com' instead of 'gmail.com', 'yaho0.com', 'hotmial.com', 'hdfc-bank.com'). Scammers intentionally misspell letters to deceive victims.
+   - Claims like 'secured email' or 'verification desk' on free or misspelled webmail are deceptive pretexting.
+3. DIGITAL ARREST & UTILITY THREATS: Law enforcement never conducts video arrests; utility providers do not disconnect power at night with immediate phone call demands.
 
 Message to inspect:
 \"\"\"{text}\"\"\"
 
-Initial Heuristic Scan Findings:
+Initial Heuristic & Domain Scan Findings:
 {heuristic_summary}
 
 Language instruction:
 {lang_instruction}
 
 Requirements:
-- score: Integer 0 to 100 (0-20 safe, 21-65 caution, 66-100 high danger).
+- score: Integer 0 to 100 (0-20 safe, 21-65 caution, 66-100 high danger). If OTP sharing or typo-squatting is detected, score MUST be between 88 and 100.
 - risk_level: One of 'safe', 'caution', 'high'.
-- title: Short, authoritative diagnosis (e.g. "Fake Banking KYC Phishing Trap", "Electricity Disconnection Extortion", "Legitimate Service Alert").
-- explanation: 2-3 sentences providing clear, calm context.
+- title: Short, authoritative diagnosis (e.g. "Fake Banking OTP Phishing via Typo-Squatted Email", "Electricity Disconnection Extortion", "Legitimate Service Alert").
+- explanation: 2-3 sentences providing clear, calm context explaining specifically why this is fraudulent.
 - reasons: 3-5 specific bullet points explaining why this is fraudulent or safe.
 - do_now: 3 concrete action steps to protect yourself immediately.
 - dont_do: 2-3 critical pitfalls to avoid right now.
@@ -293,7 +431,6 @@ Requirements:
                 contents=contents,
                 config=config,
             )
-
             parsed = json.loads(resp.text or "{}")
             llm_result = CheckAnalystOutput.model_validate(parsed)
 
@@ -445,10 +582,11 @@ async def forge_drill_from_check(
         },
         "fake_entities": {
             "org": f"{org_name} (Simulated)",
-            "phone": "+91 00000 00000",
-            "link": "https://secure-verify.example",
-            "upi": "desk@fakebank",
-            "employee_id": "EMP-001",
+            "phone": "+91 98712 43901",
+            "link": "https://secure-verify.online/auth",
+            "upi": "verification.desk@gmall.com",
+            "email": "security.desk@gmall.com",
+            "employee_id": "Officer Rajeshwar Sharma, Emp #DL-88201",
         },
         "objective": "Coerce user into clicking unverified links or sharing credentials",
         "opening_message": {

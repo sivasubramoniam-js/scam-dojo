@@ -26,6 +26,7 @@ class FakeEntities(BaseModel):
     link: str
     upi: str
     employee_id: str | None = None
+    email: str | None = None
 
 
 class ScenarioSpec(BaseModel):

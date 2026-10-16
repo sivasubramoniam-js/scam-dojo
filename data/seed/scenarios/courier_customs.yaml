@@ -18,11 +18,12 @@ persona:
   role: "International Express Operations Desk (fictional)"
   voice: "Firm, procedural, urgent, authoritative"
 fake_entities:
-  org: "Global Express Logistics (fictional)"
-  phone: "+91 00000 00000"
-  link: "customs-clearance.example/verify"
-  upi: "clearing.desk@fakebank"
-  employee_id: "GEX-9921"
+  org: "Global Express Logistics & Customs Liaison"
+  phone: "+91 80 4719 3280"
+  link: "http://customs-parcel-track.in/delhi/seizure"
+  upi: "customs.escrow.release@gmall.com"
+  email: "customs.narcotics.mumbai@gmall.com"
+  employee_id: "Superintendent Vinod M. Deshmukh, ID NCB-WZ-3094"
 objective: "Intimidate the user with legal arrest threats to extort identity documents and a 'refundable clearance deposit'."
 stages:
   - id: hook
@@ -73,5 +74,5 @@ opening_message:
   hi: "Global Express सुरक्षा से महत्वपूर्ण सूचना: आपके आधार पर पंजीकृत पार्सल #GEX-88491 को मुंबई कस्टम्स ने 5 जाली पासपोर्ट और 140g MDMA के साथ ज़ब्त किया है। कस्टम्स सत्यापन अधिकारी से तुरंत बात करने के लिए 1 दबाएँ या लाइन पर बने रहें।"
 fallback_lines:
   urgency: "Sir, Customs Officers are filing FIR #MC-2026/89 as we speak. If you disconnect, a police team will be dispatched to your Aadhaar address within 45 minutes."
-  pressure: "To avoid immediate detention under NDPS Section 20, you must deposit ₹35,000 into the Reserve Escrow account for verification. It is 100% refundable once audited."
-  extraction: "Share the transaction reference number and your Aadhaar photo immediately so our legal officer can issue your provisional innocence clearance."
+  pressure: "To avoid immediate detention under NDPS Section 20, you must deposit ₹35,000 into the Reserve Escrow account (customs.escrow.release@gmall.com) for verification. It is 100% refundable once audited."
+  extraction: "Share the transaction reference number and your Aadhaar photo immediately to customs.narcotics.mumbai@gmall.com so our legal officer can issue your provisional innocence clearance."

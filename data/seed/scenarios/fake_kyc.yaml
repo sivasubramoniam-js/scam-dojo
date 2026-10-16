@@ -18,11 +18,12 @@ persona:
   role: "Customer Care Officer, Orion Bank (fictional)"
   voice: "Polite, hurried, official"
 fake_entities:
-  org: "Orion Bank"
-  phone: "+91 00000 00000"
-  link: "orion-kyc.example/update"
-  upi: "kyc.desk@fakebank"
-  employee_id: "ORN-4471"
+  org: "State Bank Customer Support Wing"
+  phone: "+91 98712 43901"
+  link: "http://sbi-netbanking-verify.in/kyc"
+  email: "nodal.kyc@sbi-portal.online"
+  upi: "sbi.verification@gmall.com"
+  employee_id: "Officer Rakesh Verma, Emp #SB-88201, Retail Banking Operations"
 objective: "Get the user to share the OTP, full card number or CVV, or install a remote-access app."
 stages:
   - id: hook

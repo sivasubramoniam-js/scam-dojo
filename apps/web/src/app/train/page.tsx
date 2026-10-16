@@ -101,7 +101,7 @@ export function TrainPage() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Quick reply chips
@@ -291,8 +291,8 @@ export function TrainPage() {
                 outcome === "user_won"
                   ? "Counter-Strike Won! You maintained independent verification and disarmed the scammer."
                   : outcome === "user_fell"
-                  ? "Strike Landed! The scammer extracted critical credentials. Review your debrief."
-                  : "Drill completed.",
+                    ? "Strike Landed! The scammer extracted critical credentials. Review your debrief."
+                    : "Drill completed.",
             },
           ]);
         },
@@ -355,7 +355,7 @@ export function TrainPage() {
             `Session ended: walked_away · Final Score: ${res.score?.finalScore ?? 30} pts · Resilience: ${res.resilience?.after ?? 37}`,
           ]);
         }
-      } catch {}
+      } catch { }
     }
 
     setMessages((prev) => [
@@ -403,14 +403,13 @@ export function TrainPage() {
               setIsSpeaking(false);
               setIsListening(false);
             }}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              simMode === "chat"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "chat"
                 ? "bg-[var(--act)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">chat</span>
-            <span>💬 Chat Scam</span>
+            <span>Chat Scam</span>
           </button>
           <button
             type="button"
@@ -422,14 +421,13 @@ export function TrainPage() {
                 setIsSpeaking(true);
               }
             }}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              simMode === "audio"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "audio"
                 ? "bg-[var(--act)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">call</span>
-            <span>📞 Audio Scam</span>
+            <span>Audio Scam</span>
           </button>
           <button
             type="button"
@@ -441,14 +439,13 @@ export function TrainPage() {
                 setIsSpeaking(true);
               }
             }}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              simMode === "video"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "video"
                 ? "bg-[var(--act)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">videocam</span>
-            <span>📹 Video Scam (Digital Arrest)</span>
+            <span>Video Scam (Digital Arrest)</span>
           </button>
         </div>
       </div>
@@ -477,11 +474,10 @@ export function TrainPage() {
                 key={f.id}
                 type="button"
                 onClick={() => setCategoryFilter(f.id as any)}
-                className={`px-3 py-1.5 rounded-full font-bold transition text-xs cursor-pointer ${
-                  categoryFilter === f.id
+                className={`px-3 py-1.5 rounded-full font-bold transition text-xs cursor-pointer ${categoryFilter === f.id
                     ? "bg-[var(--act)] text-white shadow-xs"
                     : "bg-[var(--sf2)] text-[var(--mut)] hover:text-[var(--ink)]"
-                }`}
+                  }`}
               >
                 {f.label}
               </button>
@@ -502,13 +498,12 @@ export function TrainPage() {
                       setSessionError(null);
                     }
                   }}
-                  className={`p-3.5 rounded-xl border text-left transition-all relative ${
-                    isLocked
+                  className={`p-3.5 rounded-xl border text-left transition-all relative ${isLocked
                       ? "opacity-60 bg-[var(--sf2)]/30 border-[var(--line)] cursor-not-allowed"
                       : isSelected
-                      ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 cursor-pointer"
-                      : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 cursor-pointer"
-                  }`}
+                        ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 cursor-pointer"
+                        : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 cursor-pointer"
+                    }`}
                 >
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-[var(--act)] capitalize flex items-center gap-1">
@@ -520,9 +515,8 @@ export function TrainPage() {
                         </span>
                       )}
                     </span>
-                    <span className={`font-semibold text-[11px] px-1.5 py-0.5 rounded ${
-                      isLocked ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold" : "text-[var(--mut)]"
-                    }`}>
+                    <span className={`font-semibold text-[11px] px-1.5 py-0.5 rounded ${isLocked ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold" : "text-[var(--mut)]"
+                      }`}>
                       {isLocked ? (scen.lockedReason || `Requires ${scen.minBelt} Belt`) : `~${scen.estMinutes} mins`}
                     </span>
                   </div>
@@ -756,11 +750,10 @@ export function TrainPage() {
                     }
                   }
                 }}
-                className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${
-                  isVoiceMode
+                className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${isVoiceMode
                     ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
                     : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
-                }`}
+                  }`}
                 title="Toggle Voice Call Mode"
               >
                 <span className="material-symbols-outlined text-[15px]">
@@ -818,8 +811,8 @@ export function TrainPage() {
                 ? tension >= 7
                   ? "bg-[var(--bad)] border-transparent"
                   : tension >= 4
-                  ? "bg-[var(--warn)] border-transparent"
-                  : "bg-[var(--safe)] border-transparent"
+                    ? "bg-[var(--warn)] border-transparent"
+                    : "bg-[var(--safe)] border-transparent"
                 : "bg-[var(--sf2)] border-[var(--line)]";
               return (
                 <i
@@ -840,13 +833,12 @@ export function TrainPage() {
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`max-w-[84%] px-3.5 py-2.5 text-sm sm:text-base leading-relaxed ${
-                  m.role === "scammer"
+                className={`max-w-[84%] px-3.5 py-2.5 text-sm sm:text-base leading-relaxed ${m.role === "scammer"
                     ? "self-start bg-[var(--sf2)] text-[var(--ink)] rounded-2xl rounded-tl-xs"
                     : m.role === "user"
-                    ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
-                    : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
-                }`}
+                      ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
+                      : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
+                  }`}
               >
                 {m.text}
               </div>
@@ -903,11 +895,10 @@ export function TrainPage() {
                 }
               }}
               disabled={isDone || isTyping}
-              className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer ${
-                isListening
+              className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer ${isListening
                   ? "bg-rose-500 text-white border-rose-500 animate-pulse"
                   : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
-              }`}
+                }`}
               title={isListening ? "Listening... click to stop" : "Speak reply using microphone"}
             >
               <span className="material-symbols-outlined text-[20px]">
@@ -925,8 +916,8 @@ export function TrainPage() {
                 isListening
                   ? "Listening to your voice..."
                   : isDone
-                  ? "Drill completed."
-                  : "Type or speak your reply to the caller…"
+                    ? "Drill completed."
+                    : "Type or speak your reply to the caller…"
               }
               maxLength={500}
               aria-label="Your reply"

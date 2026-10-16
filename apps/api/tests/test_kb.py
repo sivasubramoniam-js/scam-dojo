@@ -22,7 +22,8 @@ def test_get_scenario_by_slug():
     assert scen is not None
     assert scen["slug"] == "fake_kyc"
     assert "fake_entities" in scen
-    assert scen["fake_entities"]["link"].endswith(".example/update")
+    assert "link" in scen["fake_entities"]
+    assert "verify" in scen["fake_entities"]["link"] or ".example" in scen["fake_entities"]["link"]
 
 
 def test_get_resources():

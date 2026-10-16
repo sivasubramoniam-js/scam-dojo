@@ -19,10 +19,11 @@ persona:
   voice: "Enthusiastic, welcoming, casual"
 fake_entities:
   org: "Global Media WorkHub"
-  phone: "+91 00000 00000"
-  link: "workhub-media.example/tasks"
-  upi: "tasks.pay@fakebank"
-  employee_id: "HR-904"
+  phone: "+91 91672 88419"
+  link: "http://merchant-vip-tasks.work/login"
+  upi: "global.merchant.rating@gmall.com"
+  email: "recruitment.desk@gmall.com"
+  employee_id: "Recruiter Sarah Jenkins, Partner ID TG-GLOBAL-84920"
 objective: "Get the user to pay a 'refundable deposit' or security fee to unlock VIP tasks or withdraw balance."
 stages:
   - id: hook
@@ -76,5 +77,5 @@ opening_message:
   hi: "Namaste! Main Global Media WorkHub se Pooja hoon. Aapka profile review role ke liye select hua hai. Ghar baithe hotel listings rate karke daily ₹1,500 se ₹3,500 kama sakte hain. Kya aap 5-minute ka free demo trial lena chahenge?"
 fallback_lines:
   urgency: "Today's VIP batch only has 2 slots left. Once filled, payout drops back to standard rate."
-  pressure: "Your trial balance of ₹800 is already credited in our portal wallet, but company security policy requires a refundable verification deposit to disburse."
-  extraction: "Kindly transfer the refundable verification deposit of ₹1,000 to tasks.pay@fakebank. Your entire ₹1,800 will be credited to your bank within 60 seconds."
+  pressure: "Your trial balance of ₹800 is already credited in our portal wallet at http://merchant-vip-tasks.work/login, but company security policy requires a refundable verification deposit to disburse."
+  extraction: "Kindly transfer the refundable verification deposit of ₹1,000 to global.merchant.rating@gmall.com. Your entire ₹1,800 will be credited to your bank within 60 seconds."

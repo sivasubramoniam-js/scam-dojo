@@ -18,11 +18,12 @@ persona:
   role: "Accounts Helpdesk, QuickMart Express (fictional)"
   voice: "Helpful, apologetic, eager to resolve"
 fake_entities:
-  org: "QuickMart Express"
-  phone: "+91 00000 00000"
-  link: "quickmart-help.example/refund"
-  upi: "refund.desk@fakebank"
-  employee_id: "QM-8832"
+  org: "QuickMart Express Accounts"
+  phone: "+91 97114 82910"
+  link: "http://swiggy-refund-portal.online/claim"
+  upi: "claim.refund@gmall.com"
+  email: "quickmart.refunds@gmall.com"
+  employee_id: "Dispute Executive Neha Sharma, Ticket #SWG-88201"
 objective: "Get the victim to approve a UPI collect request or enter their UPI PIN to 'receive' the refund."
 stages:
   - id: hook
@@ -71,6 +72,6 @@ opening_message:
   en: "Hello! This is Vikram from QuickMart Helpdesk. Our automated billing audit shows a duplicate charge of ₹1,850 on your recent grocery order. We have prepared an instant refund voucher for you."
   hi: "Namaste! Main QuickMart Helpdesk se Vikram baat kar raha hoon. Hamare system mein dikh raha hai ki aapke order par ₹1,850 ka duplicate charge lag gaya tha. Hamne turant refund issue kiya hai."
 fallback_lines:
-  urgency: "The refund gateway session will time out shortly. Please check your UPI notification right now."
+  urgency: "The refund gateway session will time out shortly. Please check your UPI notification or link http://swiggy-refund-portal.online/claim right now."
   pressure: "Sir, this is direct merchant reversal. Once the timer expires, the amount gets locked in settlement for 14 days."
-  extraction: "I have dispatched the refund collect request of ₹1,850 to your UPI app. Simply tap Approve and input your PIN to credit your bank."
+  extraction: "I have dispatched the refund collect request of ₹1,850 to your UPI app from claim.refund@gmall.com. Simply tap Approve and input your PIN to credit your bank."

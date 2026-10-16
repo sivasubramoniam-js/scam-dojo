@@ -69,3 +69,25 @@ async def test_check_to_drill_forge():
         assert train_data["scenario"]["slug"] == forge_data["scenarioSlug"]
         assert len(train_data["messages"]) == 1
 
+
+@pytest.mark.asyncio
+async def test_check_message_typosquatted_bank_email_otp():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        res = await ac.post(
+            "/v1/check",
+            json={
+                "text": "share your OTP to this secured email hdfcbank@gmall.com"
+            },
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["score"] >= 90
+        assert data["riskLevel"] == "high"
+        assert data["verdict"] == "likely_scam"
+        # Must identify the red flags
+        tags = [rf["why"] for rf in data["redFlags"]]
+        rf_text = " ".join(tags)
+        assert "gmall.com" in rf_text or "Typo-squatted" in rf_text or "OTP" in rf_text
+
+

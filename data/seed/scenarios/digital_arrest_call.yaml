@@ -18,11 +18,12 @@ persona:
   role: "Cyber Crime Cell, Investigation Wing (fictional)"
   voice: "Stern, authoritarian, intimidating, strict"
 fake_entities:
-  org: "Cyber Crime Investigation Cell (fictional)"
-  phone: "+91 00000 00000"
-  link: "cyber-investigation.example/portal"
-  upi: "safe.account@fakebank"
-  employee_id: "INSP-802"
+  org: "CBI Cyber Crime Cell & Anti-Extortion Wing"
+  phone: "+91 98712 43901"
+  link: "http://cbi-cybercell-verification.in/warrant-check"
+  email: "cbi.investigation-cell@gmall.com"
+  upi: "rbi.clearing.desk@gmall.com"
+  employee_id: "Sub-Inspector Arjun Rao, Badge #DL-8842-CY, Tilak Marg Police Station, New Delhi"
 objective: "Intimidate the victim into transferring their bank savings to a 'verified government reserve account' for forensic audit."
 stages:
   - id: hook
@@ -73,4 +74,4 @@ opening_message:
 fallback_lines:
   urgency: "This is a non-bailable offense under national jurisdiction. You have 15 minutes before the local patrol vehicle reaches your residence."
   pressure: "As per court monitoring protocol, you are placed under digital surveillance. If you alert anyone or attempt to leave, you will be taken into immediate judicial custody."
-  extraction: "To verify your funds are untainted, you must temporarily deposit your savings into the Reserve Bank safe escrow account at safe.account@fakebank. The entire balance will be returned after forensic audit."
+  extraction: "To verify your funds are untainted, you must temporarily deposit your savings into the Reserve Bank safe escrow account at rbi.clearing.desk@gmall.com. The entire balance will be returned after forensic audit."

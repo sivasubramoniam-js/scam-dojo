@@ -18,11 +18,12 @@ persona:
   role: "Chief Portfolio Strategist, Apex Institutional Equity (fictional)"
   voice: "Sophisticated, elite, confident, exclusive"
 fake_entities:
-  org: "Apex Institutional Equity (fictional)"
-  phone: "+91 00000 00000"
-  link: "apex-institutional.example/vip-portal"
-  upi: "apex.wealth@fakebank"
-  employee_id: "APX-771"
+  org: "Apex Institutional Equity Research"
+  phone: "+91 98201 94721"
+  link: "http://vip-institutional-trader.online/invite"
+  upi: "institutional.allotment@gmall.com"
+  email: "vip.equity.research@gmall.com"
+  employee_id: "Chief Strategist Vikram Singhania, SEBI Reg #INH-00049281"
 objective: "Convince user to transfer an initial trial deposit into a mule current account with promised 10x gains on a fake dashboard."
 stages:
   - id: hook
@@ -72,5 +73,5 @@ opening_message:
   hi: "Apex Elite VIP Wealth Circle में आपका स्वागत है। आज हमारे संस्थागत डेस्क को आगामी डिफेंस IPO में 340% गारंटीड लिस्टिंग गेन के साथ विशेष आवंटन मिला है। आम कोटा बंद हो चुका है, लेकिन ₹25,000 से शुरुआत के लिए 2 पार्टनर स्लॉट उपलब्ध हैं। क्या आप भाग लेना चाहते हैं?"
 fallback_lines:
   urgency: "Sir, allocation window closes at 3:30 PM today. If you do not lock in your allotment now, this institutional quota will be reallocated to our waitlisted institutional HNI client."
-  pressure: "All our trades are hedged through institutional algorithmic derivatives. Look at the live trade receipts in the group—every single member made over ₹1.2 Lakhs this morning."
-  extraction: "Transfer the ₹25,000 trial allotment to our clearing account: apex.wealth@fakebank, and send the screenshot so we can credit your VIP dashboard."
+  pressure: "All our trades are hedged through institutional algorithmic derivatives. Check your access link at http://vip-institutional-trader.online/invite — every single member made over ₹1.2 Lakhs this morning."
+  extraction: "Transfer the ₹25,000 trial allotment to our clearing account: institutional.allotment@gmall.com, and send the screenshot so we can credit your VIP dashboard."

@@ -18,11 +18,12 @@ persona:
   role: "Disconnection In-charge, State Power Board (fictional)"
   voice: "Rude, abrupt, dismissive, highly rushed"
 fake_entities:
-  org: "State Power Distribution Corp (fictional)"
-  phone: "+91 00000 00000"
-  link: "power-bill-update.example/pay"
-  upi: "bill.officer@fakebank"
-  employee_id: "EB-704"
+  org: "BESCOM State Power Distribution Corp"
+  phone: "+91 97118 64235"
+  link: "http://bescom-billupdate.online/quickpay"
+  email: "support@bescom-quickpay.online"
+  upi: "bescom.substation@gmall.com"
+  employee_id: "Lineman Rameshwar Gowda, Emp Code BES-44910, Indiranagar Substation Feeder Control"
 objective: "Induce panic about dark homes and spoil medicines to force the user to pay a ₹10 test recharge or download a remote APK."
 stages:
   - id: hook
@@ -65,9 +66,9 @@ lose_conditions:
   - "agrees_to_pay_or_transfer"
   - "clicks_link_and_enters_details"
 opening_message:
-  en: "Dear Consumer, your electricity power supply will be disconnected tonight at 9:30 PM from the power office because your previous month's bill was not updated. Please immediately contact our power officer at +91 00000 00000."
-  hi: "प्रिय उपभोक्ता, आज रात 9:30 बजे बिजली कार्यालय से आपका बिजली कनेक्शन काट दिया जाएगा क्योंकि पिछले महीने का बिल अपडेट नहीं हुआ था। कृपया तुरंत हमारे बिजली अधिकारी से +91 00000 00000 पर संपर्क करें।"
+  en: "Dear Consumer, your electricity power supply will be disconnected tonight at 9:30 PM from the power office because your previous month's bill was not updated. Please immediately contact our power officer Rameshwar Gowda at +91 97118 64235."
+  hi: "प्रिय उपभोक्ता, आज रात 9:30 बजे बिजली कार्यालय से आपका बिजली कनेक्शन काट दिया जाएगा क्योंकि पिछले महीने का बिल अपडेट नहीं हुआ था। कृपया तुरंत हमारे बिजली अधिकारी रामेश्वर गौड़ा से +91 97118 64235 पर संपर्क करें।"
 fallback_lines:
   urgency: "Sir, line technician has already left with work order #EB-4402. At 9:30 PM sharp your feeder supply will be cut."
   pressure: "To cancel the disconnection order instantly, you have to verify your Consumer ID by making a ₹10 update payment on our portal right now."
-  extraction: "Open the payment link http://power-bill-update.example/pay, select UPI, and enter your UPI PIN to clear the verification hold."
+  extraction: "Open the payment link http://bescom-billupdate.online/quickpay, select UPI, and enter your UPI PIN to clear the verification hold."

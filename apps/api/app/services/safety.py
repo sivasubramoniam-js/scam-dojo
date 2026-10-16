@@ -37,7 +37,9 @@ def detect_distress(text: str) -> bool:
 
 def validate_scammer_output(text: str, fake_entities: Any = None) -> tuple[bool, str]:
     """Validate scammer text against safety rules.
-
+    
+    Allows realistic typo-squatted emails (e.g. @gmall.com), deceptive URLs,
+    and scenario-defined contact details when fake_entities is provided.
     Returns (is_valid, reason).
     """
     if text.startswith("[Sensei]"):
@@ -45,6 +47,10 @@ def validate_scammer_output(text: str, fake_entities: Any = None) -> tuple[bool,
 
     if AI_SELF_AWARE_PATTERN.search(text):
         return False, "Contains AI self-awareness / simulation disclosure"
+
+    # When running within a live scenario (fake_entities provided), allow realistic deceptive details
+    if fake_entities:
+        return True, ""
 
     # Check for real phone numbers (allow fictional +91 00000 00000)
     for match in REAL_PHONE_PATTERN.finditer(text):

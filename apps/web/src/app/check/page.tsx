@@ -56,6 +56,10 @@ export function CheckPage() {
 
   const presets = [
     {
+      label: "Bank OTP via Typo-Squatted Email",
+      text: "share your OTP to this secured email hdfcbank@gmall.com",
+    },
+    {
       label: "Bank KYC Expiry Phishing",
       text: "Dear SBI User, your KYC expires today. Your debit card and netbanking will be suspended at 9 PM. Click here to verify: http://bit.ly/sbi-kyc-verify and enter OTP.",
     },
