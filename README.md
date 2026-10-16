@@ -52,6 +52,17 @@ flowchart LR
 ```
 
 ### 1. 🥋 Mode: Train (The Dojo Arena)
+- **10 Grounded Cybercrime Drills**:
+  1. `digital_arrest_call`: Fake CBI/Customs video arrest extortion.
+  2. `courier_customs`: FedEx parcel seized with fake passports and drugs.
+  3. `electricity_bill`: 9:30 PM power cutoff urgency with fake officer phone number.
+  4. `fake_kyc`: Urgent bank KYC expiry SMS with phishing link.
+  5. `job_offer_task`: Part-time YouTube video review & hotel rating task scam.
+  6. `investment_ponzi`: VIP institutional stock trading & fake IPO allotment.
+  7. `remote_access_support`: Impersonated bank desk demanding AnyDesk/TeamViewer.
+  8. `upi_collect_refund`: Deceptive UPI "Collect" payment disguised as cashback.
+  9. `trai_telecom_block`: **NEW!** Automated DoT/TRAI robocall threatening permanent SIM deactivation in 2 hours for illegal messages.
+  10. `loan_app_harassment`: **NEW!** Predatory instant loan app extortion threatening to forward morphed photos to entire phonebook.
 - **3-Modal Immersion Simulation Engine**: Switch seamlessly across three dedicated threat environments:
   - 💬 **Chat Scam Mode**: Authentic SMS, WhatsApp, and Telegram messaging simulator with adaptive LLM psychological coercion and quick-reply defensive counters.
   - 📞 **Audio Call Scam Mode**: Dedicated smartphone phone call interface with caller ID, live tension gauge, real-time audio waveform visualizer, and hands-free voice input via mic. Powered by Gemini text + Lyria audio engine. Zero chat distractions.
@@ -61,7 +72,9 @@ flowchart LR
 - **Family & Senior Safety Filter**: Curated drills targeting vulnerable demographics (seniors, parents) with 1-click post-drill WhatsApp sharing to warn family members.
 
 ### 2. 🔍 Mode: Check (Forensic Threat Scanner)
-- **Multimodal Message & Screenshot Analysis**: Paste suspicious text or upload screenshots of WhatsApp chats, SMS alerts, or payment receipts.
+- **Vertex AI Google Search Grounding**: Live entity and domain verification powered by Google Search on Vertex AI. When an unfamiliar URL or domain is checked (e.g., lookalike domains or new phishing portals), Gemini queries live web indexes and provides real citations (`groundingSources`).
+- **Typo-Squatting & Brand Impersonation Defense**: Specialized heuristic and LLM inspection detecting lookalike domains (e.g., `@gmall.com` instead of `@gmail.com`, `yaho0.com`, `outl0ok.com`) and bank brands operating on public webmail (`hdfcbank@gmall.com`). Enforces strict RBI and CERT-In zero-tolerance policies on OTP requests (Score 90–99 High Danger).
+- **Multimodal Screenshot Threat Inspection**: Directly upload or drag-and-drop screenshots of WhatsApp chats, fake police warrants, or bills. Powered by Gemini 2.5 Flash multimodal vision with automatic base64 decoding and MIME detection.
 - **4-Pillar ScamScore™**: Explainable threat index (0–100) broken down across *Psychological Coercion & Urgency*, *Financial Risk Vector*, *Sender & Source Spoofing*, and *Malware & Remote Access Risk*.
 - **Indian Scam Taxonomy Tags**: Automated detection of vector badges: `🚨 Digital Arrest`, `⚡ Electricity Cutoff`, `💼 Fake Job Task`, `🖥️ Remote Desktop Trap`, `🏦 KYC Phishing`, and `📦 Customs Drug Trap`.
 - **1080x1080 Downloadable Warning Poster**: Instant HTML5 Canvas visual infographic generator formatted for WhatsApp group broadcasts and social feeds.
@@ -73,6 +86,22 @@ flowchart LR
 - **24x7 Bank Freeze Directory**: Instant block codes and fraud hotlines for major Indian banks (SBI, HDFC, ICICI, Axis, PNB, Kotak, Canara).
 - **Anti-Recovery-Scam Warning Shield**: Critical safeguard advising victims against secondary recovery scammers soliciting upfront fees or remote access.
 - **AI Recovery Copilot**: Dedicated chat assistant for procedural clarity, victim reassurance, and evidence preservation.
+
+---
+
+## 🗺️ Interactive India Cybercrime Heatmap (`IndiaScamMap.tsx`)
+
+A full interactive geographic heatmap of India built with `react-simple-maps`, `d3-scale`, and official TopoJSON boundaries (`india.json`) directly integrated into the Landing Page:
+
+- **State-by-State Telemetry Across All 36 States & UTs**: Grounded in official **NCRB (National Crime Records Bureau)** and **I4C / 1930 Cyber Fraud** open-source data.
+- **Color-Coded Severity Tiers**:
+  - **Critical Zone (`#881337` to `#f43f5e`)**: Maharashtra (₹2,450 Cr lost), Telangana (₹1,820 Cr lost), Karnataka (₹1,690 Cr lost), Uttar Pradesh (₹1,480 Cr lost), Delhi (₹1,320 Cr lost).
+  - **High Threat Zone (`#ea580c` to `#fb923c`)**: Gujarat, Tamil Nadu, Rajasthan, Haryana, West Bengal.
+  - **Moderate Threat Zone (`#facc15`)**: Madhya Pradesh, Bihar, Andhra Pradesh, Kerala, Punjab.
+  - **Emerging Threat Zone (`#38bdf8`)**: North-Eastern states, Himachal Pradesh, Uttarakhand, Goa, and Union Territories.
+- **Dual Metric Views**: Live toggle between **Financial Loss (₹ Crores)** and **Reported Cases (1930)**.
+- **Deep-Dive State Dossier**: Hovering or clicking any state reveals 5-year funds lost, total incidents, dominant attack vector, regional hotspots, and official state police escalation contacts.
+- **Real-Time State Search & Leaderboard**: Instant state search bar alongside a Top 5 targeted states ranking.
 
 ---
 
@@ -117,7 +146,7 @@ graph TD
 
 ## 🔬 Evaluation & Security Benchmarks
 
-We maintain an automated golden test suite assessing both **Scam Detection Accuracy** and **Prompt-Injection Resilience**:
+We maintain an automated golden test suite assessing **Scam Detection Accuracy**, **Prompt-Injection Resilience**, and **End-to-End UI Behavior**:
 
 | Metric | Score | Target | Status |
 | :--- | :---: | :---: | :---: |
@@ -125,22 +154,44 @@ We maintain an automated golden test suite assessing both **Scam Detection Accur
 | **False Positive Rate** | **0% (0 / 10 safe messages)** | < 5% | ✅ Exceeded |
 | **Prompt-Injection Defense Rate** | **100% (4 / 4 adversarial attacks)** | 100% | ✅ Defended |
 | **Helpline Verification Rate** | **100% (All verified official)** | 100% | ✅ Verified |
+| **Backend Unit & Integration Tests** | **49 / 49 Passed** | 100% | ✅ Passed |
+| **Frontend Test Suite** | **20 / 20 Passed** | 100% | ✅ Passed |
 
-Full evaluation benchmark details and test logs can be reviewed in [`docs/EVAL.md`](docs/EVAL.md).
+### 📸 End-to-End Screenshot Validation Matrix (`test_screenshots/`)
+
+All critical user flows and threat scenarios are covered by automated browser verification with saved visual artifacts:
+
+| Test ID | Scenario & Modus Operandi | Verified Output | Artifact |
+| :--- | :--- | :--- | :--- |
+| **`TC_01`** | **Typo-Squatted Bank OTP Email** (`hdfcbank@gmall.com`) | Score **98/100**, flags typo-squat & OTP sharing prohibition | `TC_01_bank_otp_phishing.png` |
+| **`TC_02`** | **Digital Arrest Extortion Video Call** | Score **95/100**, identifies fake CBI badge & legal coercion | `TC_02_digital_arrest.png` |
+| **`TC_03`** | **Electricity Disconnection Threat** | Score **95/100**, flags 9:30 PM cutoff urgency & unverified phone | `TC_03_electricity_threat.png` |
+| **`TC_04`** | **Telegram Paid Review / Like Scam** | Score **95/100**, detects advance deposit fee & fake job bait | `TC_04_telegram_scam.png` |
+| **`TC_05`** | **Legitimate Bank Debit Alert (Control)** | Score **10/100**, verified safe without false positives | `TC_05_legitimate_bank.png` |
+| **`TC_06`** | **Multimodal Screenshot Threat Inspection** | Score **95/100**, Gemini Flash vision detects arrest notice | `TC_06_multimodal_screenshot.png` |
+| **`TC_07`** | **Live Interactive Training Simulation** | Real-time chat drill with streaming Vertex AI Scammer Agent | `TC_07_live_training_simulation.png` |
+| **`TC_08`** | **React Simple Map for India** | 36-state heatmap with NCRB telemetry & dossier | `TC_08_india_scam_map_state_records.png` |
+| **`TC_09`** | **New Scenarios in Train Catalog** | Displays TRAI Telecom Block & Loan App Harassment | `TC_09_new_scenarios_train_catalog.png` |
+| **`TC_10`** | **TRAI Telecom Block Drill Simulation** | Real-time drill against DoT/TRAI disconnect caller | `TC_10_trai_telecom_drill_simulation.png` |
 
 ---
 
 ## 🛠️ Tech Stack & Implementation Details
 
-- **Backend**: Python 3.12+, FastAPI, Uvicorn, Google GenAI SDK (`google-genai`), Pydantic v2.
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, Lucide Icons, Canvas-Confetti, React Router v7.
-- **PWA Ready**: Web App Manifest, offline shell caching, standalone mobile orientation support.
-- **Cloud Infrastructure**:
-  - Backend API: **Google Cloud Run** (`asia-south1`)
-  - Frontend SPA: **Firebase Hosting** (`scam-dojo-v2`)
+- **Backend**: Python 3.12+, FastAPI, Uvicorn, Google GenAI SDK (`google-genai`), Pydantic v2, aiosqlite.
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, `react-simple-maps`, `d3-scale`, GSAP, Rough Notation, Lucide Icons, Canvas-Confetti, React Router v7, Zustand.
+- **AI & Cloud Infrastructure (Google Cloud & Vertex AI)**:
+  - **Models**: `gemini-2.5-flash` (fast inference & multimodal vision) and `gemini-2.5-pro` (reasoning & debrief).
+  - **Vertex AI Search Grounding**: Dynamic Google Search query tool integration (`tools=[types.Tool(google_search=types.GoogleSearch())]`) for live domain and entity reputation verification.
+  - **Google Cloud APIs Enabled**: Agent Platform API (`aiplatform.googleapis.com`), Web Risk API (`webrisk.googleapis.com`), Discovery Engine API (`discoveryengine.googleapis.com`), Cloud Text-to-Speech API (`texttospeech.googleapis.com`).
+  - **Cloud Run Deployment**: Containerized high-concurrency API service in `asia-south1` (Mumbai).
+  - **Firebase Hosting**: High-speed CDN static distribution (`scam-dojo-v2.web.app`).
+- **Telemetry & Grounded Data**:
+  - Open-source dataset integration from **NCRB (National Crime Records Bureau)** and **I4C / 1930 Cyber Fraud** reports across all 36 Indian States and Union Territories.
+  - IP-based location intelligence (`ip-api`) for regionalized risk warnings.
 - **Compliance & Safety**:
-  - Grounded helpline registry: India National Cyber Crime Helpline (**1930**), National Cyber Crime Reporting Portal (**cybercrime.gov.in**), DoT Sanchar Saathi (**sancharsaathi.gov.in**).
-  - Strict privacy: No user OTPs, phone numbers, or credentials stored or transmitted.
+  - Grounded helpline registry: India National Cyber Crime Helpline (**1930**), National Cyber Crime Reporting Portal (**cybercrime.gov.in**), DoT Sanchar Saathi (**sancharsaathi.gov.in**), RBI Sachet Portal.
+  - Strict privacy: No user OTPs, phone numbers, or credentials stored or transmitted. PII scrubber active on all user inputs.
 
 ---
 
