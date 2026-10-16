@@ -66,7 +66,12 @@ flowchart LR
 - **3-Modal Immersion Simulation Engine**: Switch seamlessly across three dedicated threat environments:
   - 💬 **Chat Scam Mode**: Authentic SMS, WhatsApp, and Telegram messaging simulator with adaptive LLM psychological coercion and quick-reply defensive counters.
   - 📞 **Audio Call Scam Mode**: Dedicated smartphone phone call interface with caller ID, live tension gauge, real-time audio waveform visualizer, and hands-free voice input via mic. Powered by Gemini text + Lyria audio engine. Zero chat distractions.
-  - 📹 **Video Call Scam Mode**: High-stress "Digital Arrest" & law-enforcement extortion simulation with official badges, legal warrant overlays, and dynamic visual states powered by Veo generative video (listening, interrogating, issuing threats). Includes optional, non-mandatory user webcam Picture-in-Picture (PiP). Zero chat distractions.
+  - 📹 **Video Call Scam Mode (4-Video Interactive Engine)**: High-stress "Digital Arrest" & law-enforcement extortion simulation with official badges, legal warrant overlays, and dual-persona video feeds (**Police / CBI** and **Customs & Narcotics**):
+    - **Talking Loop at 2x Speed**: Interrogation video plays in loop mode at 2x playback speed while the scammer is speaking.
+    - **Simultaneous Muted Voiceover**: Talking video is muted so official TTS audio / voiceover plays simultaneously without clash, maximizing cognitive realism.
+    - **Seamless Listening Loop**: Once talking stops, the system seamlessly transitions to the listening video on continuous loop at 1x speed until the citizen completes their verbal defense.
+    - **Dual Persona Feeds**: Interactive toggle between `👮 Police Feed (CBI)` and `🛃 Customs Feed (Narcotics)`.
+    - **User Picture-in-Picture (PiP)**: Optional, non-mandatory user webcam stream with local mic indicator.
 - **Tactic Detection Engine**: Real-time identification of psychological tactics: *Authority Coercion*, *Artificial Urgency*, *Social Proof*, *Isolation*, *Greed / Bait*, *Sympathy / Guilt*, *FOMO*, and *Threat of Legal Action*.
 - **Belt Ranking Progression**: Martial arts progression from **White Belt (10th Kyu)** up to **5th Dan Black Belt** as users demonstrate vigilance, refuse credential disclosure, and deploy defensive counter-questions.
 - **Family & Senior Safety Filter**: Curated drills targeting vulnerable demographics (seniors, parents) with 1-click post-drill WhatsApp sharing to warn family members.
