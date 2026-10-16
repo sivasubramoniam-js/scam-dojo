@@ -150,6 +150,7 @@ export interface CheckResult {
   alreadyActedHint?: boolean;
   inputTypes: string[];
   resources: ResourceItem[];
+  groundingSources?: string[];
   scoreBreakdown?: ScamScoreBreakdown;
   vectorBadges?: string[];
 }

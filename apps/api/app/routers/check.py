@@ -71,6 +71,7 @@ class CheckResponse(CamelModel):
     input_types: list[str] = ["text"]
     matches: list[RedFlagMatch] = []
     resources: list[dict[str, Any]] = []
+    grounding_sources: list[str] = []
 
 
 class CheckAnalystOutput(BaseModel):
@@ -372,6 +373,40 @@ async def check_message(
                 [f"- {m.kind}: {m.note} (weight: {m.weight})" for m in matches]
             ) or "- None"
 
+            grounding_sources: list[str] = []
+            has_domain_or_url = bool(
+                re.search(
+                    r"(?:https?://\S+|@[\w.-]+\.\w+|[\w-]+\.(?:com|in|org|net|site|xyz|online|live|info|club))",
+                    text,
+                    re.IGNORECASE,
+                )
+            )
+            if has_domain_or_url and is_live_llm_enabled():
+                try:
+                    search_query = (
+                        f"Check if this domain, email, or URL is a scam, phishing, or legitimate service: {text[:200]}"
+                    )
+                    search_resp = await client.aio.models.generate_content(
+                        model=settings.MODEL_FAST,
+                        contents=search_query,
+                        config=types.GenerateContentConfig(
+                            tools=[types.Tool(google_search=types.GoogleSearch())],
+                            temperature=0.1,
+                        ),
+                    )
+                    search_text = search_resp.text or ""
+                    if search_resp.candidates and search_resp.candidates[0].grounding_metadata:
+                        chunks = search_resp.candidates[0].grounding_metadata.grounding_chunks or []
+                        for chunk in chunks:
+                            if chunk.web and chunk.web.title:
+                                grounding_sources.append(chunk.web.title)
+                    if search_text:
+                        heuristic_summary += (
+                            f"\n- Google Search Grounding Analysis: {search_text[:400]}"
+                        )
+                except Exception as search_err:
+                    logger.debug("Search Grounding pre-pass skipped or failed: %s", search_err)
+
             lang_instruction = (
                 "Respond in clear, natural Hindi (Devanagari) as spoken in everyday India."
                 if req.lang == "hi"
@@ -393,7 +428,7 @@ CRITICAL THREAT EVALUATION STANDARDS (RBI, CERT-In, & Cyber Crime 1930 Standards
 Message to inspect:
 \"\"\"{text}\"\"\"
 
-Initial Heuristic & Domain Scan Findings:
+Initial Heuristic, Domain & Search Grounding Findings:
 {heuristic_summary}
 
 Language instruction:
@@ -411,14 +446,25 @@ Requirements:
 """
             contents: list[Any] = [prompt]
             if req.image_base64:
+                import base64
+
                 input_types.append("image")
+                mime_type = "image/jpeg"
+                if "data:image/png" in req.image_base64:
+                    mime_type = "image/png"
+                elif "data:image/webp" in req.image_base64:
+                    mime_type = "image/webp"
                 clean_b64 = req.image_base64.split(",", 1)[-1]
-                contents.append(
-                    types.Part.from_bytes(
-                        data=clean_b64.encode("utf-8"),
-                        mime_type="image/jpeg",
+                try:
+                    img_bytes = base64.b64decode(clean_b64)
+                    contents.append(
+                        types.Part.from_bytes(
+                            data=img_bytes,
+                            mime_type=mime_type,
+                        )
                     )
-                )
+                except Exception as b64_err:
+                    logger.warning("Failed to decode base64 image: %s", b64_err)
 
             config = types.GenerateContentConfig(
                 temperature=0.2,
@@ -452,6 +498,10 @@ Requirements:
         raw_resources = kb_service.get_resources(country="IN", lang=req.lang)
         resources = [r for r in raw_resources if r.get("id") in ("helpline_1930", "portal_cybercrime", "portal_sancharsaathi")][:3]
 
+    unique_grounding = []
+    if "grounding_sources" in locals() and grounding_sources:
+        unique_grounding = list(dict.fromkeys(grounding_sources))[:5]
+
     response_doc = {
         "checkId": check_id,
         "createdAt": now_iso,
@@ -477,6 +527,7 @@ Requirements:
         "inputTypes": input_types,
         "matches": [m.model_dump(by_alias=True) for m in matches],
         "resources": resources,
+        "groundingSources": unique_grounding,
     }
 
     # Save check in repo

@@ -556,6 +556,27 @@ export function CheckPage() {
             </div>
           )}
 
+          {/* Live Google Search Grounding Sources */}
+          {checkResult.groundingSources && checkResult.groundingSources.length > 0 && (
+            <div className="bg-sky-50/70 dark:bg-sky-950/30 border-2 border-sky-300 dark:border-sky-800 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 text-sky-900 dark:text-sky-300 text-xs font-black uppercase tracking-wider">
+                <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <span>Google Cloud Vertex AI Live Search Grounding Sources</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {checkResult.groundingSources.map((source, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-800 text-[11px] font-semibold text-slate-800 dark:text-slate-200 shadow-2xs"
+                  >
+                    <ExternalLink className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                    {source}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* High Danger Emergency Helplines */}
           {checkResult.riskLevel === "high" && (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
