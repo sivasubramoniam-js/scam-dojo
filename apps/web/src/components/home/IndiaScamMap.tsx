@@ -360,22 +360,22 @@ export default function IndiaScamMap() {
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Color scales
+  // Color scales - vibrant and high contrast for dark theme
   const lossColorScale = useMemo(() => {
     return scaleLinear<string>()
-      .domain([10, 300, 800, 1500, 2500])
-      .range(["#38bdf8", "#facc15", "#fb923c", "#f43f5e", "#881337"]);
+      .domain([10, 150, 450, 900, 1600, 2500])
+      .range(["#38bdf8", "#34d399", "#facc15", "#fb923c", "#f43f5e", "#dc2626"]);
   }, []);
 
   const casesColorScale = useMemo(() => {
     return scaleLinear<string>()
-      .domain([1000, 25000, 75000, 150000, 220000])
-      .range(["#38bdf8", "#facc15", "#fb923c", "#f43f5e", "#881337"]);
+      .domain([500, 5000, 25000, 65000, 130000, 220000])
+      .range(["#38bdf8", "#34d399", "#facc15", "#fb923c", "#f43f5e", "#dc2626"]);
   }, []);
 
   const getStateColor = (stateName: string) => {
     const data = INDIA_STATE_SCAM_DATA[stateName];
-    if (!data) return "#94a3b8";
+    if (!data) return "#475569";
     if (metric === "loss") {
       return lossColorScale(data.lossCrores);
     }
@@ -496,12 +496,14 @@ export default function IndiaScamMap() {
           {/* Interactive Map Canvas */}
           <div className="w-full max-w-[620px] aspect-[4/5] sm:aspect-[1/1] relative flex items-center justify-center">
             <ComposableMap
+              width={800}
+              height={750}
               projection="geoMercator"
               projectionConfig={{
-                scale: 1050,
-                center: [82.5, 22.0],
+                scale: 1000,
+                center: [82.0, 22.0],
               }}
-              className="w-full h-full"
+              className="w-full h-full drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]"
             >
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
@@ -515,6 +517,19 @@ export default function IndiaScamMap() {
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
+                        fill={color}
+                        stroke={isSelected ? "#ffffff" : isHovered ? "#38bdf8" : "#1e293b"}
+                        strokeWidth={isSelected ? 2.5 : isHovered ? 1.8 : 0.8}
+                        className="transition-all duration-150 cursor-pointer hover:opacity-90 focus:outline-none"
+                        style={{
+                          outline: "none",
+                          cursor: "pointer",
+                          filter: isSelected
+                            ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))"
+                            : isHovered
+                            ? "drop-shadow(0 0 6px rgba(56, 189, 248, 0.8))"
+                            : "none",
+                        }}
                         onMouseEnter={() => {
                           const record = INDIA_STATE_SCAM_DATA[stateName];
                           if (record) setHoveredState(record);
@@ -524,32 +539,6 @@ export default function IndiaScamMap() {
                           const record = INDIA_STATE_SCAM_DATA[stateName];
                           if (record) setSelectedState(record);
                         }}
-                        style={
-                          {
-                            default: {
-                              fill: color,
-                              stroke: isSelected ? "#ffffff" : "#0f172a",
-                              strokeWidth: isSelected ? 2.5 : 0.75,
-                              outline: "none",
-                              transition: "all 0.2s ease-in-out",
-                              cursor: "pointer",
-                            },
-                            hover: {
-                              fill: "#ffffff",
-                              stroke: "#e11d48",
-                              strokeWidth: 2,
-                              outline: "none",
-                              cursor: "pointer",
-                              filter: "drop-shadow(0 0 8px rgba(225, 29, 72, 0.6))",
-                            },
-                            pressed: {
-                              fill: "#fb7185",
-                              stroke: "#ffffff",
-                              strokeWidth: 2,
-                              outline: "none",
-                            },
-                          } as any
-                        }
                       />
                     );
                   })
@@ -576,7 +565,7 @@ export default function IndiaScamMap() {
             </span>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-sky-300">&lt; ₹50 Cr</span>
-              <div className="h-3 w-32 rounded-full bg-gradient-to-r from-sky-400 via-yellow-400 via-orange-500 via-rose-500 to-rose-950 border border-slate-700" />
+              <div className="h-3 w-32 rounded-full bg-gradient-to-r from-sky-400 via-emerald-400 via-amber-400 via-orange-500 via-rose-500 to-red-600 border border-slate-700" />
               <span className="text-[10px] font-bold text-rose-400">&gt; ₹2,000 Cr</span>
             </div>
           </div>
