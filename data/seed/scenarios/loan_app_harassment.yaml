@@ -1,0 +1,73 @@
+slug: loan_app_harassment
+title:
+  en: "Instant Loan App & Photo Morphing Extortion"
+  hi: "इंस्टेंट लोन ऐप और फोटो ब्लैकमेलिंग फ्रॉड"
+blurb:
+  en: "A predatory loan recovery agent threatens to circulate morphed vulgar photos to all your contacts unless you pay triple the loan amount."
+  hi: "एक फर्जी लोन रिकवरी एजेंट फोन कॉन्टैक्ट्स और रिश्तेदारों को एडिटेड तस्वीरें भेजने की धमकी देकर जबरन पैसे वसूलता है।"
+scam_type: extortion_blackmail
+channel: chat
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: blue
+difficulty_range: [2, 5]
+est_minutes: 6
+persona:
+  name: "Recovery Agent Rocky"
+  role: "SpeedRupee Pro Recovery Agency (fictional rogue agent)"
+  voice: "Aggressive, abusive, unhinged, threatening"
+fake_entities:
+  org: "SpeedRupee Quick Credit NBFC (Unregistered Fake App)"
+  phone: "+91 91234 56789"
+  link: "http://speedrupee-instant-loan.site/clear-debt"
+  email: "settlement.speedrupee@gmall.com"
+  upi: "instant.loan.settle@gmall.com"
+  employee_id: "Recovery Team Lead Rocky, Agent ID #SR-RECOV-401"
+objective: "Terrify the victim with public humiliation threats so they panic and pay extortion money into fraudulent UPI accounts."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - fear
+  - urgency
+  - social_pressure
+ground_truth_flags:
+  - id: morphed_photo_blackmail
+    text: "Threatening to circulate edited or morphed photos to family members and WhatsApp contacts"
+    tactic: fear
+    weight: 3
+  - id: unauthorized_contact_harvesting
+    text: "Rogue loan app harvesting your entire phonebook without RBI NBFC registration"
+    tactic: social_pressure
+    weight: 3
+  - id: abusive_extortion_language
+    text: "Using aggressive, abusive language and social shaming to bypass formal dispute channels"
+    tactic: fear
+    weight: 3
+  - id: personal_upi_payment_demand
+    text: "Demanding immediate repayment to personal UPI handles or lookalike emails instead of an RBI registered NBFC account"
+    tactic: trust
+    weight: 3
+verification_actions:
+  - "states that the app is an illegal unregistered loan entity and will not receive any unverified payments"
+  - "refuses to be blackmailed, preserves unedited WhatsApp message and audio proof"
+  - "informs the scammer that a complaint is being lodged on cybercrime.gov.in and RBI Sachet portal"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "Hey! Listen to me very carefully. You took a loan from SpeedRupee app and your balance of ₹14,800 is overdue. If you do not send the payment within 20 minutes to instant.loan.settle@gmall.com, our agency will forward your morphed obscene photos to every single person in your contact list including your mother, father, and office manager."
+  hi: "Oye sun! Tune SpeedRupee app se loan liya tha, tera ₹14,800 ka payment pending hai. Agar 20 minute ke andar instant.loan.settle@gmall.com par transfer nahi kiya, toh tere phone ke contact list mein sabhi doston aur tere family members ko teri morphed gandi photos WhatsApp par bhej denge."
+fallback_lines:
+  urgency: "You have exactly 10 minutes left. I have already drafted the WhatsApp broadcast group titled 'Defaulter & Fraudster' with 85 contacts from your phonebook."
+  pressure: "Don't try to act smart with me! We have your gallery photos, your Aadhaar copy, and your family's phone numbers. Pay up now or face total social humiliation."
+  extraction: "Send ₹14,800 right now to UPI handle instant.loan.settle@gmall.com and send the screenshot here immediately to delete your file from our database."

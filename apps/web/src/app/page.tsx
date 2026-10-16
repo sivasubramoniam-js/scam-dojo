@@ -3,6 +3,7 @@ import { Link, useRouter } from "@/lib/navigation";
 import { fetchMe, UserProfile } from "@/lib/api";
 import { gsap } from "@/lib/gsap";
 import ScamStatisticsCharts from "@/components/home/ScamStatisticsCharts";
+import IndiaScamMap from "@/components/home/IndiaScamMap";
 import NewspaperHeadlines from "@/components/home/NewspaperHeadlines";
 import InteractiveScammerShowcase from "@/components/home/InteractiveScammerShowcase";
 
@@ -181,7 +182,10 @@ export function HomePage() {
       {/* 2. FIVE-YEAR CRIME TELEMETRY CHARTS (2020-2025) */}
       <ScamStatisticsCharts />
 
-      {/* 3. MULTI-SCENARIO 3-MODAL SLIDESHOW (CHAT, VOICE, VIDEO) + ROUGH NOTATION */}
+      {/* 3. INTERACTIVE REACT SIMPLE MAP FOR INDIA (STATE-WISE SCAM HEATMAP) */}
+      <IndiaScamMap />
+
+      {/* 4. MULTI-SCENARIO 3-MODAL SLIDESHOW (CHAT, VOICE, VIDEO) + ROUGH NOTATION */}
       <InteractiveScammerShowcase />
 
       {/* 4. REAL JOURNALISTIC NEWSPAPER HEADLINES & CASE STUDIES */}

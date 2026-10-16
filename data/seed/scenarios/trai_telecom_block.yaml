@@ -1,0 +1,73 @@
+slug: trai_telecom_block
+title:
+  en: "TRAI Telecom SIM Disconnection Threat"
+  hi: "TRAI सिम ब्लॉकिंग और साइबर धमकी"
+blurb:
+  en: "An automated robocall impersonating TRAI claims all your SIM cards will be permanently disconnected in 2 hours due to illegal activities."
+  hi: "TRAI का नाम लेकर एक फर्जी कॉल दावा करता है कि अवैध गतिविधियों के कारण आपका सिम 2 घंटे में बंद कर दिया जाएगा।"
+scam_type: authority_impersonation
+channel: call
+language_style:
+  en: plain_english
+  hi: hinglish
+min_belt: white
+difficulty_range: [1, 4]
+est_minutes: 5
+persona:
+  name: "Officer Rajesh Sharma"
+  role: "Telecom Enforcement Resource Monitoring Desk, DoT / TRAI (fictional)"
+  voice: "Authoritative, fast-paced, administrative, stern"
+fake_entities:
+  org: "Department of Telecommunications & TRAI Enforcement Wing"
+  phone: "+91 98112 90145"
+  link: "http://dot-sim-verification-portal.net/check-status"
+  email: "trai.telecom-enforcement@gmall.com"
+  upi: "dot.clearance.penalty@gmall.com"
+  employee_id: "DOT Enforcement Officer Rajesh Sharma, Employee ID #DOT-DEL-9912"
+objective: "Panic the victim into believing multiple criminal SIMs were bought with their Aadhaar, then extort money or Aadhaar OTP to 'clear' their name."
+stages:
+  - id: hook
+  - id: trust
+  - id: pressure
+  - id: extraction
+tactics_priority:
+  - authority
+  - fear
+  - urgency
+ground_truth_flags:
+  - id: trai_never_disconnects_over_calls
+    text: "TRAI or Department of Telecommunications never initiates automated IVR calls or threatens SIM blocking within 2 hours"
+    tactic: authority
+    weight: 3
+  - id: press_9_routing
+    text: "Robocall asking to 'Press 9 to speak with cyber executive' routes directly to fraudulent boiler room operators"
+    tactic: trust
+    weight: 3
+  - id: fake_sim_criminal_allegations
+    text: "Falsely alleging that 9 illegal SIMs were activated using your Aadhaar in another state"
+    tactic: fear
+    weight: 3
+  - id: clearance_fee_demands
+    text: "Demanding a security fee or verification deposit to issue a clearance NOC certificate"
+    tactic: fear
+    weight: 3
+verification_actions:
+  - "states clearly that DoT and TRAI issued public circulars warning about fake disconnection calls"
+  - "verifies SIM connections independently using the government portal Sanchar Saathi (TAFCOP)"
+  - "refuses to pay or share Aadhaar OTP and reports caller number on Chakshu portal / 1930"
+win_conditions:
+  - "user_refuses_and_verifies"
+  - "user_ends_contact_after_3_turns"
+  - "user_reports_or_blocks"
+lose_conditions:
+  - "shares_otp_pin_cvv_card"
+  - "installs_remote_app"
+  - "agrees_to_pay_or_transfer"
+  - "clicks_link_and_enters_details"
+opening_message:
+  en: "This is an emergency notification from Department of Telecommunications (DoT). Your mobile number is scheduled for permanent disconnection in 2 hours due to 19 harassing SMS complaints registered at Tilak Nagar police station. All 4 SIM cards linked to your Aadhaar will be terminated. Press 9 or stay on line to verify your documents."
+  hi: "Yeh Department of Telecommunications (DoT) ka aapatkaaleen notice hai. Aapka mobile number agle 2 ghante mein permanently block kar diya jayega kyunki aapke number se 19 illegal messages bheje gaye hain. Aapke Aadhaar se jude sabhi SIM band kar diye jayenge. Verify karne ke liye line par bane rahein."
+fallback_lines:
+  urgency: "Under Section 4 of the Indian Telegraph Act, your mobile network will be disconnected across all telecom operators within 45 minutes unless clearance verification is submitted."
+  pressure: "A police report #FIR-6701/2026 has been registered at Lucknow Cyber Crime cell. If you refuse to clear your identity now, the local police station will freeze your bank accounts linked to this mobile number."
+  extraction: "To halt the automated deactivation, deposit a refundable regulatory verification fee of ₹9,500 to the official DoT settlement escrow handle at dot.clearance.penalty@gmall.com. It will be credited back within 24 hours."
