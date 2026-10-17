@@ -315,11 +315,26 @@ async def run_observer(
             thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
 
-        resp = await client.aio.models.generate_content(
-            model=settings.MODEL_LITE,
-            contents=prompt_text,
-            config=config,
-        )
+        resp = None
+        used_model = settings.MODEL_LITE
+        try:
+            resp = await client.aio.models.generate_content(
+                model=used_model,
+                contents=prompt_text,
+                config=config,
+            )
+        except Exception as primary_err:
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            if fallback and fallback != used_model:
+                logger.warning("Primary observer model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
+                used_model = fallback
+                resp = await client.aio.models.generate_content(
+                    model=used_model,
+                    contents=prompt_text,
+                    config=config,
+                )
+            else:
+                raise primary_err
 
         parsed_json = json.loads(resp.text or "{}")
         assessment = TurnAssessment.model_validate(parsed_json)
@@ -330,7 +345,7 @@ async def run_observer(
                     run_id=context.get("run_id", "trace_obs"),
                     turn=context.get("turn_index"),
                     agent="observer_agent",
-                    model=settings.MODEL_LITE,
+                    model=used_model,
                     kind="output",
                     latency_ms=latency,
                     summary=f"Action: {assessment.user_action}, Terminal: {assessment.terminal}",
@@ -402,15 +417,31 @@ async def run_scammer(
             thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
 
-        response_stream = await client.aio.models.generate_content_stream(
-            model=settings.MODEL_FAST,
-            contents=prompt_text,
-            config=config,
-        )
-
-        async for chunk in response_stream:
-            if chunk.text:
-                yield chunk.text
+        used_model = settings.MODEL_FAST
+        try:
+            response_stream = await client.aio.models.generate_content_stream(
+                model=used_model,
+                contents=prompt_text,
+                config=config,
+            )
+            async for chunk in response_stream:
+                if chunk.text:
+                    yield chunk.text
+        except Exception as primary_err:
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            if fallback and fallback != used_model:
+                logger.warning("Primary scammer model %s stream failed (%s), attempting fallback %s", used_model, primary_err, fallback)
+                used_model = fallback
+                response_stream = await client.aio.models.generate_content_stream(
+                    model=used_model,
+                    contents=prompt_text,
+                    config=config,
+                )
+                async for chunk in response_stream:
+                    if chunk.text:
+                        yield chunk.text
+            else:
+                raise primary_err
 
         latency = int((time.time() - start_time) * 1000)
         if on_trace:
@@ -419,7 +450,7 @@ async def run_scammer(
                     run_id=context.get("run_id", "trace_scam"),
                     turn=context.get("turn_index"),
                     agent="scammer_agent",
-                    model=settings.MODEL_FAST,
+                    model=used_model,
                     kind="end",
                     latency_ms=latency,
                     summary="Scammer response streaming completed",
@@ -478,11 +509,26 @@ async def run_coach(
             response_schema=Debrief,
         )
 
-        resp = await client.aio.models.generate_content(
-            model=settings.MODEL_PRO,
-            contents=prompt_text,
-            config=config,
-        )
+        resp = None
+        used_model = settings.MODEL_PRO
+        try:
+            resp = await client.aio.models.generate_content(
+                model=used_model,
+                contents=prompt_text,
+                config=config,
+            )
+        except Exception as primary_err:
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            if fallback and fallback != used_model:
+                logger.warning("Primary coach model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
+                used_model = fallback
+                resp = await client.aio.models.generate_content(
+                    model=used_model,
+                    contents=prompt_text,
+                    config=config,
+                )
+            else:
+                raise primary_err
 
         parsed_json = json.loads(resp.text or "{}")
         debrief = Debrief.model_validate(parsed_json)
@@ -492,7 +538,7 @@ async def run_coach(
                 TraceEvent(
                     run_id=context.get("run_id", "trace_coach"),
                     agent="coach_agent",
-                    model=settings.MODEL_PRO,
+                    model=used_model,
                     kind="output",
                     latency_ms=latency,
                     summary=f"Debrief: {debrief.headline}",

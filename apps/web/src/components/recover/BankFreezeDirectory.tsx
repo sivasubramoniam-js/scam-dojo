@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PhoneCall, Building2, ExternalLink, ChevronDown, ChevronUp, Lock } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 interface BankDetail {
   name: string;
@@ -78,6 +79,7 @@ const TOP_BANKS: BankDetail[] = [
 ];
 
 export function BankFreezeDirectory() {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -100,13 +102,13 @@ export function BankFreezeDirectory() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <span>Emergency Bank Freeze Directory</span>
+              <span>{t("freeze.title")}</span>
               <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                24/7 Hotlines
+                {t("freeze.hotlines")}
               </span>
             </h3>
             <p className="text-xs text-muted-foreground">
-              Direct emergency numbers to block cards, UPI debits, and netbanking for major Indian banks.
+              {t("freeze.desc")}
             </p>
           </div>
         </div>
@@ -122,7 +124,7 @@ export function BankFreezeDirectory() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search bank name (e.g. SBI, HDFC, ICICI)..."
+              placeholder={t("freeze.search")}
               className="w-full p-2.5 rounded-xl border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
@@ -142,7 +144,7 @@ export function BankFreezeDirectory() {
 
                 <div className="space-y-1 text-muted-foreground">
                   <div className="flex items-center justify-between">
-                    <span>Fraud Desk:</span>
+                    <span>{t("freeze.fraud_desk")}</span>
                     <a
                       href={`tel:${b.phone.replace(/\s+/g, "")}`}
                       className="font-bold text-primary hover:underline flex items-center gap-1"
@@ -154,7 +156,7 @@ export function BankFreezeDirectory() {
 
                   {b.tollFree && (
                     <div className="flex items-center justify-between">
-                      <span>Toll-Free:</span>
+                      <span>{t("freeze.toll_free")}</span>
                       <a
                         href={`tel:${b.tollFree.replace(/\s+/g, "")}`}
                         className="font-semibold text-foreground hover:underline"
@@ -176,7 +178,7 @@ export function BankFreezeDirectory() {
           </div>
 
           <div className="text-[11px] text-muted-foreground bg-muted/40 p-3 rounded-xl border border-border/60">
-            <strong>Pro Tip:</strong> When speaking with the bank fraud desk, explicitly request a <em>"Transaction Dispute Reference Number"</em> and ask them to mark the recipient transaction on the <strong>CFCFRMS / 1930 portal</strong> to attempt an interbank hold before cashout.
+            {t("freeze.protip")}
           </div>
         </div>
       )}

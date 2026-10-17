@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useT } from "@/lib/i18n";
 
 export function NewsletterPage() {
+  const { t } = useT();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -49,14 +51,14 @@ export function NewsletterPage() {
             mark_email_unread
           </span>
           <span className="font-label-sm text-xs font-bold text-ink-aizome">
-            Zero-Day Intelligence Dispatches
+            {t("news.tag")}
           </span>
         </div>
         <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-ink-aizome font-extrabold tracking-tight">
-          Stay Ahead of Emerging Scams
+          {t("news.title")}
         </h1>
         <p className="font-body-lg text-sm sm:text-base text-ink-sumi max-w-2xl">
-          Weekly intelligence bulletins on active cyber syndicates, newly observed SMS malware campaigns, and counter-tactics verified with CERT-In and state police advisories.
+          {t("news.desc")}
         </p>
       </div>
 
@@ -87,7 +89,7 @@ export function NewsletterPage() {
 
               <div className="mt-4 p-3 bg-surface-container-low rounded-lg border border-line-ito/50 text-xs text-ink-aizome">
                 <span className="font-bold text-action-ai block mb-0.5">
-                  🥋 Counter-Stance:
+                  {t("news.stance")}
                 </span>
                 {b.defense}
               </div>
@@ -103,19 +105,19 @@ export function NewsletterPage() {
                 mail
               </span>
               <h3 className="font-headline-sm text-base font-bold text-ink-aizome">
-                Join the Dojo Dispatch
+                {t("news.join.title")}
               </h3>
             </div>
             <p className="text-xs text-ink-sumi leading-relaxed mb-4">
-              Get one concise 3-minute briefing every Sunday morning. No marketing spam, no affiliate links, only tactical defense intelligence.
+              {t("news.join.desc")}
             </p>
 
             {subscribed ? (
               <div className="p-4 bg-safe-matcha/10 border border-safe-matcha/30 rounded-xl text-xs text-ink-aizome">
                 <span className="font-bold block text-safe-matcha mb-1">
-                  ✓ Dispatch Confirmed
+                  {t("news.join.confirmed")}
                 </span>
-                You are enrolled in the Sunday Dojo Briefing. Stay calm, stay sharp.
+                {t("news.join.enrolled")}
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
@@ -124,14 +126,14 @@ export function NewsletterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
+                  placeholder={t("news.join.placeholder")}
                   className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low border border-line-ito text-xs text-ink-aizome focus:outline-none focus:border-action-ai focus:ring-2 focus:ring-action-ai/20 transition-all"
                 />
                 <button
                   type="submit"
                   className="w-full py-2.5 rounded-lg bg-action-ai text-action-ink text-xs font-bold hover:opacity-95 shadow-xs transition-opacity"
                 >
-                  Subscribe to Zero-Day Intel
+                  {t("news.join.submit")}
                 </button>
               </form>
             )}
@@ -140,13 +142,13 @@ export function NewsletterPage() {
               <span className="material-symbols-outlined text-[15px] text-safe-matcha">
                 verified
               </span>
-              <span>100% Zero-Spam. Unsubscribe with 1 click anytime.</span>
+              <span>{t("news.join.nospam")}</span>
             </div>
           </div>
 
           <div className="bg-surface-container-high rounded-xl p-4 border border-line-ito/40 text-xs text-ink-aizome">
-            <span className="font-bold block mb-1">Dojo Intelligence Sources</span>
-            Our threat models ingest daily advisories from I4C (Indian Cyber Crime Coordination Centre), RBI consumer alerts, CERT-In vulnerability bulletins, and DoT Sanchar Saathi.
+            <span className="font-bold block mb-1">{t("news.sources.title")}</span>
+            {t("news.sources.desc")}
           </div>
         </div>
       </div>

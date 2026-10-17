@@ -1,0 +1,299 @@
+SCAM DOJO
+Google AI Ecosystem Catalogue + Comprehensive Anti-Scam Web Application Blueprint
+Research and planning edition • 17 October 2026 • For a two-person AI Builder Cup team
+Executive decision
+Build a defensible, evidence-led scam triage assistant, not a tool that claims to certify safety. The MVP should accept suspicious messages, URLs and screenshots; extract indicators; check known unsafe URLs using an appropriately licensed reputation service; produce a calibrated risk assessment with evidence; and offer concrete protective next steps. A convincing working flow matters more than integrating every available Google service.
+Competition requirements and timing
+The official AI Builder Cup themes page lists BFSI fraud/risk as an eligible theme; prototypes must meaningfully use Google AI and be deployed via Google Cloud/Cloud Run or Firebase. Required materials include a proposal PDF and a three-minute demo link. The published submission deadline is 18 October 2026. Confirm submission portal status directly before relying on the deadline. Judging weights: technical merit and GenAI implementation 40%; problem alignment and impact 25%; innovation 25%; user experience 10%. Source: https://aibuildercup.com/themes.html and https://aibuildercup.com/
+Part I — Broad Google product and feature catalogue
+Core generative AI
+Gemini models — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemma open-weight models — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Imagen image generation — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Veo video generation — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Lyria music generation — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Gemini embeddings — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini Live API — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini File API — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini Batch API — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini context caching — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini structured JSON output — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini function calling — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini code execution — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini Google Search grounding — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini URL Context — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini safety settings — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini Interactions API — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+AI development and agents
+Google AI Studio / Build mode — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Antigravity — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Gemini Code Assist — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Gemini CLI — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Vertex AI / Agent Platform — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI Studio — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Agent Development Kit (ADK) — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Agent Engine — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Agent Garden — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Model Context Protocol integrations — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Agent2Agent (A2A) protocol — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI evaluation — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI model registry — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI pipelines — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase and app operations
+Firebase Authentication — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Firestore — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Realtime Database — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Storage for Firebase — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Firebase Hosting — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase App Hosting — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Functions for Firebase — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase AI Logic — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase App Check — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Firebase Remote Config — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Analytics for Firebase — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Crashlytics — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Performance Monitoring — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase Cloud Messaging — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase In-App Messaging — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase A/B Testing — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase Extensions — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase Data Connect — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase Emulator Suite — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Firebase Test Lab — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud and data infrastructure
+Cloud Run — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Run functions — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Storage — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+BigQuery — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+BigQuery ML — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud SQL — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+AlloyDB — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Memorystore — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Pub/Sub — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Tasks — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Scheduler — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Workflows — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Build — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Artifact Registry — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Secret Manager — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Logging — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Monitoring — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+API Gateway — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud IAM — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud KMS — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Sensitive Data Protection — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Security Command Center — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Cloud Audit Logs — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Specialized AI and security
+Document AI — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Vision API — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Speech-to-Text — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Text-to-Speech — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Translation — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Cloud Natural Language — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Video Intelligence API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI Search — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Vertex AI Vector Search — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Safe Browsing APIs — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Google Web Risk — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+reCAPTCHA Enterprise — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Google Identity Services — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Maps and geospatial
+Maps JavaScript API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Places API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Geocoding API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Routes API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Distance Matrix functionality — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Geolocation API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Maps Datasets API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Address Validation API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Maps Static API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Workspace and productivity
+Gmail API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Drive API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Sheets API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Docs API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Slides API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Calendar API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Meet API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Chat API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Forms API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Tasks API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+People API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Apps Script — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Workspace Add-ons — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Picker API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Analytics and marketing
+Google Analytics 4 — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Analytics Data API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Ads API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Search Console API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Merchant API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Trends — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Tag Manager — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Looker — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Looker Studio — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+YouTube Data API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+YouTube Analytics API — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+ML, research, UX and testing
+TensorFlow — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Keras — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+LiteRT / TensorFlow Lite — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+MediaPipe — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+ML Kit — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Colab — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+JAX — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Flutter — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Dart — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Angular — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Chrome DevTools — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Lighthouse — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Chrome for Testing — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Fonts — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Material Design — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Material Web — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+NotebookLM — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Gemini Deep Research — Potential SCAM DOJO use: analyze or extract user-submitted evidence, support trustworthy lookup, or securely run and store the workflow; confirm API eligibility, limits and pricing.
+Google Scholar — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Dataset Search — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Patents — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Kaggle — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Google Skills / Cloud Skills Boost — General capability: development, hosting, automation, analytics, collaboration, ML or product operations; add only when a defined user need justifies it.
+Part II — SCAM DOJO product design
+Positioning and user promise
+SCAM DOJO helps people pause, inspect, and verify suspicious digital interactions. It explains observable red flags, distinguishes verified findings from uncertainty, and gives safe next steps. It must never guarantee that a link, payment, caller, or person is safe. Focus initial coverage on phishing links, impersonation messages, fake job offers, delivery/payment scams, QR-payment pressure, investment promises, and customer-support impersonation.
+1. Scam message analyzer
+User flow / implementation: Paste SMS, WhatsApp or email text. Gemini extracts requested action, urgency cues, impersonation claims, links, phone numbers and payment requests; return evidence snippets and a reasoned assessment.
+Google stack: Gemini structured output, Cloud Run, Firestore   |   Phase: MVP
+2. Screenshot intelligence
+User flow / implementation: Upload screenshot; multimodal Gemini or Vision OCR extracts text and interface cues. Mask contact details by default. Display extracted text for correction before analysis.
+Google stack: Gemini vision, Cloud Vision, Cloud Storage   |   Phase: MVP
+3. URL reputation checks
+User flow / implementation: Parse and normalize a URL; check domain and redirects using a safe backend workflow, then query Safe Browsing or Web Risk subject to licensing. Do not visit malicious sites in a user browser or execute active content.
+Google stack: Google Safe Browsing / Web Risk, Cloud Run, Cloud Tasks   |   Phase: MVP
+4. Explainable risk meter
+User flow / implementation: Combine reputation match, message cues, impersonation signals, and uncertainty in an explicitly labeled heuristic score. Show observed evidence, not false probability of fraud.
+Google stack: Gemini, deterministic rules, structured JSON   |   Phase: MVP
+5. Protective action guide
+User flow / implementation: Tailor actions: do not click, verify via independently sourced official contact, do not share OTP/PIN, contact bank, block/report; urgent account compromise flow.
+Google stack: Gemini, curated safety playbooks   |   Phase: MVP
+6. Source-backed verification
+User flow / implementation: Ground claims about companies or current scam advisories in official public sources; show dates, citations and whether verification failed.
+Google stack: Gemini Search grounding, URL Context   |   Phase: High
+7. Fake job offer checker
+User flow / implementation: Extract recruiter identity, salary promises, upfront fees and domain mismatch. Highlight what to independently verify without declaring every unknown recruiter fraudulent.
+Google stack: Gemini, Search grounding   |   Phase: High
+8. Payment/UPI scam coach
+User flow / implementation: Explain collect requests, QR payment requests, OTP/PIN risks and safe confirmation steps. Never ask for a real PIN or banking credentials.
+Google stack: Gemini, curated India-specific guidance   |   Phase: High
+9. Multilingual detection
+User flow / implementation: Analyze Hindi, English and mixed-language messages; present explanation in user-selected language. Validate language quality with native speakers.
+Google stack: Gemini, Cloud Translation   |   Phase: High
+10. Voice note analyzer
+User flow / implementation: With consent, upload audio, transcribe, identify coercion patterns and return cited excerpts with uncertainty. Do not claim speaker identity.
+Google stack: Speech-to-Text, Gemini audio   |   Phase: Later
+11. Live voice coaching
+User flow / implementation: Optional real-time coaching that reminds users not to disclose secrets; explicit consent, latency and privacy safeguards required.
+Google stack: Gemini Live API   |   Phase: Later
+12. Document scam checker
+User flow / implementation: Inspect fake invoices, offer letters, notices and payment demands; extract fields, compare inconsistencies, do not certify authenticity.
+Google stack: Document AI, Gemini   |   Phase: Later
+13. QR code analysis
+User flow / implementation: Decode QR text locally, inspect destinations and payment payloads; avoid automatically opening links.
+Google stack: Client-side QR decoder, Gemini, Web Risk   |   Phase: High
+14. Image impersonation cues
+User flow / implementation: Analyze logo use, layout inconsistencies and suspicious prompts, but do not equate imperfect branding with proof of fraud.
+Google stack: Gemini vision, Cloud Vision   |   Phase: Later
+15. Deepfake caution workflow
+User flow / implementation: Guide users through out-of-band verification; do not promise definitive deepfake detection.
+Google stack: Gemini audio/video, safety checklist   |   Phase: Later
+16. Community scam reports
+User flow / implementation: Allow opt-in reports, redact personal data, moderate submissions and avoid public accusations or unverified naming.
+Google stack: Firestore, Cloud Run, Firebase Auth, moderation   |   Phase: Later
+17. Scam pattern similarity search
+User flow / implementation: Use embeddings to find comparable verified scam patterns and explain similarities without treating matches as proof.
+Google stack: Gemini embeddings, Vertex AI Vector Search   |   Phase: Later
+18. Personalized scam education
+User flow / implementation: Generate short quizzes from common scam scenarios and adaptive explanations.
+Google stack: Gemini, Firestore   |   Phase: High
+19. Emergency recovery wizard
+User flow / implementation: Differentiate clicked link, shared OTP, sent money, installed app, and account takeover; route to appropriate official recovery guidance.
+Google stack: Gemini, curated official guidance   |   Phase: High
+20. Evidence export
+User flow / implementation: Create a redacted incident summary with timeline, indicators and links to official reporting channels; user reviews before export.
+Google stack: Docs API, PDF generation, Cloud Run   |   Phase: Later
+21. User history dashboard
+User flow / implementation: Store only opted-in, redacted past checks; support deletion and retention controls.
+Google stack: Firebase Auth, Firestore   |   Phase: High
+22. Scam alert digest
+User flow / implementation: Opt-in updates from verified advisories; send only when new relevant advisories are found.
+Google stack: Cloud Scheduler, Pub/Sub, FCM   |   Phase: Later
+23. Browser extension
+User flow / implementation: User-triggered scan of current page and selected text; strict permission minimization, no passive collection.
+Google stack: Chrome extension APIs, Cloud Run   |   Phase: Later
+24. Accessibility mode
+User flow / implementation: Large text, screen-reader labels, simple language and optional audio playback.
+Google stack: Material Design, Text-to-Speech   |   Phase: High
+25. Admin review and evaluation
+User flow / implementation: Review de-identified test cases, false positives/negatives, latency, costs and unsafe advice.
+Google stack: BigQuery, Cloud Logging, Looker Studio   |   Phase: High
+26. Business verification workflow
+User flow / implementation: Compare a claimed brand with official domain/contact from independently sourced references; display unverifiable status.
+Google stack: Search grounding, URL Context, Firestore   |   Phase: High
+27. Suspicious file handling
+User flow / implementation: Accept limited safe formats, size-check and malware-scan in isolated processing; never execute uploaded code.
+Google stack: Cloud Run, Cloud Storage, security controls   |   Phase: High
+28. Abuse prevention
+User flow / implementation: Rate limits, bot mitigation, API key isolation and authenticated admin actions.
+Google stack: App Check, reCAPTCHA Enterprise, Secret Manager, IAM   |   Phase: MVP
+29. Analytics and A/B tests
+User flow / implementation: Measure completion, helpfulness, false alarms and retention with privacy-aware event design.
+Google stack: GA4, Firebase Remote Config, BigQuery   |   Phase: Later
+30. Human escalation
+User flow / implementation: Direct users to banks, platforms, cybercrime reporting and trusted contacts rather than pretending the app can reverse transfers.
+Google stack: Curated official links, Gemini guidance   |   Phase: High
+Part III — Architecture and operational detail
+Frontend (React + Material Design) → Firebase App Check / Authentication (optional guest mode) → Cloud Run API → input validation and redaction → modality extraction (Gemini/Vision/Speech) → URL reputation lookup (licensed Safe Browsing or Web Risk) → deterministic rules + Gemini reasoning → structured assessment → user action cards. Store only consented redacted results in Firestore; short-lived uploads in Cloud Storage. Secret Manager holds credentials; Cloud Logging records technical telemetry without raw scam messages.
+Recommended assessment schema
+Input type; extracted indicators; risk category (low / caution / high / unknown); observed evidence with exact snippets; verified external matches with timestamp and source; uncertainty and limitations; recommended safe actions; privacy/redaction status. Never expose an unsupported numeric confidence as a statistical fraud probability.
+Scoring and quality methodology
+Keep known reputation matches separate from heuristic language cues.
+Use a test set including genuine bank alerts, legitimate job offers and genuine delivery messages to measure false positives.
+Measure precision, recall, false-positive rate, citation correctness, redaction success and response latency.
+Label ambiguous inputs as inconclusive and ask for more context rather than fabricate evidence.
+Defend against prompt injection embedded inside suspicious messages or pages: treat user-submitted material as untrusted data.
+Do not fetch arbitrary URLs without SSRF defenses, domain/IP restrictions, redirect limits and isolated infrastructure.
+Do not expose user uploads, passwords, OTPs, payment credentials or unredacted personal data in logs or demo materials.
+India-focused response design
+Offer independently verified links to the official National Cyber Crime Reporting Portal and the 1930 financial cyber-fraud helpline where applicable; remind users to contact their bank immediately after suspected payment fraud. Provide general safety education rather than legal or financial guarantees. The product should not request Aadhaar numbers, OTPs, UPI PINs, bank passwords or full card data.
+Part IV — Practical 24-hour hackathon implementation
+0–2 hours — Freeze scope: text + screenshot + URL check + explainable result + action guidance. Prepare 12 synthetic cases and 5 benign controls.
+2–5 hours — Developer creates React UI and Cloud Run backend; domain expert writes risk rubric, safe advice and expected results.
+5–9 hours — Integrate Gemini structured output and screenshot extraction; build deterministic URL parsing and reputation integration if approved and available.
+9–13 hours — Implement evidence display, redaction, safe fallback behavior and feedback form. Add authentication only if necessary.
+13–17 hours — Deploy to Cloud Run/Firebase; configure Secret Manager, App Check, limits, CORS and basic logging.
+17–20 hours — Test adversarial examples, false positives, mobile UX, broken links and empty uploads; fix critical bugs.
+20–24 hours — Record a three-minute demo; create proposal PDF; verify public link and submission requirements.
+Roles: domain lead vs developer
+Domain lead: define scam taxonomy, collect synthetic scenarios, draft explainable safety language, verify official reporting guidance, evaluate outputs, design pitch and record demo. Developer: frontend, Gemini integration, Cloud Run, URL safety, database, security, tests and deployment. Both: agree on MVP, validate end-to-end flow, rehearse demo.
+Suggested three-minute demo
+0:00–0:25: real-world problem and why existing warning tools miss conversational pressure. 0:25–1:10: analyze a suspicious job-offer screenshot. 1:10–1:55: analyze a URL and show independent reputation status plus uncertainty. 1:55–2:25: show safe action guidance and multilingual explanation. 2:25–3:00: technical architecture, safeguards, measured test results and impact.
+Part V — Prioritization and tradeoffs
+Must-have: Gemini multimodal understanding, structured output, deterministic URL parsing, secure backend, Firebase/Cloud Run deployment, safe next steps, evidence and uncertainty. Strong next additions: search grounding, QR decoding, Hindi, scam education, document extraction. Post-competition: voice, multi-agent coordination, community reporting, browser extension, advanced analytics and optional live monitoring. Imagen, Veo and Lyria are not core to scam detection; use them only for educational content if justified.
+Licensing, availability and caveats
+Safe Browsing and Web Risk have different permitted uses, eligibility and commercial licensing. Confirm the correct service before deployment. Search grounding and URL Context are retrieval aids, not reputation verdicts. Maps, YouTube, Workspace, retail and ML tools from Part I are optional; most should not be included in the first version. Google products and quotas can change, and a product catalogue does not imply every feature is universally available.
+Official sources and documentation
+https://aibuildercup.com/themes.html
+https://aibuildercup.com/
+https://ai.google.dev/gemini-api/docs
+https://ai.google.dev/gemini-api/docs/google-search
+https://ai.google.dev/gemini-api/docs/url-context
+https://ai.google.dev/gemini-api/docs/function-calling
+https://developers.google.com/safe-browsing
+https://cloud.google.com/web-risk/docs
+https://firebase.google.com/docs
+https://cloud.google.com/run/docs
+https://google.github.io/adk-docs/
+https://developers.google.com/workspace
+https://cloud.google.com/security/products/secret-manager
+https://cybercrime.gov.in/

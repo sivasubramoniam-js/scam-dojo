@@ -52,7 +52,7 @@ class TurnAssessment(CamelModel):
     terminal: TerminalStatus = "none"
     tension: int = Field(default=0, ge=0, le=10)
     safety_concern: bool = False
-    rationale: str = Field(default="", max_length=240)
+    rationale: str = Field(default="", max_length=2000)
 
 
 class ReplayMoment(CamelModel):

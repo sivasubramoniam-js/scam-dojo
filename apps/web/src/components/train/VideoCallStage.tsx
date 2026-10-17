@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
+import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
+import { useT } from "@/lib/i18n";
 
 interface VideoCallStageProps {
   callerName: string;
@@ -13,6 +15,11 @@ interface VideoCallStageProps {
   onSendMessage: (text: string) => void;
   onHangUp: () => void;
   onToggleMic: () => void;
+  onPowerOff?: () => void;
+  onAirplaneMode?: () => void;
+  onDial1930?: () => void;
+  onBlockNumber?: () => void;
+  onSpeakingChange?: (speaking: boolean) => void;
   isDone: boolean;
   sessionId?: string;
   enableLiveApi?: boolean;
@@ -30,20 +37,28 @@ export function VideoCallStage({
   onSendMessage,
   onHangUp,
   onToggleMic,
+  onPowerOff,
+  onAirplaneMode,
+  onDial1930,
+  onBlockNumber,
+  onSpeakingChange,
   isDone,
   sessionId,
   enableLiveApi = true,
 }: VideoCallStageProps) {
+  const { t } = useT();
   const [callDuration, setCallDuration] = useState(0);
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [manualInput, setManualInput] = useState("");
   const [showManualFallback, setShowManualFallback] = useState(false);
+  const [showEmergencyDeck, setShowEmergencyDeck] = useState(false);
 
   // Gemini Live State
   const [liveConnected, setLiveConnected] = useState(false);
   const [liveSpeaking, setLiveSpeaking] = useState(false);
   const [liveCaptions, setLiveCaptions] = useState<string>("");
+  const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
 
   const userVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -124,38 +139,78 @@ export function VideoCallStage({
   const isSpeaking = liveSpeaking || externalIsSpeaking;
   const isListening = externalIsListening;
 
+  // Track which scammer texts have already been spoken by Gemini Live
+  const spokenTextsRef = useRef<Set<string>>(new Set());
+  const lastScammerTextRef = useRef(lastScammerText);
+  lastScammerTextRef.current = lastScammerText;
+
   // Initialize Gemini Live Client
   useEffect(() => {
-    if (!enableLiveApi || typeof window === "undefined") return;
+    if (
+      !enableLiveApi ||
+      typeof window === "undefined" ||
+      !sessionId ||
+      GeminiLiveClient.getActiveSelection() !== "video"
+    ) {
+      if (liveClientRef.current) {
+        liveClientRef.current.disconnect();
+        liveClientRef.current = null;
+      }
+      setLiveConnected(false);
+      setLiveSpeaking(false);
+      onSpeakingChange?.(false);
+      return;
+    }
 
+    let isDisposed = false;
     const liveClient = new GeminiLiveClient({
       onSpeakingChange: (speaking) => {
-        setLiveSpeaking(speaking);
+        if (!isDisposed) {
+          setLiveSpeaking(speaking);
+          onSpeakingChange?.(speaking);
+        }
       },
       onTranscript: (text, role) => {
-        if (role === "scammer") {
+        if (!isDisposed && role === "scammer" && text) {
           setLiveCaptions((prev) => (prev ? `${prev} ${text}` : text));
         }
       },
       onReady: () => {
-        setLiveConnected(true);
+        if (!isDisposed) {
+          setLiveConnected(true);
+        }
       },
       onConnected: () => {
-        setLiveConnected(true);
+        if (!isDisposed) setLiveConnected(true);
       },
       onInterrupted: () => {
-        setLiveSpeaking(false);
+        if (!isDisposed) {
+          setLiveSpeaking(false);
+          onSpeakingChange?.(false);
+        }
       },
       onError: (err) => {
-        console.warn("Gemini Live warning:", err);
+        if (!isDisposed) {
+          console.warn("Gemini Live warning:", err);
+        }
       },
     });
 
     liveClientRef.current = liveClient;
-    const targetSid = sessionId || `live_sim_${Date.now()}`;
-    liveClient.connect(targetSid).catch(() => {});
+    liveClient
+      .connect(sessionId, "video")
+      .then(() => {
+        if (!isDisposed) liveClient.resumeAudio();
+      })
+      .catch((err) => {
+        if (!isDisposed) {
+          console.warn("Gemini Live video connect error:", err);
+        }
+      });
 
     return () => {
+      isDisposed = true;
+      onSpeakingChange?.(false);
       liveClient.disconnect();
       liveClientRef.current = null;
     };
@@ -173,17 +228,26 @@ export function VideoCallStage({
     }
   }, [cameraEnabled]);
 
-  // Stream user mic audio to Gemini Live when user toggles mic
+  // When lastScammerText updates or connection is established, synchronize subtitles and trigger Gemini Live speech
   useEffect(() => {
-    const client = liveClientRef.current;
-    if (!client) return;
-
-    if (isListening) {
-      client.startAudioCapture().catch(() => {});
-    } else {
-      client.stopAudioCapture();
+    if (lastScammerText) {
+      setCurrentTurnCaption(lastScammerText);
+      setLiveCaptions("");
     }
-  }, [isListening]);
+
+    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
+    if (
+      liveConnected &&
+      !isTyping &&
+      lastScammerText &&
+      liveClientRef.current &&
+      !spokenTextsRef.current.has(lastScammerText)
+    ) {
+      spokenTextsRef.current.add(lastScammerText);
+      liveClientRef.current.stopAudioPlayback();
+      liveClientRef.current.sendText(lastScammerText);
+    }
+  }, [lastScammerText, isTyping, liveConnected]);
 
   const PERSONA_VIDEOS = {
     police: {
@@ -278,7 +342,10 @@ export function VideoCallStage({
   ];
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-black text-white shadow-2xl flex flex-col justify-between animate-in fade-in duration-300">
+    <div
+      onPointerDown={() => liveClientRef.current?.resumeAudio()}
+      className="relative w-full max-w-4xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-black text-white shadow-2xl flex flex-col justify-between animate-in fade-in duration-300"
+    >
       {/* Central Scammer Video Stream Window */}
       <div className="relative w-full aspect-video sm:aspect-16/10 bg-slate-950 overflow-hidden flex items-center justify-center">
         {/* Scammer Talking Video (2x Speed Loop Mode, Muted for voiceover clarity) */}
@@ -348,7 +415,7 @@ export function VideoCallStage({
                   }`}
                 title="Switch to Police / CBI Feed"
               >
-                👮 Police Feed
+                {t("train.call.police_feed")}
               </button>
               <button
                 type="button"
@@ -359,7 +426,7 @@ export function VideoCallStage({
                   }`}
                 title="Switch to Customs / Narcotics Feed"
               >
-                🛃 Customs Feed
+                {t("train.call.customs_feed")}
               </button>
             </div>
 
@@ -416,7 +483,7 @@ export function VideoCallStage({
                 videocam_off
               </span>
               <span className="text-[10px] text-slate-400 font-medium leading-tight">
-                Camera Off
+                {t("train.call.camera_off")}
               </span>
               <span className="text-[8px] text-slate-500">(Optional)</span>
             </div>
@@ -424,7 +491,7 @@ export function VideoCallStage({
 
           {/* User PiP Status Badge */}
           <div className="absolute bottom-1 left-1.5 right-1.5 flex items-center justify-between text-[9px] font-mono text-slate-300 bg-black/60 px-1.5 py-0.5 rounded">
-            <span>You (Citizen)</span>
+            <span>{t("train.call.you_citizen")}</span>
             {isListening && (
               <span className="text-emerald-400 font-bold animate-pulse">● Mic On</span>
             )}
@@ -433,11 +500,11 @@ export function VideoCallStage({
       </div>
 
       {/* Subtitles & Spoken Dialogue CC Banner */}
-      {(liveCaptions || lastScammerText) && (
-        <div className="bg-slate-950 px-6 py-2.5 border-t border-b border-slate-800 text-center">
+      {(currentTurnCaption || liveCaptions || lastScammerText) && (
+        <div className="bg-slate-950 px-6 py-2.5 border-t border-b border-slate-800 text-center animate-in fade-in duration-200">
           <p className="text-xs sm:text-sm text-slate-200 font-medium">
             <span className="text-amber-400 font-bold mr-1">Officer:</span>
-            "{liveCaptions || lastScammerText}"
+            "{currentTurnCaption || liveCaptions || lastScammerText}"
           </p>
         </div>
       )}
@@ -458,13 +525,13 @@ export function VideoCallStage({
         {!isDone && (
           <div>
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
-              <span>Verbal Tactical Counters (Speak or Click to Execute):</span>
+              <span>{t("train.call.quick_counters")}:</span>
               <button
                 type="button"
                 onClick={() => setShowManualFallback(!showManualFallback)}
                 className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer"
               >
-                {showManualFallback ? "Hide typing" : "Type reply"}
+                {showManualFallback ? t("train.call.hide_typing") : t("train.call.type_reply")}
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -473,12 +540,12 @@ export function VideoCallStage({
                   key={i}
                   type="button"
                   onClick={() => {
-                    if (liveClientRef.current) {
-                      liveClientRef.current.sendText(phrase);
-                    }
+                    setCurrentTurnCaption("");
+                    setLiveCaptions("");
+                    liveClientRef.current?.stopAudioPlayback();
                     onSendMessage(phrase);
                   }}
-                  disabled={isSpeaking || isTyping}
+                  disabled={isTyping || isSpeaking}
                   className="text-left text-xs p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-850 text-slate-300 hover:text-white transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group"
                 >
                   <span className="material-symbols-outlined text-[16px] text-slate-500 group-hover:text-emerald-400 shrink-0">
@@ -495,10 +562,11 @@ export function VideoCallStage({
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (manualInput.trim()) {
-                    if (liveClientRef.current) {
-                      liveClientRef.current.sendText(manualInput.trim());
-                    }
-                    onSendMessage(manualInput.trim());
+                    const text = manualInput.trim();
+                    setCurrentTurnCaption("");
+                    setLiveCaptions("");
+                    liveClientRef.current?.stopAudioPlayback();
+                    onSendMessage(text);
                     setManualInput("");
                   }
                 }}
@@ -508,15 +576,16 @@ export function VideoCallStage({
                   type="text"
                   value={manualInput}
                   onChange={(e) => setManualInput(e.target.value)}
-                  placeholder="State your legal defense or counter-question…"
-                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  placeholder={t("train.call.speak_or_type")}
+                  disabled={isTyping || isSpeaking}
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
                 />
                 <button
                   type="submit"
-                  disabled={!manualInput.trim() || isSpeaking || isTyping}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                  disabled={!manualInput.trim() || isTyping || isSpeaking}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send
+                  {t("train.send")}
                 </button>
               </form>
             )}
@@ -538,24 +607,42 @@ export function VideoCallStage({
             <span className="material-symbols-outlined text-[18px]">
               {cameraEnabled ? "videocam" : "videocam_off"}
             </span>
-            <span>{cameraEnabled ? "Camera On" : "Camera Off (Optional)"}</span>
+            <span>{cameraEnabled ? t("train.call.camera_on") : t("train.call.camera_off")}</span>
           </button>
 
           {/* User Microphone Toggle Button */}
           <button
             type="button"
             onClick={onToggleMic}
-            disabled={isDone}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md ${isListening
+            disabled={isDone || isSpeaking || isTyping}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${isListening
               ? "bg-emerald-500 text-black ring-4 ring-emerald-400/40"
               : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
               }`}
-            title={isListening ? "Listening... click to stop" : "Click to speak your reply"}
+            title={isSpeaking ? "Officer is speaking..." : isTyping ? "AI is processing..." : isListening ? "Listening... click to stop" : "Click to speak your reply"}
           >
             <span className="material-symbols-outlined text-[18px]">
               {isListening ? "mic" : "mic_none"}
             </span>
-            <span>{isListening ? "Listening… Speak Now" : "Push-to-Talk (Mic)"}</span>
+            <span>{isListening ? t("train.call.listening") : t("train.call.mic")}</span>
+          </button>
+
+          {/* Emergency SOS Countermeasures Button */}
+          <button
+            type="button"
+            onClick={() => setShowEmergencyDeck(!showEmergencyDeck)}
+            disabled={isDone}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md ${
+              showEmergencyDeck
+                ? "bg-amber-500 text-black ring-4 ring-amber-400/40"
+                : "bg-slate-800 text-amber-300 hover:text-white hover:bg-slate-700 border border-amber-500/40"
+            }`}
+            title="Emergency Panic Escape / Power Off Mobile"
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              shield_with_heart
+            </span>
+            <span>{t("train.call.sos_actions")}</span>
           </button>
 
           {/* Red Disconnect Video Call Button */}
@@ -572,9 +659,24 @@ export function VideoCallStage({
             <span className="material-symbols-outlined text-[18px]">
               call_end
             </span>
-            <span>Hang Up</span>
+            <span>{t("train.hangup")}</span>
           </button>
         </div>
+
+        {/* Expandable Emergency Deck inside Video Stage */}
+        {showEmergencyDeck && onPowerOff && onAirplaneMode && onDial1930 && (
+          <div className="mt-4 animate-in slide-in-from-bottom duration-200">
+            <EmergencyCountermeasures
+              onPowerOff={onPowerOff}
+              onAirplaneMode={onAirplaneMode}
+              onDial1930={onDial1930}
+              onBlockNumber={onBlockNumber || (() => {})}
+              callerName={callerName}
+              callerOrg={callerOrg}
+              isCompact={true}
+            />
+          </div>
+        )}
 
         {cameraError && (
           <p className="text-center text-[11px] text-amber-400">{cameraError}</p>

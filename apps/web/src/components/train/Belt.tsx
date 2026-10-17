@@ -1,4 +1,5 @@
 import React from "react";
+import { useT } from "@/lib/i18n";
 
 interface BeltProps {
   belt: "white" | "yellow" | "orange" | "green" | "blue" | "brown" | "black" | string;
@@ -7,6 +8,7 @@ interface BeltProps {
 }
 
 export function Belt({ belt, progress = 0.5, className = "" }: BeltProps) {
+  const { t } = useT();
   const beltColors: Record<string, string> = {
     white: "bg-belt-white text-ink-aizome border-line-ito",
     yellow: "bg-belt-yellow text-action-ink border-transparent",
@@ -23,7 +25,7 @@ export function Belt({ belt, progress = 0.5, className = "" }: BeltProps) {
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <div className="flex items-center justify-between">
         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border capitalize ${colorClass}`}>
-          {belt} Belt
+          {belt} {t("nav.belt")}
         </span>
         <span className="font-mono text-xs font-bold text-ink-aizome">
           {Math.round(progress * 100)}%

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
+import { useT } from "@/lib/i18n";
 
 interface YearlyData {
   year: string;
@@ -107,8 +108,10 @@ const SCAM_VECTORS = [
 ];
 
 export function ScamStatisticsCharts() {
+  const { t } = useT();
   const [activeMetric, setActiveMetric] = useState<"cases" | "losses">("losses");
   const [activeYearIndex, setActiveYearIndex] = useState<number>(5); // default 2025
+  const [hoveredYearIndex, setHoveredYearIndex] = useState<number | null>(null);
   const chartRef = useRef<HTMLDivElement | null>(null);
 
   const maxVal = activeMetric === "cases" ? 1750000 : 19800;
@@ -129,7 +132,7 @@ export function ScamStatisticsCharts() {
     );
   }, [activeMetric]);
 
-  const selectedData = HISTORICAL_DATA[activeYearIndex];
+  const selectedData = HISTORICAL_DATA[hoveredYearIndex !== null ? hoveredYearIndex : activeYearIndex];
 
   return (
     <section className="my-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-[var(--sf)] to-[var(--sf2)]/40 border border-[var(--line)] shadow-dojo">
@@ -138,13 +141,13 @@ export function ScamStatisticsCharts() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 mb-3">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span>National Crisis Telemetry · 2020–2025</span>
+            <span>{t("charts.tag")}</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-[var(--ink)] tracking-tight">
-            The 5-Year Epidemic in India
+            {t("charts.title")}
           </h2>
           <p className="text-sm sm:text-base text-[var(--mut)] max-w-xl mt-1">
-            Official figures from the Ministry of Home Affairs (MHA) & National Cyber Crime Reporting Portal (1930).
+            {t("charts.desc")}
           </p>
         </div>
 
@@ -160,7 +163,7 @@ export function ScamStatisticsCharts() {
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">payments</span>
-            <span>Money Siphoned (₹ Cr)</span>
+            <span>{t("charts.tab.losses")}</span>
           </button>
           <button
             type="button"
@@ -172,7 +175,7 @@ export function ScamStatisticsCharts() {
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">group</span>
-            <span>Victims Trapped</span>
+            <span>{t("charts.tab.cases")}</span>
           </button>
         </div>
       </div>
@@ -183,9 +186,9 @@ export function ScamStatisticsCharts() {
         <div className="lg:col-span-8 bg-[var(--sf)]/70 border border-[var(--line)] rounded-2xl p-5 sm:p-6" ref={chartRef}>
           <div className="flex items-center justify-between text-xs text-[var(--mut)] mb-6 font-semibold">
             <span>
-              {activeMetric === "losses" ? "ANNUAL FINANCIAL LOSS (₹ IN CRORES)" : "ANNUAL CITIZENS COMPLAINTS FILED"}
+              {activeMetric === "losses" ? t("charts.axis.loss") : t("charts.axis.cases")}
             </span>
-            <span className="text-[var(--ink)]">Hover or click year to inspect</span>
+            <span className="text-[var(--ink)]">{t("charts.hover_inspect")}</span>
           </div>
 
           {/* Bar Chart Canvas */}
@@ -202,42 +205,56 @@ export function ScamStatisticsCharts() {
               const val = activeMetric === "losses" ? item.lossCrores : item.casesReported;
               const heightPercent = Math.max(12, Math.round((val / maxVal) * 100));
               const isSelected = activeYearIndex === idx;
+              const isHovered = hoveredYearIndex === idx;
+              const isTooltipVisible = hoveredYearIndex !== null ? isHovered : isSelected;
 
               return (
                 <div
                   key={item.year}
                   onClick={() => setActiveYearIndex(idx)}
+                  onMouseEnter={() => setHoveredYearIndex(idx)}
+                  onMouseLeave={() => setHoveredYearIndex(null)}
                   className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative z-10"
                 >
-                  {/* Tooltip on Hover / Selection */}
+                  {/* Bar Wrapper positioned by height */}
                   <div
-                    className={`absolute -top-12 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-200 pointer-events-none ${
-                      isSelected
-                        ? "bg-[var(--ink)] text-[var(--on)] scale-100 opacity-100"
-                        : "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 bg-slate-800 text-white"
-                    }`}
-                  >
-                    {activeMetric === "losses" ? item.lossLabel : item.casesLabel}
-                  </div>
-
-                  {/* The Bar */}
-                  <div
-                    className={`stat-bar-fill w-full max-w-[48px] rounded-t-xl transition-colors duration-200 ${
-                      isSelected
-                        ? activeMetric === "losses"
-                          ? "bg-gradient-to-t from-red-600 to-rose-400 ring-2 ring-red-400"
-                          : "bg-gradient-to-t from-blue-700 to-sky-400 ring-2 ring-blue-400"
-                        : activeMetric === "losses"
-                        ? "bg-red-500/40 group-hover:bg-red-500/70"
-                        : "bg-blue-500/40 group-hover:bg-blue-500/70"
-                    }`}
+                    className="w-full max-w-[48px] relative flex flex-col justify-end items-center"
                     style={{ height: `${heightPercent}%` }}
-                  />
+                  >
+                    {/* Tooltip anchored exactly 10px from the top of the bar */}
+                    <div
+                      style={{ bottom: "calc(100% + 10px)" }}
+                      className={`absolute left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-150 pointer-events-none z-30 ${
+                        isTooltipVisible
+                          ? "bg-[var(--ink)] text-[var(--on)] scale-100 opacity-100"
+                          : "opacity-0 scale-95 pointer-events-none"
+                      }`}
+                    >
+                      {activeMetric === "losses" ? item.lossLabel : item.casesLabel}
+                      {/* Downward pointing triangle/caret */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--ink)]" />
+                    </div>
+
+                    {/* The Bar */}
+                    <div
+                      className={`stat-bar-fill w-full h-full rounded-t-xl transition-colors duration-200 ${
+                        isSelected || isHovered
+                          ? activeMetric === "losses"
+                            ? "bg-gradient-to-t from-red-600 to-rose-400 ring-2 ring-red-400"
+                            : "bg-gradient-to-t from-blue-700 to-sky-400 ring-2 ring-blue-400"
+                          : activeMetric === "losses"
+                          ? "bg-red-500/40 group-hover:bg-red-500/70"
+                          : "bg-blue-500/40 group-hover:bg-blue-500/70"
+                      }`}
+                    />
+                  </div>
 
                   {/* Year Label */}
                   <span
                     className={`mt-3 text-xs font-bold transition-colors ${
-                      isSelected ? "text-[var(--ink)] underline underline-offset-4" : "text-[var(--mut)] group-hover:text-[var(--ink)]"
+                      isSelected || isHovered
+                        ? "text-[var(--ink)] underline underline-offset-4"
+                        : "text-[var(--mut)] group-hover:text-[var(--ink)]"
                     }`}
                   >
                     {item.year}
@@ -249,8 +266,8 @@ export function ScamStatisticsCharts() {
 
           {/* Chart Footnote */}
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-[var(--mut)] gap-2">
-            <span>Sources: I4C / MHA Citizen Fraud Reporting System (CFCFRMS) & Lok Sabha Parliamentary Reports.</span>
-            <span className="font-bold text-red-600 dark:text-red-400">Cumulative: ₹52,000+ Cr siphoned since 2020</span>
+            <span>{t("charts.sources")}</span>
+            <span className="font-bold text-red-600 dark:text-red-400">{t("charts.cumulative")}</span>
           </div>
         </div>
 
@@ -259,7 +276,7 @@ export function ScamStatisticsCharts() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-[var(--mut)]">
-                Year {selectedData.year} Deep Dive
+                {t("charts.year_deep_dive", { year: selectedData.year })}
               </span>
               <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-red-500/10 text-red-600 dark:text-red-400">
                 {selectedData.growth}
@@ -271,13 +288,13 @@ export function ScamStatisticsCharts() {
                 {selectedData.lossLabel}
               </div>
               <div className="text-xs text-[var(--mut)] font-semibold mt-1">
-                Lost across {selectedData.casesLabel}
+                {t("charts.lost_across", { cases: selectedData.casesLabel })}
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[var(--sf2)]/60 border border-[var(--line)]/60 my-4">
               <div className="text-[11px] uppercase font-bold text-[var(--mut)] mb-1">
-                Dominant Scam Vector in {selectedData.year}
+                {t("charts.dominant_vector", { year: selectedData.year })}
               </div>
               <div className="text-sm font-bold text-[var(--ink)] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px] text-[var(--bad)]">warning</span>
@@ -289,10 +306,10 @@ export function ScamStatisticsCharts() {
           <div className="pt-4 border-t border-[var(--line)]">
             <div className="flex items-center gap-2 text-xs text-[var(--mut)] mb-2">
               <span className="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
-              <span>1930 National Helpline Impact:</span>
+              <span>{t("charts.impact_title")}</span>
             </div>
             <p className="text-xs text-[var(--ink)] font-medium leading-relaxed">
-              Timely reporting within the <strong className="text-emerald-700 dark:text-emerald-400">Golden 2 Hours</strong> saved over ₹1,120 Crore from leaving recipient mule accounts in 2024.
+              {t("charts.impact_desc")}
             </p>
           </div>
         </div>
@@ -302,7 +319,7 @@ export function ScamStatisticsCharts() {
       <div className="mt-8 pt-8 border-t border-[var(--line)]">
         <h3 className="text-base sm:text-lg font-bold font-display text-[var(--ink)] mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px] text-red-500">pie_chart</span>
-          <span>Where Indian Citizens Are Siphoned (By Scam Typology)</span>
+          <span>{t("charts.typology_title")}</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Bot, Terminal, ChevronDown, ChevronUp, Cpu, Activity, Sparkles } from "lucide-react";
+import { MarkdownView } from "@/components/common/MarkdownView";
+import { useT } from "@/lib/i18n";
 
 export interface TraceEntry {
   id: string;
@@ -11,6 +13,7 @@ export interface TraceEntry {
 }
 
 export function TracePanel() {
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [traces, setTraces] = useState<TraceEntry[]>([
     {
@@ -75,7 +78,7 @@ export function TracePanel() {
           title="Judge Live AI Agent Trace Panel"
         >
           <Cpu className="w-4 h-4 animate-pulse text-amber-400" />
-          <span>Agent Trace Panel (ADK)</span>
+          <span>{t("trace_panel.badge")}</span>
           <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
         </button>
       )}
@@ -87,7 +90,7 @@ export function TracePanel() {
           <div className="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2 text-amber-400 font-bold">
               <Terminal className="w-4 h-4" />
-              <span>Google ADK Multi-Agent Tracing</span>
+              <span>{t("trace_panel.title")}</span>
             </div>
             <button
               type="button"
@@ -101,7 +104,7 @@ export function TracePanel() {
           {/* Body */}
           <div className="p-3 space-y-2.5 overflow-y-auto flex-1">
             <div className="text-[11px] text-slate-400">
-              Live handoffs between the 7 coordinated ADK agents across Train, Check & Recover:
+              {t("trace_panel.desc")}
             </div>
 
             {traces.map((t) => (
@@ -122,7 +125,7 @@ export function TracePanel() {
                   <span className="text-slate-500">({t.model})</span>
                 </div>
                 <div className="text-slate-300 leading-tight text-[11px] font-sans">
-                  {t.details}
+                  <MarkdownView content={t.details} />
                 </div>
               </div>
             ))}

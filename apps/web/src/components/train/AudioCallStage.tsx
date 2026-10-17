@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
+import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
+import { useT } from "@/lib/i18n";
 
 interface AudioCallStageProps {
   callerName: string;
@@ -13,6 +15,11 @@ interface AudioCallStageProps {
   onSendMessage: (text: string) => void;
   onHangUp: () => void;
   onToggleMic: () => void;
+  onPowerOff?: () => void;
+  onAirplaneMode?: () => void;
+  onDial1930?: () => void;
+  onBlockNumber?: () => void;
+  onSpeakingChange?: (speaking: boolean) => void;
   isDone: boolean;
   sessionId?: string;
   enableLiveApi?: boolean;
@@ -30,73 +37,130 @@ export function AudioCallStage({
   onSendMessage,
   onHangUp,
   onToggleMic,
+  onPowerOff,
+  onAirplaneMode,
+  onDial1930,
+  onBlockNumber,
+  onSpeakingChange,
   isDone,
   sessionId,
   enableLiveApi = true,
 }: AudioCallStageProps) {
+  const { t } = useT();
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(true);
   const [manualInput, setManualInput] = useState("");
   const [showManualFallback, setShowManualFallback] = useState(false);
+  const [showEmergencyDeck, setShowEmergencyDeck] = useState(false);
 
   // Gemini Live State
   const [liveConnected, setLiveConnected] = useState(false);
   const [liveSpeaking, setLiveSpeaking] = useState(false);
   const [liveCaptions, setLiveCaptions] = useState<string>("");
+  const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
 
   const isSpeaking = liveSpeaking || externalIsSpeaking;
   const isListening = externalIsListening;
 
+  // Track which scammer texts have already been spoken by Gemini Live
+  const spokenTextsRef = useRef<Set<string>>(new Set());
+  const lastScammerTextRef = useRef(lastScammerText);
+  lastScammerTextRef.current = lastScammerText;
+
   // Initialize Gemini Live Client
   useEffect(() => {
-    if (!enableLiveApi || typeof window === "undefined") return;
+    if (
+      !enableLiveApi ||
+      typeof window === "undefined" ||
+      !sessionId ||
+      GeminiLiveClient.getActiveSelection() !== "audio"
+    ) {
+      if (liveClientRef.current) {
+        liveClientRef.current.disconnect();
+        liveClientRef.current = null;
+      }
+      setLiveConnected(false);
+      setLiveSpeaking(false);
+      onSpeakingChange?.(false);
+      return;
+    }
 
+    let isDisposed = false;
     const liveClient = new GeminiLiveClient({
       onSpeakingChange: (speaking) => {
-        setLiveSpeaking(speaking);
+        if (!isDisposed) {
+          setLiveSpeaking(speaking);
+          onSpeakingChange?.(speaking);
+        }
       },
       onTranscript: (text, role) => {
-        if (role === "scammer") {
+        if (!isDisposed && role === "scammer" && text) {
           setLiveCaptions((prev) => (prev ? `${prev} ${text}` : text));
         }
       },
       onReady: () => {
-        setLiveConnected(true);
+        if (!isDisposed) {
+          setLiveConnected(true);
+        }
       },
       onConnected: () => {
-        setLiveConnected(true);
+        if (!isDisposed) setLiveConnected(true);
       },
       onInterrupted: () => {
-        setLiveSpeaking(false);
+        if (!isDisposed) {
+          setLiveSpeaking(false);
+          onSpeakingChange?.(false);
+        }
       },
       onError: (err) => {
-        console.warn("Gemini Live warning:", err);
+        if (!isDisposed) {
+          console.warn("Gemini Live warning:", err);
+        }
       },
     });
 
     liveClientRef.current = liveClient;
-    const targetSid = sessionId || `live_audio_${Date.now()}`;
-    liveClient.connect(targetSid).catch(() => {});
+    liveClient
+      .connect(sessionId, "audio")
+      .then(() => {
+        if (!isDisposed) liveClient.resumeAudio();
+      })
+      .catch((err) => {
+        if (!isDisposed) {
+          console.warn("Gemini Live connect error:", err);
+        }
+      });
 
     return () => {
+      isDisposed = true;
+      onSpeakingChange?.(false);
       liveClient.disconnect();
       liveClientRef.current = null;
     };
   }, [sessionId, enableLiveApi]);
 
-  // Stream user mic audio to Gemini Live when user toggles mic
+  // When lastScammerText updates or connection is established, synchronize subtitles and trigger Gemini Live speech
   useEffect(() => {
-    const client = liveClientRef.current;
-    if (!client) return;
-
-    if (isListening && !isMuted) {
-      client.startAudioCapture().catch(() => {});
-    } else {
-      client.stopAudioCapture();
+    if (lastScammerText) {
+      setCurrentTurnCaption(lastScammerText);
+      setLiveCaptions("");
     }
-  }, [isListening, isMuted]);
+
+    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
+    if (
+      liveConnected &&
+      !isTyping &&
+      lastScammerText &&
+      liveClientRef.current &&
+      !spokenTextsRef.current.has(lastScammerText)
+    ) {
+      spokenTextsRef.current.add(lastScammerText);
+      liveClientRef.current.stopAudioPlayback();
+      liveClientRef.current.sendText(lastScammerText);
+    }
+  }, [lastScammerText, isTyping, liveConnected]);
 
   // Call timer
   useEffect(() => {
@@ -121,7 +185,10 @@ export function AudioCallStage({
   ];
 
   return (
-    <div className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white shadow-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[580px] animate-in fade-in duration-300">
+    <div
+      onPointerDown={() => liveClientRef.current?.resumeAudio()}
+      className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white shadow-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[580px] animate-in fade-in duration-300"
+    >
       {/* Background glow effects based on tension */}
       <div
         className={`absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-colors duration-700 opacity-30 ${
@@ -204,7 +271,7 @@ export function AudioCallStage({
               <span className="material-symbols-outlined text-[16px]">
                 graphic_eq
               </span>
-              Scammer Speaking…
+              {t("train.call.speaking")}
             </span>
           ) : isTyping ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-3 py-1 rounded-full">
@@ -216,11 +283,11 @@ export function AudioCallStage({
           ) : isListening ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Microphone Active — Speak Now!
+              {t("train.call.listening")}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1 rounded-full">
-              Line Connected · Tap mic to respond
+              {t("train.call.line_connected")}
             </span>
           )}
         </div>
@@ -252,10 +319,10 @@ export function AudioCallStage({
       </div>
 
       {/* Scammer Last Spoken Closed Caption (Subtle / Audio Subtitle) */}
-      {(liveCaptions || lastScammerText) && (
-        <div className="relative z-10 my-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
+      {(currentTurnCaption || liveCaptions || lastScammerText) && (
+        <div className="relative z-10 my-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center animate-in fade-in duration-200">
           <p className="text-xs text-slate-300 italic line-clamp-2">
-            "{liveCaptions || lastScammerText}"
+            "{currentTurnCaption || liveCaptions || lastScammerText}"
           </p>
         </div>
       )}
@@ -267,7 +334,7 @@ export function AudioCallStage({
             <span className="material-symbols-outlined text-[15px] text-amber-400">
               psychology
             </span>
-            Psychological Pressure Level
+            {t("hud.pressure_level")}
           </span>
           <span
             className={`font-mono font-bold ${
@@ -278,7 +345,7 @@ export function AudioCallStage({
                 : "text-emerald-400"
             }`}
           >
-            {tension}/10 ({tension >= 7 ? "CRITICAL COERCION" : tension >= 4 ? "ELEVATED" : "MODERATE"})
+            {tension}/10 ({tension >= 7 ? t("hud.critical") : tension >= 4 ? t("hud.elevated") : t("hud.moderate")})
           </span>
         </div>
         <div className="flex gap-1 h-2">
@@ -303,13 +370,13 @@ export function AudioCallStage({
       {!isDone && (
         <div className="relative z-10 my-2">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
-            <span>Quick Tactical Verbal Counters:</span>
+            <span>{t("train.call.quick_counters")}:</span>
             <button
               type="button"
               onClick={() => setShowManualFallback(!showManualFallback)}
               className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer"
             >
-              {showManualFallback ? "Hide typing" : "Type reply instead"}
+              {showManualFallback ? t("train.call.hide_typing") : t("train.call.type_reply")}
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -318,12 +385,12 @@ export function AudioCallStage({
                 key={i}
                 type="button"
                 onClick={() => {
-                  if (liveClientRef.current) {
-                    liveClientRef.current.sendText(phrase);
-                  }
+                  setCurrentTurnCaption("");
+                  setLiveCaptions("");
+                  liveClientRef.current?.stopAudioPlayback();
                   onSendMessage(phrase);
                 }}
-                disabled={isSpeaking || isTyping}
+                disabled={isTyping || isSpeaking}
                 className="text-left text-xs p-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-800/80 transition-all text-slate-300 hover:text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 group"
               >
                 <span className="material-symbols-outlined text-[16px] text-slate-500 group-hover:text-emerald-400 transition-colors shrink-0">
@@ -340,10 +407,11 @@ export function AudioCallStage({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (manualInput.trim()) {
-                  if (liveClientRef.current) {
-                    liveClientRef.current.sendText(manualInput.trim());
-                  }
-                  onSendMessage(manualInput.trim());
+                  const text = manualInput.trim();
+                  setCurrentTurnCaption("");
+                  setLiveCaptions("");
+                  liveClientRef.current?.stopAudioPlayback();
+                  onSendMessage(text);
                   setManualInput("");
                 }
               }}
@@ -353,15 +421,16 @@ export function AudioCallStage({
                 type="text"
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
-                placeholder="Speak or type your defensive statement…"
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                placeholder={t("train.call.speak_or_type")}
+                disabled={isTyping || isSpeaking}
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
               />
               <button
                 type="submit"
-                disabled={!manualInput.trim() || isSpeaking || isTyping}
-                className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                disabled={!manualInput.trim() || isTyping || isSpeaking}
+                className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send
+                {t("train.send")}
               </button>
             </form>
           )}
@@ -382,20 +451,20 @@ export function AudioCallStage({
           <span className="material-symbols-outlined text-[24px]">
             {isMuted ? "mic_off" : "mic"}
           </span>
-          <span className="text-[10px] font-medium">{isMuted ? "Muted" : "Mute"}</span>
+          <span className="text-[10px] font-medium">{isMuted ? t("train.call.muted") : t("train.call.mute")}</span>
         </button>
 
         {/* PRIMARY MICROPHONE PUSH-TO-TALK BUTTON */}
         <button
           type="button"
           onClick={onToggleMic}
-          disabled={isDone}
-          className={`relative p-5 rounded-full shadow-lg transition-all duration-200 flex flex-col items-center justify-center cursor-pointer ${
+          disabled={isDone || isSpeaking || isTyping}
+          className={`relative p-5 rounded-full shadow-lg transition-all duration-200 flex flex-col items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
             isListening
               ? "bg-emerald-500 text-black scale-110 ring-4 ring-emerald-400/50 shadow-emerald-500/50"
               : "bg-slate-800 text-white hover:bg-slate-700 ring-2 ring-slate-600"
           }`}
-          title={isListening ? "Listening... click to stop" : "Click to speak your reply"}
+          title={isSpeaking ? "Scammer is speaking..." : isTyping ? "AI is processing..." : isListening ? "Listening... click to stop" : "Click to speak your reply"}
         >
           {isListening && (
             <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75 pointer-events-none" />
@@ -417,7 +486,25 @@ export function AudioCallStage({
           <span className="material-symbols-outlined text-[24px]">
             {isSpeaker ? "volume_up" : "volume_down"}
           </span>
-          <span className="text-[10px] font-medium">{isSpeaker ? "Speaker On" : "Speaker Off"}</span>
+          <span className="text-[10px] font-medium">{isSpeaker ? t("train.call.speaker_on") : t("train.call.speaker_off")}</span>
+        </button>
+
+        {/* Emergency SOS / Tactical Escape Button */}
+        <button
+          type="button"
+          onClick={() => setShowEmergencyDeck(!showEmergencyDeck)}
+          disabled={isDone}
+          className={`flex flex-col items-center gap-1 p-3 rounded-full transition cursor-pointer ${
+            showEmergencyDeck
+              ? "bg-amber-500 text-black shadow-lg shadow-amber-500/40"
+              : "bg-slate-900 text-amber-400 hover:text-white hover:bg-slate-800 border border-amber-500/40"
+          }`}
+          title="Emergency Countermeasures / Power Off Mobile"
+        >
+          <span className="material-symbols-outlined text-[24px]">
+            shield_with_heart
+          </span>
+          <span className="text-[10px] font-bold">{t("train.call.sos_actions")}</span>
         </button>
 
         {/* Big Red Hang Up Button */}
@@ -434,9 +521,24 @@ export function AudioCallStage({
           <span className="material-symbols-outlined text-[28px]">
             call_end
           </span>
-          <span className="text-[10px] font-bold">Hang Up</span>
+          <span className="text-[10px] font-bold">{t("train.hangup")}</span>
         </button>
       </div>
+
+      {/* Expandable Emergency Deck inside Stage */}
+      {showEmergencyDeck && onPowerOff && onAirplaneMode && onDial1930 && (
+        <div className="relative z-20 mt-4 animate-in slide-in-from-bottom duration-200">
+          <EmergencyCountermeasures
+            onPowerOff={onPowerOff}
+            onAirplaneMode={onAirplaneMode}
+            onDial1930={onDial1930}
+            onBlockNumber={onBlockNumber || (() => {})}
+            callerName={callerName}
+            callerOrg={callerOrg}
+            isCompact={true}
+          />
+        </div>
+      )}
     </div>
   );
 }

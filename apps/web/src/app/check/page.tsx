@@ -18,12 +18,17 @@ import {
   Share2,
   Copy,
   Check,
+  FileText,
+  Video,
 } from "lucide-react";
 import { ScamScoreCard } from "@/components/check/ScamScoreCard";
 import { ShareableWarningCardModal } from "@/components/check/ShareableWarningCardModal";
+import { MarkdownView } from "@/components/common/MarkdownView";
+import { useT } from "@/lib/i18n";
 
 export function CheckPage() {
   const navigate = useNavigate();
+  const { t } = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [inputText, setInputText] = useState("");
@@ -53,8 +58,19 @@ export function CheckPage() {
     setCopiedAlert(true);
     setTimeout(() => setCopiedAlert(false), 2500);
   };
-
   const presets = [
+    {
+      label: "📹 Deepfake Police 'Digital Arrest' Video Call",
+      text: "I received a WhatsApp video call from someone in a police uniform claiming to be CBI Officer Vikram Rathore with a police emblem backdrop. He told me I am under 24-hour Digital Custody for narcotics money laundering unless I transfer ₹2,50,000 to an RBI Verification Account.",
+    },
+    {
+      label: "📄 Fake Supreme Court / ED Seizure Order (PDF/Doc)",
+      text: "Attached is an official legal confiscation order citing non-bailable arrest warrant under Section 420 and Money Laundering Act with Ashoka Pillar emblem and signature of Enforcement Directorate Director, ordering immediate freeze of bank account unless bail deposit is transferred.",
+    },
+    {
+      label: "⚡ Deceptive UPI QR / Collect Trap",
+      text: "Congratulations! You have won ₹5,000 festival cashback from Rewards Desk. Click to claim refund into your bank account: upi://pay?pa=refunddesk91@okaxis&pn=RewardsRefund&am=5000&cu=INR&tn=CashbackRefund",
+    },
     {
       label: "Bank OTP via Typo-Squatted Email",
       text: "share your OTP to this secured email hdfcbank@gmall.com",
@@ -77,21 +93,49 @@ export function CheckPage() {
     },
   ];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [docFileName, setDocFileName] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<"image" | "video" | "document" | null>(null);
+  const [fileMime, setFileMime] = useState<string | null>(null);
+  const [fileSizeText, setFileSizeText] = useState<string | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setErrorMessage("Please upload an image file (PNG, JPG, Screenshot).");
+    // Limit to 25MB for smooth processing
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorMessage("File exceeds 25MB limit. Please upload a shorter clip or smaller document.");
       return;
     }
+
+    const nameLower = file.name.toLowerCase();
+    const isVideo = file.type.startsWith("video/") || nameLower.endsWith(".mp4") || nameLower.endsWith(".webm") || nameLower.endsWith(".mov");
+    const isDoc = file.type === "application/pdf" || nameLower.endsWith(".pdf") || nameLower.endsWith(".docx") || nameLower.endsWith(".doc") || nameLower.endsWith(".txt") || nameLower.endsWith(".csv");
+    const isImg = file.type.startsWith("image/") || nameLower.endsWith(".png") || nameLower.endsWith(".jpg") || nameLower.endsWith(".jpeg") || nameLower.endsWith(".webp");
+
+    if (!isVideo && !isDoc && !isImg) {
+      setErrorMessage("Please upload an image (PNG, JPG), video (MP4, WebM), or official document (PDF, DOCX, TXT).");
+      return;
+    }
+
+    const type = isVideo ? "video" : (isDoc ? "document" : "image");
+    setMediaType(type);
+    setDocFileName(file.name);
+    setFileMime(file.type || (isVideo ? "video/mp4" : (isDoc ? "application/pdf" : "image/jpeg")));
+    setFileSizeText(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
 
     const reader = new FileReader();
     reader.onload = () => {
       const b64 = reader.result as string;
       setImagePreview(b64);
       if (!inputText) {
-        setInputText("Scam check: Analyze the screenshot uploaded");
+        if (type === "video") {
+          setInputText(`Inspect video evidence (${file.name}): scan for deepfake artifacts, digital arrest impersonation, or screen recording fraud`);
+        } else if (type === "document") {
+          setInputText(`Inspect official document (${file.name}): verify court warrant, law enforcement seals, and legal citations`);
+        } else {
+          setInputText("Scam check: Analyze the screenshot uploaded");
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -100,7 +144,7 @@ export function CheckPage() {
   const handleRunAnalysis = async (customText?: string) => {
     const textToScan = (customText || inputText).trim();
     if (!textToScan && !imagePreview) {
-      setErrorMessage("Please paste a suspicious message or upload a screenshot.");
+      setErrorMessage("Please paste a suspicious message or upload evidence (video, document, or screenshot).");
       return;
     }
 
@@ -113,7 +157,13 @@ export function CheckPage() {
     setTimeout(() => setStepIndex(3), 750);
 
     try {
-      const result = await checkMessage(textToScan, imagePreview || undefined);
+      const result = await checkMessage(
+        textToScan,
+        imagePreview || undefined,
+        undefined,
+        docFileName || undefined,
+        fileMime || undefined
+      );
       setTimeout(() => {
         setCheckResult(result);
         setLoading(false);
@@ -140,6 +190,10 @@ export function CheckPage() {
   const clearForm = () => {
     setInputText("");
     setImagePreview(null);
+    setDocFileName(null);
+    setMediaType(null);
+    setFileMime(null);
+    setFileSizeText(null);
     setCheckResult(null);
     setErrorMessage(null);
   };
@@ -150,13 +204,13 @@ export function CheckPage() {
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
           <ShieldAlert className="w-3.5 h-3.5" />
-          AI Threat Inspector & Heuristic Scanner
+          {t("check.header.tag")}
         </div>
         <h1 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-slate-50 tracking-tight">
-          Am I being scammed right now?
+          {t("check.header.title")}
         </h1>
         <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base max-w-2xl font-medium leading-relaxed">
-          Paste any suspicious SMS, WhatsApp message, email, or upload a screenshot. Our dual-engine pipeline verifies against official Indian banking patterns and detects psychological coercion.
+          {t("check.header.desc")}
         </p>
       </div>
 
@@ -165,69 +219,113 @@ export function CheckPage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <span>Suspicious Message or Transcript</span>
+              <span>{t("check.input.label")}</span>
             </label>
             {(inputText || imagePreview) && (
               <button
                 onClick={clearForm}
                 className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 underline transition"
               >
-                Clear all
+                {t("check.input.clear")}
               </button>
             )}
           </div>
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="e.g. 'Your SBI account is blocked due to KYC. Download AnyDesk or click http://bit.ly/... to verify immediately.'"
+            placeholder={t("check.input.placeholder")}
             rows={4}
             className="w-full rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-4 text-sm text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 transition placeholder:text-slate-500 dark:placeholder:text-slate-500 resize-y"
           />
         </div>
 
-        {/* Screenshot Upload & Preview */}
-        <div className="flex flex-wrap items-center gap-4">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            accept="image/*"
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 dark:border-slate-700 dark:hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 transition"
-          >
-            <Upload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>Upload Screenshot / Image</span>
-          </button>
+        {/* Multimodal Upload (Video, Document, Screenshot) */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.csv"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 dark:border-slate-700 dark:hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 transition cursor-pointer"
+            >
+              <Upload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>{t("check.upload.btn")}</span>
+            </button>
 
-          {imagePreview && (
-            <div className="relative inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-700 text-xs">
-              <img
-                src={imagePreview}
-                alt="Uploaded preview"
-                className="w-6 h-6 rounded object-cover"
-              />
-              <span className="text-slate-900 dark:text-slate-100 font-bold truncate max-w-[150px]">
-                Screenshot Attached
-              </span>
-              <button
-                type="button"
-                onClick={() => setImagePreview(null)}
-                className="text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 text-sm font-black ml-1"
-              >
-                ×
-              </button>
-            </div>
-          )}
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              {t("check.upload.hint")}
+            </span>
+
+            {imagePreview && (
+              <div className="relative inline-flex items-center gap-2.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 text-xs shadow-2xs">
+                {mediaType === "video" ? (
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-10 h-8 rounded bg-slate-900 flex items-center justify-center text-rose-500 overflow-hidden shrink-0">
+                      <video src={imagePreview} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <Video className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                      Video
+                    </span>
+                  </div>
+                ) : mediaType === "document" ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                      Doc
+                    </span>
+                  </div>
+                ) : (
+                  <img
+                    src={imagePreview}
+                    alt="Uploaded preview"
+                    className="w-8 h-8 rounded object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                  />
+                )}
+
+                <div className="flex flex-col max-w-[220px]">
+                  <span className="text-slate-900 dark:text-slate-100 font-bold truncate">
+                    {docFileName || (mediaType === "video" ? "Video Evidence" : mediaType === "document" ? "Official Document" : "Screenshot")}
+                  </span>
+                  {fileSizeText && (
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                      {fileSizeText}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImagePreview(null);
+                    setDocFileName(null);
+                    setMediaType(null);
+                    setFileMime(null);
+                    setFileSizeText(null);
+                  }}
+                  className="w-5 h-5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/40 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 text-sm font-black flex items-center justify-center ml-1 cursor-pointer transition"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Quick Presets */}
         <div className="space-y-2">
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            Try a real-world sample:
+            {t("check.presets.title")}
           </span>
           <div className="flex flex-wrap gap-2">
             {presets.map((p, idx) => (
@@ -264,12 +362,12 @@ export function CheckPage() {
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Running Deep Threat Inspection...</span>
+                <span>{t("check.submit.running")}</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 text-amber-300" />
-                <span>Inspect Message Now</span>
+                <span>{t("check.submit.btn")}</span>
               </>
             )}
           </button>
@@ -381,7 +479,7 @@ export function CheckPage() {
               </div>
             </div>
 
-            <p
+            <div
               className={`text-sm sm:text-base leading-relaxed font-semibold ${checkResult.riskLevel === "high"
                 ? "text-rose-950 dark:text-rose-100"
                 : checkResult.riskLevel === "caution"
@@ -389,8 +487,8 @@ export function CheckPage() {
                   : "text-emerald-950 dark:text-emerald-100"
                 }`}
             >
-              {checkResult.explanation}
-            </p>
+              <MarkdownView content={checkResult.explanation} />
+            </div>
 
             {/* Action Bar: Train me on this + Share Alert */}
             <div
@@ -477,7 +575,9 @@ export function CheckPage() {
                         "{flag.quote}"
                       </div>
                     )}
-                    <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">{flag.why}</p>
+                    <div className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
+                      <MarkdownView content={flag.why} />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -543,7 +643,7 @@ export function CheckPage() {
               <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
               <div className="leading-relaxed">
                 <strong className="text-blue-950 dark:text-blue-200 font-black">Official Verification Protocol: </strong>
-                <span className="text-slate-800 dark:text-slate-200 font-medium">{checkResult.verifyHow}</span>
+                <MarkdownView content={checkResult.verifyHow} className="inline" />
               </div>
             </div>
           )}

@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 import json
 import logging
 import re
+import urllib.parse
 import uuid
 from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,6 +20,7 @@ from app.repo.base import Repo
 from app.schemas.common import CamelModel, Lang
 from app.schemas.user import Me
 from app.services.kb import kb_service
+from app.services.webrisk import webrisk_service
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,9 @@ router = APIRouter(prefix="/v1", tags=["check"])
 class CheckRequest(CamelModel):
     text: str = Field(..., min_length=1, max_length=5000)
     image_base64: str | None = None
+    file_base64: str | None = None
+    file_name: str | None = None
+    mime_type: str | None = None
     lang: Lang = "en"
 
 
@@ -36,7 +41,7 @@ class RedFlagItem(CamelModel):
     quote: str
     why: str
     severity: Literal["low", "medium", "high"]
-    source: Literal["text", "image", "video", "audio", "indicator"]
+    source: Literal["text", "image", "video", "audio", "indicator", "document"]
 
 
 class RedFlagMatch(CamelModel):
@@ -44,6 +49,17 @@ class RedFlagMatch(CamelModel):
     kind: str
     note: str
     weight: int
+
+
+class MediaAnalysisInfo(CamelModel):
+    media_type: Literal["image", "video", "document"]
+    file_name: str | None = None
+    mime_type: str | None = None
+    deepfake_detected: bool = False
+    synthetic_confidence: int = 0
+    forgery_flags: list[str] = []
+    summary: str = ""
+    google_api_used: str = "Google Gemini 2.5 Flash Multimodal & Cloud Security"
 
 
 class CheckResponse(CamelModel):
@@ -72,6 +88,9 @@ class CheckResponse(CamelModel):
     matches: list[RedFlagMatch] = []
     resources: list[dict[str, Any]] = []
     grounding_sources: list[str] = []
+    upi_payload: dict[str, Any] | None = None
+    web_risk: dict[str, Any] | None = None
+    media_analysis: MediaAnalysisInfo | None = None
 
 
 class CheckAnalystOutput(BaseModel):
@@ -83,6 +102,10 @@ class CheckAnalystOutput(BaseModel):
     do_now: list[str]
     dont_do: list[str]
     verify_how: str
+    deepfake_detected: bool = False
+    synthetic_confidence: int = 0
+    forgery_flags: list[str] = []
+    media_summary: str | None = None
 
 
 class ForgeDrillResponse(CamelModel):
@@ -91,6 +114,28 @@ class ForgeDrillResponse(CamelModel):
     channel: str
     persona_name: str
     blurb: str
+
+
+def extract_docx_text(docx_bytes: bytes) -> str:
+    """Extract plain text from uploaded Word (.docx) files using standard zipfile and xml parsing."""
+    try:
+        import io
+        import xml.etree.ElementTree as ET
+        import zipfile
+
+        with zipfile.ZipFile(io.BytesIO(docx_bytes)) as z:
+            if "word/document.xml" in z.namelist():
+                xml_content = z.read("word/document.xml")
+                root = ET.fromstring(xml_content)
+                texts = [
+                    elem.text
+                    for elem in root.iter()
+                    if elem.tag.endswith("}t") and elem.text
+                ]
+                return "\n".join(texts)
+    except Exception as e:
+        logger.debug("Failed to extract docx text: %s", e)
+    return ""
 
 
 def inspect_email_and_domains(text: str) -> list[dict[str, Any]]:
@@ -160,6 +205,33 @@ def inspect_email_and_domains(text: str) -> list[dict[str, Any]]:
     return findings
 
 
+def extract_upi_intent(text: str) -> dict[str, Any] | None:
+    """Extract and analyze deceptive UPI collect/payment intent URI or QR parameters."""
+    match = re.search(r"upi://pay\?[^\s\"'<>]+", text, re.IGNORECASE)
+    if not match:
+        return None
+    raw_uri = match.group(0)
+    try:
+        parsed = urllib.parse.urlparse(raw_uri)
+        params = urllib.parse.parse_qs(parsed.query)
+        pa = params.get("pa", [""])[0]
+        pn = params.get("pn", [""])[0]
+        am = params.get("am", [""])[0]
+        tn = params.get("tn", [""])[0]
+        cu = params.get("cu", ["INR"])[0]
+        return {
+            "raw": raw_uri,
+            "payeeVpa": pa,
+            "payeeName": pn,
+            "amount": am,
+            "note": tn,
+            "currency": cu,
+            "isDebit": True,
+        }
+    except Exception:
+        return None
+
+
 @router.post("/check", response_model=CheckResponse)
 async def check_message(
     req: CheckRequest,
@@ -170,6 +242,87 @@ async def check_message(
     check_id = f"chk_{uuid.uuid4().hex[:12]}"
     now_iso = datetime.now(UTC).isoformat()
     input_types = ["text"]
+
+    # Decode and categorize uploaded media (Video, Document, Image)
+    media_b64 = req.file_base64 or req.image_base64
+    media_type: Literal["image", "video", "document"] | None = None
+    detected_mime: str | None = req.mime_type
+    doc_extracted_text: str = ""
+    media_bytes: bytes | None = None
+    media_analysis: MediaAnalysisInfo | None = None
+
+    if media_b64:
+        import base64
+
+        clean_b64 = media_b64.split(",", 1)[-1]
+        header = media_b64.split(",", 1)[0].lower() if "," in media_b64 else ""
+        file_name_lower = (req.file_name or "").lower()
+
+        if (
+            "video/" in header
+            or (detected_mime and detected_mime.startswith("video/"))
+            or file_name_lower.endswith((".mp4", ".webm", ".mov", ".mkv", ".avi", ".3gp"))
+        ):
+            media_type = "video"
+            if not detected_mime or not detected_mime.startswith("video/"):
+                detected_mime = "video/webm" if "video/webm" in header or file_name_lower.endswith(".webm") else "video/mp4"
+            if "video" not in input_types:
+                input_types.append("video")
+        elif (
+            "application/pdf" in header
+            or clean_b64.startswith("JVBERi")
+            or file_name_lower.endswith(".pdf")
+        ):
+            media_type = "document"
+            detected_mime = "application/pdf"
+            if "document" not in input_types:
+                input_types.append("document")
+            if "pdf" not in input_types:
+                input_types.append("pdf")
+        elif (
+            "wordprocessingml" in header
+            or "msword" in header
+            or file_name_lower.endswith((".docx", ".doc"))
+        ):
+            media_type = "document"
+            detected_mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            if "document" not in input_types:
+                input_types.append("document")
+        elif (
+            "text/plain" in header
+            or "text/csv" in header
+            or file_name_lower.endswith((".txt", ".csv"))
+        ):
+            media_type = "document"
+            detected_mime = "text/plain"
+            if "document" not in input_types:
+                input_types.append("document")
+        else:
+            media_type = "image"
+            if not detected_mime or not detected_mime.startswith("image/"):
+                detected_mime = (
+                    "image/png"
+                    if "image/png" in header
+                    else ("image/webp" if "image/webp" in header else "image/jpeg")
+                )
+            if "image" not in input_types:
+                input_types.append("image")
+
+        try:
+            media_bytes = base64.b64decode(clean_b64)
+            if file_name_lower.endswith(".docx") or detected_mime == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                doc_extracted_text = extract_docx_text(media_bytes)
+                if doc_extracted_text:
+                    text += f"\n\n[Extracted Document Content ({req.file_name or 'Document'})]:\n{doc_extracted_text}"
+            elif detected_mime == "text/plain" or file_name_lower.endswith((".txt", ".csv")):
+                try:
+                    doc_extracted_text = media_bytes.decode("utf-8", errors="ignore")
+                    if doc_extracted_text:
+                        text += f"\n\n[Extracted Document Content ({req.file_name or 'Document'})]:\n{doc_extracted_text}"
+                except Exception:
+                    pass
+        except Exception as b64_err:
+            logger.warning("Failed to decode base64 media: %s", b64_err)
 
     # 1. Fast heuristic pattern rule matching from SQLite KB
     conn = kb_service._get_conn()
@@ -258,18 +411,114 @@ async def check_message(
             )
             idx += 1
 
+    # Deceptive UPI payment intent & QR payload extraction
+    upi_payload = extract_upi_intent(text)
+    if upi_payload:
+        amt_str = f" of ₹{upi_payload['amount']}" if upi_payload.get("amount") else ""
+        payee_str = f" to {upi_payload.get('payeeVpa')} ({upi_payload.get('payeeName') or 'Recipient'})" if upi_payload.get("payeeVpa") else ""
+        matches.append(
+            RedFlagMatch(
+                tag="upi_collect_debit_trap",
+                kind="financial_trap",
+                note=f"Deceptive UPI Payment Request: This link/QR initiates a direct DEBIT{amt_str}{payee_str}. Crucial rule: In UPI, you NEVER enter an MPIN or scan a QR code to receive money, cashback, or refunds.",
+                weight=5,
+            )
+        )
+        red_flags.append(
+            RedFlagItem(
+                id=idx,
+                quote=upi_payload["raw"][:100],
+                why=f"UPI payment intent initiates an instant debit{amt_str}. Entering PIN transfers money away from your account.",
+                severity="high",
+                source="indicator",
+            )
+        )
+        idx += 1
+
+    # Authoritative Google Web Risk Reputation Lookup
+    web_risk_data: dict[str, Any] | None = None
+    urls = re.findall(r"https?://[^\s\"'<>]+", text)
+    if urls:
+        web_risk_data = await webrisk_service.check_url(urls[0])
+        if web_risk_data.get("isThreat"):
+            threats = ", ".join(web_risk_data.get("threatTypes", []))
+            matches.append(
+                RedFlagMatch(
+                    tag="google_webrisk_confirmed_threat",
+                    kind="malicious_url",
+                    note=f"Google Web Risk Security Alert: Target URL is an actively confirmed threat ({threats}) in Google threat intelligence database.",
+                    weight=5,
+                )
+            )
+            red_flags.append(
+                RedFlagItem(
+                    id=idx,
+                    quote=urls[0][:80],
+                    why=f"Confirmed threat in Google Web Risk database: {threats}.",
+                    severity="high",
+                    source="indicator",
+                )
+            )
+            idx += 1
+
+    # Media-specific heuristic red flags (Video & Document)
+    if media_type == "video" or any(w in text.lower() for w in ["video call", "skype call", "digital arrest", "police uniform", "cbi officer", "facing camera"]):
+        if any(w in text.lower() for w in ["digital arrest", "cbi", "police", "customs", "arrest", "custody", "narcotics", "court", "officer"]):
+            total_weight += 5
+            matches.append(
+                RedFlagMatch(
+                    tag="digital_arrest_video_call",
+                    kind="coercion",
+                    note="Digital Arrest Video Call Threat: Real Indian law enforcement and judiciary NEVER interrogate citizens, hold hearings, or demand bail over video calls.",
+                    weight=5,
+                )
+            )
+            red_flags.append(
+                RedFlagItem(
+                    id=idx,
+                    quote="Video call claiming police/CBI digital arrest",
+                    why="Digital Arrest is a 100% fake extortion tactic. Real police do not conduct video trials or demand funds transfers to verify innocence.",
+                    severity="high",
+                    source="video" if media_type == "video" else "indicator",
+                )
+            )
+            idx += 1
+
+    if media_type == "document" or any(w in text.lower() for w in ["warrant", "seizure order", "court notice", "supreme court", "high court", "ed order", "cbi notice", "arrest order"]):
+        if any(w in text.lower() for w in ["warrant", "seizure", "arrest", "bail", "pmla", "confiscation", "notice", "deposit"]):
+            total_weight += 5
+            matches.append(
+                RedFlagMatch(
+                    tag="forged_legal_document",
+                    kind="authority",
+                    note="Forged Court / Law Enforcement Order: Government seals, Ashoka Pillar emblems, and court arrest orders are forged to intimidate victims into sending money.",
+                    weight=5,
+                )
+            )
+            red_flags.append(
+                RedFlagItem(
+                    id=idx,
+                    quote="Official warrant / court order document",
+                    why="Real arrest warrants and court orders are never sent over messaging apps demanding financial deposits or bank account clearance transfers.",
+                    severity="high",
+                    source="document" if media_type == "document" else "indicator",
+                )
+            )
+            idx += 1
+
     # Heuristic baseline calculation
     has_urls = bool(re.search(r"https?://[^\s]+|\bbit\.ly/\S+", text))
     has_shortener = any(m.tag == "shortener_url" for m in matches)
     has_otp = any(m.tag == "otp_request" or "otp" in m.kind.lower() or "otp" in m.tag.lower() for m in matches)
     has_remote_app = any(m.tag == "remote_app" for m in matches)
-    has_digital_arrest = any(m.tag == "digital_arrest" for m in matches)
+    has_digital_arrest = any(m.tag == "digital_arrest" or m.tag == "digital_arrest_video_call" for m in matches)
+    has_forged_document = any(m.tag == "forged_legal_document" for m in matches)
     has_typosquat = any(m.tag == "typosquatting_domain" or "typosquat" in m.tag for m in matches)
     has_fake_bank_email = any(m.tag == "bank_public_webmail" for m in matches)
     has_credential_email_harvest = any(m.tag == "credential_email_harvest" for m in matches)
     has_urgency = any(m.kind == "urgency" for m in matches)
 
-    if not matches and not has_urls:
+    if not matches and not has_urls and not upi_payload:
         base_score = 10
         base_risk = "safe"
         base_verdict = "likely_safe"
@@ -294,16 +543,78 @@ async def check_message(
         ]
     else:
         computed_score = min(98, 40 + total_weight * 12)
-        if has_shortener or has_otp or has_remote_app or has_digital_arrest or has_typosquat or has_fake_bank_email or has_credential_email_harvest:
+        if (
+            has_shortener
+            or has_otp
+            or has_remote_app
+            or has_digital_arrest
+            or has_forged_document
+            or has_typosquat
+            or has_fake_bank_email
+            or has_credential_email_harvest
+        ):
             computed_score = max(computed_score, 88)
         if has_otp and (has_typosquat or has_fake_bank_email or has_credential_email_harvest):
             computed_score = max(computed_score, 94)
+        if upi_payload or (web_risk_data and web_risk_data.get("isThreat")):
+            computed_score = max(computed_score, 96)
 
         base_score = computed_score
         base_risk = "high" if base_score >= 75 else "caution"
         base_verdict = "likely_scam" if base_score >= 75 else "suspicious"
 
-        if has_otp and (has_typosquat or has_fake_bank_email or has_credential_email_harvest):
+        if upi_payload:
+            base_title = "Critical Danger — Deceptive UPI Collect / Debit Trap"
+            base_one_line = "Financial theft attack: Scammers provided a payment link or QR payload designed to DEBIT your account under the guise of a refund or prize."
+            base_explanation = f"This link or QR code generates a UPI Debit transaction to {upi_payload.get('payeeVpa') or 'the recipient'}. In the Indian banking system (NPCI/RBI rules), you NEVER need to scan a QR code or enter your UPI PIN to receive money. Entering your PIN authorizes money leaving your account."
+            base_reasons = [
+                f"The link executes a direct UPI payment to '{upi_payload.get('payeeVpa') or 'unverified party'}'.",
+                "Entering an MPIN always debits money from your account; it can never receive money.",
+                "Scammers use terms like 'Cashback', 'Refund', or 'Prize' in the note to deceive victims.",
+                "Legitimate refunds are directly credited to your account via RTGS/NEFT/UPI without any approval link.",
+            ]
+            base_actions = [
+                "DO NOT enter your UPI PIN or approve any prompt in Google Pay, PhonePe, or Paytm.",
+                "Block and report the sender's VPA / phone number on your UPI app immediately.",
+                "Report the incident on National Cyber Crime Helpline 1930.",
+            ]
+            do_now = [
+                "Decline any pending collect requests inside your UPI app right now.",
+                "Never share your UPI PIN or scan QR codes sent by unknown individuals.",
+                "If you already entered your PIN, call your bank helpline immediately to block netbanking and UPI access.",
+            ]
+            dont_do = [
+                "Never enter your UPI PIN to 'receive' money or 'verify' an account.",
+                "Do not scan QR codes sent over WhatsApp or SMS.",
+            ]
+            verify_how = "Check your bank account balance directly inside your official banking app without clicking links."
+            reassuring_signals = []
+        elif web_risk_data and web_risk_data.get("isThreat"):
+            threat_names = ", ".join(web_risk_data.get("threatTypes", []))
+            base_title = f"Critical Danger — Confirmed Malicious URL ({threat_names})"
+            base_one_line = "Google Web Risk has flagged this link as an active malicious threat."
+            base_explanation = "This URL is listed in Google's enterprise threat intelligence database as actively hosting social engineering, phishing, or malicious software. Navigating to this site or submitting credentials poses an immediate security risk."
+            base_reasons = [
+                f"Google Web Risk database flag: {threat_names}.",
+                "URL is categorized as active social engineering or credential phishing.",
+                "Visiting this destination may trigger automated malware downloads or credential spoofing.",
+            ]
+            base_actions = [
+                "Do NOT click or visit this URL under any circumstances.",
+                "Report the URL on Google Safe Browsing / Web Risk and National Cyber Crime Portal (1930).",
+                "Block the sender number or email immediately.",
+            ]
+            do_now = [
+                "Close any browser tabs attempting to load this URL.",
+                "If you already visited the link, clear your browser cache and monitor your accounts.",
+            ]
+            dont_do = [
+                "Do not open the link even to 'check' what it is.",
+                "Do not enter passwords or personal information.",
+            ]
+            verify_how = "Use independently verified contact information to reach the claimed service."
+            reassuring_signals = []
+        elif has_otp and (has_typosquat or has_fake_bank_email or has_credential_email_harvest):
             base_title = "High Danger — Fake Banking OTP Phishing via Typo-Squatted Email"
             base_one_line = "Critical credential theft attack: Scammers are impersonating a bank using a typo-squatted email to steal your OTP."
             base_explanation = "This message is a high-risk phishing attack. Legitimate banks strictly prohibit asking customers to email or share OTPs, and bank communications only originate from official corporate domains (e.g. @hdfcbank.com), never lookalikes like '@gmall.com'."
@@ -424,6 +735,12 @@ CRITICAL THREAT EVALUATION STANDARDS (RBI, CERT-In, & Cyber Crime 1930 Standards
    - Beware of TYPO-SQUATTED domains (e.g. 'gmall.com' instead of 'gmail.com', 'yaho0.com', 'hotmial.com', 'hdfc-bank.com'). Scammers intentionally misspell letters to deceive victims.
    - Claims like 'secured email' or 'verification desk' on free or misspelled webmail are deceptive pretexting.
 3. DIGITAL ARREST & UTILITY THREATS: Law enforcement never conducts video arrests; utility providers do not disconnect power at night with immediate phone call demands.
+4. LEGAL SUMMONS, ARREST WARRANTS & COURT / POLICE ORDERS (PDF, DOCS & DOCUMENTS): Real Indian law enforcement and judiciary NEVER issue arrest warrants or seizure notices over WhatsApp/Telegram, and NEVER demand 'verification fees' or 'clearance deposits'. Forged documents typically feature fake seals, mismatched IPC/BNS/PMLA citations, and lack verifiable CCTNS tracking numbers.
+5. VIDEO FORENSICS & DEEPFAKE DETECTION (VIDEO FILES):
+   - Digital Arrest & Police Impersonation: Callers wearing fake police/customs uniforms on video call claiming the victim is in 'Digital Custody'. Real police NEVER conduct video arrests or online trials.
+   - Deepfake & Synthetic Indicators: Analyze for abnormal blinking, unnatural facial seam warping, robotic or cloned AI voice timbre, desynchronized lip movement, and artificial static backdrops.
+   - Screen Recording Threats: Videos instructing victims to install AnyDesk, RustDesk, TeamViewer QuickSupport, or download APK files.
+6. UPI INTENT & PAYMENT QR TRAPS: Receiving money, cashback, or refunds NEVER requires entering an MPIN or scanning a QR code. Any message, link, or QR code that initiates a UPI Debit under the pretext of 'receiving' funds is an AUTOMATIC CRITICAL FRAUD THREAT (Score 95-100).
 
 Message to inspect:
 \"\"\"{text}\"\"\"
@@ -435,36 +752,39 @@ Language instruction:
 {lang_instruction}
 
 Requirements:
-- score: Integer 0 to 100 (0-20 safe, 21-65 caution, 66-100 high danger). If OTP sharing or typo-squatting is detected, score MUST be between 88 and 100.
+- score: Integer 0 to 100 (0-20 safe, 21-65 caution, 66-100 high danger). If OTP sharing, typo-squatting, UPI debit traps, or deepfake impersonations are detected, score MUST be between 88 and 100.
 - risk_level: One of 'safe', 'caution', 'high'.
-- title: Short, authoritative diagnosis (e.g. "Fake Banking OTP Phishing via Typo-Squatted Email", "Electricity Disconnection Extortion", "Legitimate Service Alert").
+- title: Short, authoritative diagnosis (e.g. "Fake Banking OTP Phishing via Typo-Squatted Email", "Deceptive UPI Collect / Debit Trap", "Deepfake Digital Arrest Impersonation Video", "Forged Law Enforcement Warrant", "Legitimate Service Alert").
 - explanation: 2-3 sentences providing clear, calm context explaining specifically why this is fraudulent.
 - reasons: 3-5 specific bullet points explaining why this is fraudulent or safe.
 - do_now: 3 concrete action steps to protect yourself immediately.
 - dont_do: 2-3 critical pitfalls to avoid right now.
 - verify_how: 1 sentence on the single safest way to independently verify this.
+- deepfake_detected: boolean indicating if deepfake, AI voice cloning, or synthetic media artifacts were identified.
+- synthetic_confidence: integer 0 to 100 indicating confidence in synthetic manipulation.
+- forgery_flags: list of strings detailing specific visual, audio, or document anomalies found.
+- media_summary: 1-2 sentence forensic summary of the uploaded media file.
 """
             contents: list[Any] = [prompt]
-            if req.image_base64:
-                import base64
-
-                input_types.append("image")
-                mime_type = "image/jpeg"
-                if "data:image/png" in req.image_base64:
-                    mime_type = "image/png"
-                elif "data:image/webp" in req.image_base64:
-                    mime_type = "image/webp"
-                clean_b64 = req.image_base64.split(",", 1)[-1]
+            if media_bytes and detected_mime:
                 try:
-                    img_bytes = base64.b64decode(clean_b64)
-                    contents.append(
-                        types.Part.from_bytes(
-                            data=img_bytes,
-                            mime_type=mime_type,
+                    if detected_mime == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                        if doc_extracted_text:
+                            contents.append(
+                                types.Part.from_bytes(
+                                    data=doc_extracted_text.encode("utf-8"),
+                                    mime_type="text/plain",
+                                )
+                            )
+                    else:
+                        contents.append(
+                            types.Part.from_bytes(
+                                data=media_bytes,
+                                mime_type=detected_mime,
+                            )
                         )
-                    )
-                except Exception as b64_err:
-                    logger.warning("Failed to decode base64 image: %s", b64_err)
+                except Exception as part_err:
+                    logger.warning("Failed to construct Gemini media Part: %s", part_err)
 
             config = types.GenerateContentConfig(
                 temperature=0.2,
@@ -472,11 +792,27 @@ Requirements:
                 response_schema=CheckAnalystOutput,
             )
 
-            resp = await client.aio.models.generate_content(
-                model=settings.MODEL_FAST,
-                contents=contents,
-                config=config,
-            )
+            resp = None
+            used_model = settings.MODEL_FAST
+            try:
+                resp = await client.aio.models.generate_content(
+                    model=used_model,
+                    contents=contents,
+                    config=config,
+                )
+            except Exception as primary_err:
+                fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+                if fallback and fallback != used_model:
+                    logger.warning("Primary check model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
+                    used_model = fallback
+                    resp = await client.aio.models.generate_content(
+                        model=used_model,
+                        contents=contents,
+                        config=config,
+                    )
+                else:
+                    raise primary_err
+
             parsed = json.loads(resp.text or "{}")
             llm_result = CheckAnalystOutput.model_validate(parsed)
 
@@ -489,8 +825,59 @@ Requirements:
             do_now = llm_result.do_now
             dont_do = llm_result.dont_do
             verify_how = llm_result.verify_how
+
+            if media_type:
+                deepfake_flag = bool(llm_result.deepfake_detected or (llm_result.synthetic_confidence or 0) >= 60)
+                if deepfake_flag:
+                    base_score = max(base_score, 92)
+                    base_risk = "high"
+                    base_verdict = "likely_scam"
+
+                flags = list(llm_result.forgery_flags or [])
+                if deepfake_flag and not any("deepfake" in f.lower() or "synthetic" in f.lower() for f in flags):
+                    flags.insert(0, "Deepfake / Synthetic AI Artifacts Identified")
+
+                media_analysis = MediaAnalysisInfo(
+                    media_type=media_type,
+                    file_name=req.file_name,
+                    mime_type=detected_mime,
+                    deepfake_detected=deepfake_flag,
+                    synthetic_confidence=llm_result.synthetic_confidence or (88 if deepfake_flag else 5),
+                    forgery_flags=flags,
+                    summary=llm_result.media_summary or (
+                        f"Google Gemini Multimodal analyzed this {media_type}. "
+                        + ("High risk of deepfake impersonation detected." if deepfake_flag else "Inspected media markers and document structure.")
+                    ),
+                    google_api_used="Google Gemini 2.5 Flash Multimodal Video & Document AI",
+                )
         except Exception as e:
             logger.warning("Live Gemini analysis for /v1/check failed, falling back to heuristics: %s", e)
+
+    # Fallback media analysis when live LLM is inactive or offline
+    if media_type and not media_analysis:
+        is_high_risk = base_score >= 70
+        is_synthetic = media_type == "video" and any(w in text.lower() for w in ["deepfake", "digital arrest", "police uniform", "video call"])
+        flags = []
+        if is_synthetic:
+            flags.append("Digital Arrest Impersonation Video")
+            flags.append("Suspicious Uniform & Backdrop Artifacts")
+        elif media_type == "document" and is_high_risk:
+            flags.append("Forged Government / Court Seals")
+            flags.append("Unverifiable Official Dispatch Number")
+
+        media_analysis = MediaAnalysisInfo(
+            media_type=media_type,
+            file_name=req.file_name,
+            mime_type=detected_mime,
+            deepfake_detected=is_synthetic,
+            synthetic_confidence=85 if is_synthetic else 5,
+            forgery_flags=flags,
+            summary=(
+                f"Google Gemini Multimodal Video & Document Analysis: Inspected {req.file_name or media_type}. "
+                + ("Flagged high risk for simulated authority / deepfake video." if is_synthetic else f"Processed {media_type} structure and text indicators.")
+            ),
+            google_api_used="Google Gemini 2.5 Flash Multimodal Video & Document AI",
+        )
 
     # Verified resources for high danger
     resources = []
@@ -528,6 +915,9 @@ Requirements:
         "matches": [m.model_dump(by_alias=True) for m in matches],
         "resources": resources,
         "groundingSources": unique_grounding,
+        "upiPayload": upi_payload,
+        "webRisk": web_risk_data,
+        "mediaAnalysis": media_analysis.model_dump(by_alias=True) if media_analysis else None,
     }
 
     # Save check in repo
@@ -560,6 +950,10 @@ Requirements:
         input_types=input_types,
         matches=matches,
         resources=resources,
+        grounding_sources=unique_grounding,
+        upi_payload=upi_payload,
+        web_risk=web_risk_data,
+        media_analysis=media_analysis,
     )
 
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useRouter } from "@/lib/navigation";
 import { fetchMe, UserProfile } from "@/lib/api";
 import { gsap } from "@/lib/gsap";
+import { useT } from "@/lib/i18n";
 import ScamStatisticsCharts from "@/components/home/ScamStatisticsCharts";
 import IndiaScamMap from "@/components/home/IndiaScamMap";
 import NewspaperHeadlines from "@/components/home/NewspaperHeadlines";
@@ -9,6 +10,7 @@ import InteractiveScammerShowcase from "@/components/home/InteractiveScammerShow
 
 export function HomePage() {
   const router = useRouter();
+  const { t } = useT();
   const heroRef = useRef<HTMLDivElement | null>(null);
   const [choice, setChoice] = useState<"tap" | "ign" | "chk" | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -46,18 +48,18 @@ export function HomePage() {
 
   const outcomes = {
     tap: {
-      text: "That link downloads a malicious APK or prompts for your UPI PIN. Test your defensive instincts in a realistic 3-minute drill:",
-      btnText: "Start Practice Drill",
+      text: t("hero.result.tap"),
+      btnText: t("home.outcome.tap.btn"),
       action: () => router.push("/train"),
     },
     ign: {
-      text: "Smart instinct! But scammers frequently follow up with high-pressure phone calls within minutes. See how to shut them down:",
-      btnText: "Practice Follow-Up Call Drill",
+      text: t("hero.result.ignore"),
+      btnText: t("home.outcome.ign.btn"),
       action: () => router.push("/train"),
     },
     chk: {
-      text: "Excellent move! Paste any message or screenshot into our forensic scanner to detect hidden threat vectors and sender spoofing:",
-      btnText: "Scan This Message Now",
+      text: t("hero.result.check"),
+      btnText: t("home.outcome.chk.btn"),
       action: () => router.push("/check"),
     },
   };
@@ -71,23 +73,23 @@ export function HomePage() {
         {/* Top National Alert Ribbon */}
         <div className="hero-anim inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 bg-[var(--sf)] border border-[var(--line)] rounded-full text-xs font-semibold text-[var(--ink)] mb-4 shadow-xs">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-          <span className="font-bold text-red-600 dark:text-red-400">National Fraud Watch:</span>
-          <span className="text-[var(--mut)]">₹19,800+ Cr siphoned in 2025 across 17.5 Lakh+ complaints</span>
+          <span className="font-bold text-red-600 dark:text-red-400">{t("home.alert.title")}</span>
+          <span className="text-[var(--mut)]">{t("home.alert.stat")}</span>
           <span className="hidden sm:inline text-[var(--line)]">|</span>
-          <span className="text-[var(--act)] font-bold">1930 Helpline Grounded</span>
+          <span className="text-[var(--act)] font-bold">{t("home.alert.helpline")}</span>
         </div>
 
         {/* Hero Title & Subtitle */}
         <h1 className="hero-anim text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight text-[var(--ink)] leading-[1.08] mb-4">
-          India’s Defensive Cyber Arena.
+          {t("home.hero.title")}
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--act)] to-indigo-500">
-            Neutralize Scams Before They Strike.
+            {t("home.hero.highlight")}
           </span>
         </h1>
 
         <p className="hero-anim text-base sm:text-lg text-[var(--mut)] max-w-4xl leading-relaxed mb-6">
-          From <strong>₹7.8 Crore Digital Arrests</strong> to <strong>Midnight Electricity Blackouts</strong> and <strong>Telegram VIP Task Traps</strong> — Scam Dojo builds instinctive psychological reflexes against stateful AI adversaries, forensic-inspects suspicious messages, and executes golden-hour recovery protocols.
+          {t("home.hero.sub")}
         </p>
 
         {/* Main CTA Action Buttons */}
@@ -96,7 +98,7 @@ export function HomePage() {
             to="/train"
             className="dojo-btn flex items-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-md hover:scale-[1.02] transition-transform"
           >
-            <span>🥋 Enter Dojo Arena (Train)</span>
+            <span>{t("home.cta.train")}</span>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <Link
@@ -104,14 +106,14 @@ export function HomePage() {
             className="dojo-btn q flex items-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-xs hover:border-[var(--act)] transition-all"
           >
             <span className="material-symbols-outlined text-[18px]">search_check</span>
-            <span>Scan Suspicious Threat (Check)</span>
+            <span>{t("home.cta.check")}</span>
           </Link>
           <Link
             to="/recover"
             className="px-4 py-3 rounded-xl border border-red-500/30 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[18px]">emergency</span>
-            <span>1930 Emergency Triage</span>
+            <span>{t("home.cta.recover")}</span>
           </Link>
         </div>
 
@@ -121,7 +123,7 @@ export function HomePage() {
             <span className="bg-[var(--sf2)] px-2.5 py-1 rounded-md font-mono text-[var(--ink)]">
               ORN-BNK
             </span>
-            <span>Received 2 mins ago</span>
+            <span>{t("home.sms.received")}</span>
           </div>
 
           <p className="text-sm sm:text-base text-[var(--ink)] font-medium leading-relaxed mb-4">
@@ -129,7 +131,7 @@ export function HomePage() {
           </p>
 
           <div className="text-xs font-bold text-[var(--mut)] mb-2 uppercase tracking-wide">
-            Choose Your Immediate Defensive Stance:
+            {t("home.sms.stance")}
           </div>
 
           <div className="flex flex-wrap gap-2.5">
@@ -140,7 +142,7 @@ export function HomePage() {
                 choice === "tap" ? "ring-2 ring-[var(--act)] ring-offset-2" : choice ? "opacity-70" : ""
               }`}
             >
-              Tap the link
+              {t("hero.choice.tap")}
             </button>
             <button
               type="button"
@@ -149,7 +151,7 @@ export function HomePage() {
                 choice === "ign" ? "ring-2 ring-[var(--act)] ring-offset-2 font-bold" : choice ? "opacity-70" : ""
               }`}
             >
-              Ignore it
+              {t("hero.choice.ignore")}
             </button>
             <button
               type="button"
@@ -158,7 +160,7 @@ export function HomePage() {
                 choice === "chk" ? "ring-2 ring-[var(--act)] ring-offset-2 font-bold" : choice ? "opacity-70" : ""
               }`}
             >
-              Inspect for fraud
+              {t("hero.choice.check")}
             </button>
           </div>
 
@@ -195,10 +197,10 @@ export function HomePage() {
       <section className="my-14">
         <div className="text-center max-w-xl mx-auto mb-8">
           <span className="text-xs font-bold uppercase tracking-wider text-[var(--act)]">
-            A Complete Defensive Loop
+            {t("home.stages.subtitle")}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[var(--ink)] tracking-tight mt-1">
-            How Scam Dojo Protects You at Every Stage
+            {t("home.stages.title")}
           </h2>
         </div>
 
@@ -213,17 +215,17 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[28px]">sports_martial_arts</span>
               </div>
               <span className="text-[11px] font-bold text-[var(--act)] uppercase tracking-wider">
-                Stage 1: Before The Threat
+                {t("home.stage.1.tag")}
               </span>
               <h3 className="text-xl font-bold font-display text-[var(--ink)] mt-1 mb-2">
-                Train
+                {t("home.stage.1.name")}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--mut)] leading-relaxed">
-                Practice against 7 specialized Google ADK agents in 3 immersion modes (Chat, Audio Phone Call, and Video Call). Progress from White Belt to 5th Dan Black Belt.
+                {t("home.stage.1.desc")}
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-[var(--line)]/60 text-xs font-bold text-[var(--act)] flex items-center gap-1">
-              <span>Launch Dojo Arena</span>
+              <span>{t("home.stage.1.btn")}</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </div>
           </Link>
@@ -238,17 +240,17 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[28px]">document_scanner</span>
               </div>
               <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                Stage 2: During The Threat
+                {t("home.stage.2.tag")}
               </span>
               <h3 className="text-xl font-bold font-display text-[var(--ink)] mt-1 mb-2">
-                Check
+                {t("home.stage.2.name")}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--mut)] leading-relaxed">
-                Upload screenshots or suspicious texts. Get an instant 0–100 ScamScore™, forensic red flags, 1080x1080 WhatsApp warning posters, and convert threats into drills with Scenario Forge.
+                {t("home.stage.2.desc")}
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-[var(--line)]/60 text-xs font-bold text-[var(--act)] flex items-center gap-1">
-              <span>Scan Message or Screenshot</span>
+              <span>{t("home.stage.2.btn")}</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </div>
           </Link>
@@ -263,17 +265,17 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[28px]">emergency_home</span>
               </div>
               <span className="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
-                Stage 3: After An Incident
+                {t("home.stage.3.tag")}
               </span>
               <h3 className="text-xl font-bold font-display text-[var(--ink)] mt-1 mb-2">
-                Recover
+                {t("home.stage.3.name")}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--mut)] leading-relaxed">
-                Golden-Hour emergency triage under 2 hours: 1-click 1930 Cyber Helpline dialer, RBI-compliant bank dispute notices, evidence dossier generators, and 24x7 bank freeze directories.
+                {t("home.stage.3.desc")}
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-[var(--line)]/60 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-              <span>Emergency 1930 Triage</span>
+              <span>{t("home.stage.3.btn")}</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </div>
           </Link>
@@ -285,13 +287,13 @@ export function HomePage() {
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px] text-emerald-600 dark:text-emerald-400">verified_user</span>
           <span className="font-medium">
-            Zero PII retention policy. Only fictional data used during drills.
+            {t("home.footer.pii")}
           </span>
         </div>
         <div className="flex items-center gap-4 font-bold">
           <a href="tel:1930" className="text-red-600 dark:text-red-400 hover:underline flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px]">call</span>
-            <span>National Helpline: 1930</span>
+            <span>{t("home.footer.helpline")}</span>
           </a>
           <a
             href="https://cybercrime.gov.in"

@@ -14,7 +14,14 @@ export interface GeminiLiveOptions {
   onConnected?: (model: string) => void;
 }
 
+export type SimModeSelection = "chat" | "audio" | "video";
+
+// Global active client and active selection mode tracker
+let currentActiveSelection: SimModeSelection = "chat";
+let activeGlobalLiveClient: GeminiLiveClient | null = null;
+
 export class GeminiLiveClient {
+  public mode: "audio" | "video" = "audio";
   private ws: WebSocket | null = null;
   private audioCtx: AudioContext | null = null;
   private scheduledEndTime = 0;
@@ -34,26 +41,70 @@ export class GeminiLiveClient {
 
   private options: GeminiLiveOptions;
   public status: "disconnected" | "connecting" | "connected" | "ready" = "disconnected";
+  private pendingQueue: string[] = [];
+  private isExplicitDisconnect = false;
+
+  public static setActiveSelection(mode: SimModeSelection): void {
+    console.log("[GeminiLive] Active simulation selection changed to:", mode);
+    currentActiveSelection = mode;
+    if (mode === "chat") {
+      GeminiLiveClient.disconnectActive();
+    } else if (activeGlobalLiveClient && activeGlobalLiveClient.mode !== mode) {
+      console.log(`[GeminiLive] Active mode changed from ${activeGlobalLiveClient.mode} to ${mode}; terminating client.`);
+      activeGlobalLiveClient.disconnect();
+      activeGlobalLiveClient = null;
+    }
+  }
+
+  public static getActiveSelection(): SimModeSelection {
+    return currentActiveSelection;
+  }
+
+  public static disconnectActive(): void {
+    if (activeGlobalLiveClient) {
+      console.log("[GeminiLive] Explicitly disconnecting previous active live client");
+      activeGlobalLiveClient.disconnect();
+      activeGlobalLiveClient = null;
+    }
+  }
 
   constructor(options: GeminiLiveOptions = {}) {
     this.options = options;
   }
 
   /**
-   * Connect to the FastAPI Gemini Live WebSocket gateway.
+   * Connect to the FastAPI Gemini Live WebSocket gateway for voice or video mode.
+   * Strictly verifies that the requested mode matches the current active selection.
    */
-  public async connect(sessionId: string): Promise<void> {
+  public async connect(sessionId: string, mode: "audio" | "video" = "audio"): Promise<void> {
+    this.mode = mode;
+
+    // Strict active selection check: only trigger connection if mode matches current selection
+    if (currentActiveSelection !== mode) {
+      console.warn(`[GeminiLive] Connection skipped for ${mode}: current active selection is ${currentActiveSelection}`);
+      this.disconnect();
+      return;
+    }
+
+    if (activeGlobalLiveClient && activeGlobalLiveClient !== this) {
+      console.log("[GeminiLive] Toggling active live client to current selection:", mode);
+      activeGlobalLiveClient.disconnect();
+    }
+    activeGlobalLiveClient = this;
+
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
+    this.isExplicitDisconnect = false;
     this.status = "connecting";
     const protocol = typeof window !== "undefined" && window.location.protocol === "https:" ? "wss:" : "ws:";
     const host =
+      (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_URL?.replace(/^http/, "ws")) ||
       process.env.NEXT_PUBLIC_API_URL?.replace(/^http/, "ws") ||
-      (typeof window !== "undefined" ? `${protocol}//${window.location.hostname}:8080` : "ws://localhost:8080");
+      (typeof window !== "undefined" ? `${protocol}//${window.location.host}` : "ws://localhost:8080");
 
-    const wsUrl = `${host}/v1/train/live/ws/${sessionId}`;
+    const wsUrl = `${host}/v1/train/live/ws/${sessionId}?mode=${mode}`;
 
     return new Promise((resolve, reject) => {
       try {
@@ -61,15 +112,23 @@ export class GeminiLiveClient {
         this.ws = socket;
 
         socket.onopen = () => {
+          if (this.isExplicitDisconnect || currentActiveSelection !== this.mode || activeGlobalLiveClient !== this) {
+            try { socket.close(); } catch {}
+            return;
+          }
           this.status = "connected";
         };
 
         socket.onmessage = (event) => {
+          if (this.isExplicitDisconnect || currentActiveSelection !== this.mode || activeGlobalLiveClient !== this) {
+            return;
+          }
           try {
             const msg = JSON.parse(event.data);
             this.handleServerMessage(msg);
             if (msg.type === "ready") {
               this.status = "ready";
+              this.flushPending();
               this.options.onReady?.();
               resolve();
             }
@@ -79,6 +138,7 @@ export class GeminiLiveClient {
         };
 
         socket.onerror = (err) => {
+          if (this.isExplicitDisconnect || currentActiveSelection !== this.mode) return;
           console.warn("[GeminiLive] WebSocket error:", err);
           this.options.onError?.("Live WebSocket connection error");
           reject(err);
@@ -94,17 +154,23 @@ export class GeminiLiveClient {
         // Safety fallback timeout to resolve if ready arrives
         setTimeout(() => {
           if (this.status === "connected") {
+            this.flushPending();
             resolve();
           }
         }, 3000);
       } catch (err: any) {
-        this.status = "disconnected";
-        reject(err);
+        if (!this.isExplicitDisconnect) {
+          this.status = "disconnected";
+          reject(err);
+        }
       }
     });
   }
 
   private handleServerMessage(msg: any): void {
+    if (this.isExplicitDisconnect || currentActiveSelection !== this.mode || activeGlobalLiveClient !== this) {
+      return;
+    }
     switch (msg.type) {
       case "connected":
         this.options.onConnected?.(msg.model || "gemini-3.8-live");
@@ -150,7 +216,7 @@ export class GeminiLiveClient {
   /**
    * Initializes or returns the 24kHz audio playback context.
    */
-  private getAudioContext(): AudioContext {
+  public getAudioContext(): AudioContext {
     if (!this.audioCtx) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       this.audioCtx = new AudioContextClass({ sampleRate: 24000 });
@@ -160,6 +226,18 @@ export class GeminiLiveClient {
       this.audioCtx.resume();
     }
     return this.audioCtx;
+  }
+
+  /**
+   * Safe activation on user click to unlock browser audio playback autoplay policy.
+   */
+  public resumeAudio(): void {
+    try {
+      const ctx = this.getAudioContext();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+    } catch {}
   }
 
   /**
@@ -182,19 +260,32 @@ export class GeminiLiveClient {
    * Play incoming base64-encoded 24kHz 16-bit mono PCM chunk without gap stutter.
    */
   private playPcmChunk(base64Data: string, sampleRate = 24000): void {
+    if (this.isExplicitDisconnect || currentActiveSelection !== this.mode || activeGlobalLiveClient !== this) {
+      return;
+    }
     try {
       const ctx = this.getAudioContext();
-      const binaryString = atob(base64Data);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
       }
 
-      const int16Array = new Int16Array(bytes.buffer);
-      const float32Array = new Float32Array(int16Array.length);
-      for (let i = 0; i < int16Array.length; i++) {
-        float32Array[i] = int16Array[i] / 32768.0;
+      const binaryString = atob(base64Data);
+      const len = binaryString.length;
+      if (len < 2) return;
+
+      const evenLen = len - (len % 2);
+      const numSamples = evenLen / 2;
+      const float32Array = new Float32Array(numSamples);
+
+      for (let i = 0; i < numSamples; i++) {
+        const byteIndex = i * 2;
+        const low = binaryString.charCodeAt(byteIndex);
+        const high = binaryString.charCodeAt(byteIndex + 1);
+        let sample = (high << 8) | low;
+        if (sample >= 0x8000) {
+          sample -= 0x10000;
+        }
+        float32Array[i] = sample / 32768.0;
       }
 
       const buffer = ctx.createBuffer(1, float32Array.length, sampleRate);
@@ -348,12 +439,40 @@ export class GeminiLiveClient {
     this.videoTarget = null;
   }
 
+  private lastSpokenText: string | null = null;
+
+  /**
+   * Flush any queued text messages to Gemini Live WebSocket.
+   */
+  private flushPending(): void {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    while (this.pendingQueue.length > 0) {
+      const item = this.pendingQueue.shift();
+      if (item) {
+        try {
+          this.ws.send(item);
+        } catch (e) {
+          console.warn("[GeminiLive] Error sending queued message:", e);
+        }
+      }
+    }
+  }
+
   /**
    * Send text prompt / verbal counter to Gemini Live.
+   * If socket is still connecting, queues message and sends as soon as ready.
+   * Deduplicates identical turns to prevent repeated speech triggers.
    */
   public sendText(text: string): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type: "text", text }));
+    const clean = text.trim();
+    if (!clean || clean === this.lastSpokenText) return;
+    this.lastSpokenText = clean;
+    this.pendingQueue = [];
+    const payload = JSON.stringify({ type: "text", text: clean });
+    if (this.ws && this.ws.readyState === WebSocket.OPEN && (this.status === "ready" || this.status === "connected")) {
+      this.ws.send(payload);
+    } else {
+      this.pendingQueue.push(payload);
     }
   }
 
@@ -361,6 +480,11 @@ export class GeminiLiveClient {
    * Disconnect and clean up all resources.
    */
   public disconnect(): void {
+    if (activeGlobalLiveClient === this) {
+      activeGlobalLiveClient = null;
+    }
+    this.isExplicitDisconnect = true;
+    this.status = "disconnected";
     this.stopAudioPlayback();
     this.stopAudioCapture();
     this.stopVideoCapture();
@@ -369,14 +493,19 @@ export class GeminiLiveClient {
       this.checkSpeakingInterval = null;
     }
     if (this.audioCtx) {
-      this.audioCtx.close();
+      this.audioCtx.close().catch(() => {});
       this.audioCtx = null;
     }
     if (this.ws) {
-      this.ws.close();
+      this.ws.onmessage = null;
+      this.ws.onerror = null;
+      this.ws.onopen = null;
+      this.ws.onclose = null;
+      try {
+        this.ws.close(1000, "Disconnect called");
+      } catch {}
       this.ws = null;
     }
-    this.status = "disconnected";
   }
 
   private downsampleTo16k(buffer: Float32Array, inputSampleRate: number): Int16Array {

@@ -129,6 +129,34 @@ export interface ScamScoreBreakdown {
   remoteAccess: number;
 }
 
+export interface UpiPayloadInfo {
+  raw: string;
+  payeeVpa: string;
+  payeeName?: string;
+  amount?: string;
+  note?: string;
+  currency?: string;
+  isDebit?: boolean;
+}
+
+export interface WebRiskInfo {
+  checked: boolean;
+  isThreat: boolean;
+  threatTypes: string[];
+  summary: string;
+}
+
+export interface MediaAnalysisInfo {
+  mediaType: "image" | "video" | "document";
+  fileName?: string;
+  mimeType?: string;
+  deepfakeDetected?: boolean;
+  syntheticConfidence?: number;
+  forgeryFlags?: string[];
+  summary?: string;
+  googleApiUsed?: string;
+}
+
 export interface CheckResult {
   checkId: string;
   createdAt: string;
@@ -153,6 +181,9 @@ export interface CheckResult {
   groundingSources?: string[];
   scoreBreakdown?: ScamScoreBreakdown;
   vectorBadges?: string[];
+  upiPayload?: UpiPayloadInfo;
+  webRisk?: WebRiskInfo;
+  mediaAnalysis?: MediaAnalysisInfo;
 }
 
 export interface ForgeDrillResult {
@@ -242,10 +273,23 @@ export async function fetchResources(
   return api<{ items: ResourceItem[] }>(`/v1/resources?${q.toString()}`);
 }
 
-export async function checkMessage(text: string, imageBase64?: string, lang: string = "en"): Promise<CheckResult> {
+export async function checkMessage(
+  text: string,
+  imageBase64?: string,
+  lang: string = "en",
+  fileName?: string,
+  mimeType?: string
+): Promise<CheckResult> {
   return api<CheckResult>("/v1/check", {
     method: "POST",
-    json: { text, imageBase64, lang },
+    json: {
+      text,
+      imageBase64,
+      fileBase64: imageBase64,
+      fileName,
+      mimeType,
+      lang,
+    },
   });
 }
 
@@ -381,6 +425,42 @@ export async function streamTrainMessage(
         }
       } catch (e) {
         console.warn("Failed to parse SSE event data:", dataStr, e);
+      }
+    }
+  }
+
+  // Process any trailing block left in buffer
+  if (buffer.trim()) {
+    const blockLines = buffer.split("\n");
+    let eventType = "message";
+    let dataStr = "";
+
+    for (const line of blockLines) {
+      if (line.startsWith("event: ")) {
+        eventType = line.slice(7).trim();
+      } else if (line.startsWith("data: ")) {
+        dataStr = line.slice(6).trim();
+      }
+    }
+
+    if (dataStr) {
+      try {
+        const parsed = JSON.parse(dataStr);
+        if (eventType === "ack") {
+          callbacks.onAck?.(parsed);
+        } else if (eventType === "trace") {
+          callbacks.onTrace?.(parsed);
+        } else if (eventType === "state") {
+          callbacks.onState?.(parsed);
+        } else if (eventType === "token") {
+          callbacks.onToken?.(parsed.delta || "");
+        } else if (eventType === "message_end") {
+          callbacks.onMessageEnd?.(parsed);
+        } else if (eventType === "session_end") {
+          callbacks.onSessionEnd?.(parsed);
+        }
+      } catch (e) {
+        console.warn("Failed to parse trailing SSE event data:", dataStr, e);
       }
     }
   }

@@ -8,6 +8,8 @@ import { ScoreNumeral } from "@/components/train/ScoreNumeral";
 import { PiiNotice } from "@/components/train/PiiNotice";
 import { AudioCallStage } from "@/components/train/AudioCallStage";
 import { VideoCallStage } from "@/components/train/VideoCallStage";
+import { EmergencyCountermeasures } from "@/components/train/EmergencyCountermeasures";
+import { IncomingCallOverlay } from "@/components/train/IncomingCallOverlay";
 import { I18nProvider } from "@/lib/i18n";
 
 describe("Train Mode UI Components", () => {
@@ -59,20 +61,22 @@ describe("Train Mode UI Components", () => {
 
   it("renders AudioCallStage with caller profile, waveform, and controls", () => {
     render(
-      <AudioCallStage
-        callerName="Rakesh Verma"
-        callerOrg="Orion Bank Fraud Dept"
-        tension={5}
-        isSpeaking={false}
-        isListening={false}
-        isTyping={false}
-        aiStatus={null}
-        lastScammerText="Please confirm your card number immediately."
-        onSendMessage={() => {}}
-        onHangUp={() => {}}
-        onToggleMic={() => {}}
-        isDone={false}
-      />
+      <I18nProvider>
+        <AudioCallStage
+          callerName="Rakesh Verma"
+          callerOrg="Orion Bank Fraud Dept"
+          tension={5}
+          isSpeaking={false}
+          isListening={false}
+          isTyping={false}
+          aiStatus={null}
+          lastScammerText="Please confirm your card number immediately."
+          onSendMessage={() => {}}
+          onHangUp={() => {}}
+          onToggleMic={() => {}}
+          isDone={false}
+        />
+      </I18nProvider>
     );
 
     expect(screen.getByText("Rakesh Verma")).toBeInTheDocument();
@@ -83,20 +87,22 @@ describe("Train Mode UI Components", () => {
 
   it("renders VideoCallStage with officer persona, REC badge, and user PiP", () => {
     render(
-      <VideoCallStage
-        callerName="Inspector D.A. Togav"
-        callerOrg="CBI Cyber Crime Cell"
-        tension={8}
-        isSpeaking={false}
-        isListening={false}
-        isTyping={false}
-        aiStatus={null}
-        lastScammerText="This is a legal summons for immediate digital arrest."
-        onSendMessage={() => {}}
-        onHangUp={() => {}}
-        onToggleMic={() => {}}
-        isDone={false}
-      />
+      <I18nProvider>
+        <VideoCallStage
+          callerName="Inspector D.A. Togav"
+          callerOrg="CBI Cyber Crime Cell"
+          tension={8}
+          isSpeaking={false}
+          isListening={false}
+          isTyping={false}
+          aiStatus={null}
+          lastScammerText="This is a legal summons for immediate digital arrest."
+          onSendMessage={() => {}}
+          onHangUp={() => {}}
+          onToggleMic={() => {}}
+          isDone={false}
+        />
+      </I18nProvider>
     );
 
     expect(screen.getByText("Inspector D.A. Togav")).toBeInTheDocument();
@@ -105,4 +111,51 @@ describe("Train Mode UI Components", () => {
     expect(screen.getAllByText(/Camera Off/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Hang Up/i)).toBeInTheDocument();
   });
+
+  it("renders EmergencyCountermeasures with Power Off, Airplane Mode, 1930, and Reality Check", () => {
+    render(
+      <I18nProvider>
+        <EmergencyCountermeasures
+          onPowerOff={() => {}}
+          onAirplaneMode={() => {}}
+          onDial1930={() => {}}
+          onBlockNumber={() => {}}
+          callerName="Inspector Vikram"
+          callerOrg="Cyber Crime Wing"
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText("Emergency Panic Neutralizers")).toBeInTheDocument();
+    expect(screen.getByText("Power Off Mobile")).toBeInTheDocument();
+    expect(screen.getByText("Airplane Mode")).toBeInTheDocument();
+    expect(screen.getByText("Dial 1930 Helpline")).toBeInTheDocument();
+    expect(screen.getByText("Reality Check")).toBeInTheDocument();
+  });
+
+  it("renders IncomingCallOverlay with repeated redialing badge and Answer/Decline buttons", () => {
+    render(
+      <I18nProvider>
+        <IncomingCallOverlay
+          callerName="Officer Vikram Rao"
+          callerOrg="CBI Investigation Branch"
+          callType="video"
+          attempt={2}
+          onAccept={() => {}}
+          onDecline={() => {}}
+          onPowerOff={() => {}}
+          onAirplaneMode={() => {}}
+          onDial1930={() => {}}
+          onBlockNumber={() => {}}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText("Officer Vikram Rao")).toBeInTheDocument();
+    expect(screen.getByText("CBI Investigation Branch")).toBeInTheDocument();
+    expect(screen.getByText(/RELENTLESS REDIAL · ATTEMPT 2 OF 3/i)).toBeInTheDocument();
+    expect(screen.getByText("Accept & Answer")).toBeInTheDocument();
+    expect(screen.getByText("Decline")).toBeInTheDocument();
+  });
 });
+

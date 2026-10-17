@@ -1,4 +1,5 @@
 import React from "react";
+import { useT } from "@/lib/i18n";
 
 interface PressureMeterProps {
   tension: number; // 0 to 10
@@ -6,10 +7,12 @@ interface PressureMeterProps {
 }
 
 export function PressureMeter({ tension, className = "" }: PressureMeterProps) {
+  const { t } = useT();
+
   const getLevel = () => {
-    if (tension <= 3) return { text: "Low Urgency", color: "text-safe-matcha", bg: "bg-safe-matcha" };
-    if (tension <= 6) return { text: "Medium Tension", color: "text-caution-kihada", bg: "bg-caution-kihada" };
-    return { text: "Critical Pressure", color: "text-danger-beni", bg: "bg-danger-beni" };
+    if (tension <= 3) return { text: t("pressure_meter.low"), color: "text-safe-matcha", bg: "bg-safe-matcha" };
+    if (tension <= 6) return { text: t("pressure_meter.medium"), color: "text-caution-kihada", bg: "bg-caution-kihada" };
+    return { text: t("pressure_meter.critical"), color: "text-danger-beni", bg: "bg-danger-beni" };
   };
 
   const level = getLevel();
@@ -17,14 +20,14 @@ export function PressureMeter({ tension, className = "" }: PressureMeterProps) {
   return (
     <div
       role="meter"
-      aria-label="Psychological Urgency Meter"
+      aria-label={t("pressure_meter.aria_label")}
       aria-valuenow={tension}
       aria-valuemin={0}
       aria-valuemax={10}
       className={`flex flex-col gap-1 ${className}`}
     >
       <div className="flex items-center justify-between text-xs font-label-sm">
-        <span className="text-ink-sumi">Attacker Urgency Level</span>
+        <span className="text-ink-sumi">{t("pressure_meter.attacker_urgency")}</span>
         <span className={`font-bold ${level.color}`}>{level.text} ({tension}/10)</span>
       </div>
       <div className="h-2 w-full bg-surface-hanshi rounded-full overflow-hidden border border-line-ito/40">

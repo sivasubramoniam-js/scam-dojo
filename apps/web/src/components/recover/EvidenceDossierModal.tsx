@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useT } from "@/lib/i18n";
 import {
   FileText,
   Copy,
@@ -26,6 +27,7 @@ export function EvidenceDossierModal({
   defaultBank = "",
   defaultAmount = "",
 }: EvidenceDossierModalProps) {
+  const { t } = useT();
   // Form State
   const [victimName, setVictimName] = useState("");
   const [victimPhone, setVictimPhone] = useState("");
@@ -160,10 +162,10 @@ Contact: ${victimPhone || "[Phone Number]"}`;
             </div>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">
-                Official Evidence Dossier & Case Builder
+                {t("dossier_modal.title")}
               </h2>
               <p className="text-xs text-muted-foreground">
-                Generate pre-formatted legal dispute packets for cybercrime.gov.in (1930) and your bank.
+                {t("dossier_modal.subtitle")}
               </p>
             </div>
           </div>
@@ -182,12 +184,12 @@ Contact: ${victimPhone || "[Phone Number]"}`;
           <div className="bg-muted/30 border border-border rounded-xl p-4 space-y-4">
             <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
-              <span>Step 1: Enter Incident Key Facts (takes 60 seconds)</span>
+              <span>{t("dossier_modal.step1")}</span>
             </h3>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Your Full Name</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.full_name")}</label>
                 <input
                   type="text"
                   value={victimName}
@@ -198,7 +200,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Your Mobile Number</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.mobile")}</label>
                 <input
                   type="text"
                   value={victimPhone}
@@ -209,7 +211,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Your Bank Name</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.bank_name")}</label>
                 <input
                   type="text"
                   value={bankName}
@@ -220,7 +222,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Your Account (Last 4 Digits)</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.account_last4")}</label>
                 <input
                   type="text"
                   maxLength={4}
@@ -232,7 +234,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Transaction UTR / Reference ID</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.utr")}</label>
                 <input
                   type="text"
                   value={utrNumber}
@@ -243,7 +245,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Amount Debited (₹)</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.amount")}</label>
                 <input
                   type="text"
                   value={amountLost}
@@ -254,7 +256,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Suspect Mobile / WhatsApp</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.suspect_mobile")}</label>
                 <input
                   type="text"
                   value={suspectPhone}
@@ -265,7 +267,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground">Suspect Beneficiary UPI / Account</label>
+                <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.suspect_account")}</label>
                 <input
                   type="text"
                   value={suspectUpiOrAccount}
@@ -277,7 +279,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-muted-foreground">Brief Incident Description</label>
+              <label className="text-[11px] font-bold text-muted-foreground">{t("dossier_modal.incident_desc")}</label>
               <textarea
                 rows={2}
                 value={incidentDetails}
@@ -301,7 +303,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
-                  cybercrime.gov.in / 1930 Format
+                  {t("dossier_modal.tab_police")}
                 </button>
                 <button
                   type="button"
@@ -312,7 +314,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
-                  Bank RBI Dispute Letter
+                  {t("dossier_modal.tab_bank")}
                 </button>
               </div>
 
@@ -330,12 +332,12 @@ Contact: ${victimPhone || "[Phone Number]"}`;
                   {copied === activeTab ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Copied!</span>
+                      <span>{t("dossier_modal.copied")}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Document</span>
+                      <span>{t("dossier_modal.copy")}</span>
                     </>
                   )}
                 </button>
@@ -347,7 +349,7 @@ Contact: ${victimPhone || "[Phone Number]"}`;
                   title="Download both packets as .txt"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Download .txt</span>
+                  <span>{t("dossier_modal.download")}</span>
                 </button>
               </div>
             </div>
@@ -362,14 +364,14 @@ Contact: ${victimPhone || "[Phone Number]"}`;
         {/* Footer */}
         <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20 text-xs">
           <div className="text-muted-foreground">
-            💡 Submit the Police format on <strong>cybercrime.gov.in</strong> or read it aloud to <strong>1930</strong>. Email the bank letter to your branch fraud desk.
+            {t("dossier_modal.tip")}
           </div>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition"
           >
-            Done
+            {t("dossier_modal.done")}
           </button>
         </div>
       </div>

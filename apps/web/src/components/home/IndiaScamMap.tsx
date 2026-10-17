@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { scaleLinear } from "d3-scale";
+import { useT } from "@/lib/i18n";
 import {
   ShieldAlert,
   TrendingUp,
@@ -353,6 +354,7 @@ export const INDIA_STATE_SCAM_DATA: Record<string, StateRecord> = {
 type MetricMode = "loss" | "cases";
 
 export default function IndiaScamMap() {
+  const { t } = useT();
   const [metric, setMetric] = useState<MetricMode>("loss");
   const [hoveredState, setHoveredState] = useState<StateRecord | null>(null);
   const [selectedState, setSelectedState] = useState<StateRecord>(
@@ -410,14 +412,13 @@ export default function IndiaScamMap() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
             <Flame className="w-3.5 h-3.5 text-rose-400 fill-rose-400 animate-pulse" />
-            <span>Official I4C & NCRB Open Data Grounded</span>
+            <span>{t("map.tag")}</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black font-display tracking-tight text-white">
-            India State-Wise Cybercrime & Scam Map
+            {t("map.title")}
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-            Interactive geographic heatmap showing 5-year cumulative financial losses, reported 1930
-            cases, and dominant attack vectors across all 36 States & Union Territories.
+            {t("map.desc")}
           </p>
         </div>
 
@@ -432,7 +433,7 @@ export default function IndiaScamMap() {
                 : "text-slate-300 hover:text-white"
             }`}
           >
-            Financial Loss (₹ Crores)
+            {t("map.metric.loss")}
           </button>
           <button
             type="button"
@@ -443,7 +444,7 @@ export default function IndiaScamMap() {
                 : "text-slate-300 hover:text-white"
             }`}
           >
-            Reported Cases (1930)
+            {t("map.metric.cases")}
           </button>
         </div>
       </div>
@@ -458,7 +459,7 @@ export default function IndiaScamMap() {
               <Search className="w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search state (e.g. Maharashtra, Telangana, Delhi)..."
+                placeholder={t("map.search.placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none outline-none text-white w-full placeholder:text-slate-500 font-medium"
@@ -469,7 +470,7 @@ export default function IndiaScamMap() {
                   onClick={() => setSearchQuery("")}
                   className="text-slate-400 hover:text-white text-xs font-bold"
                 >
-                  Clear
+                  {t("map.search.clear")}
                 </button>
               )}
             </div>
@@ -561,7 +562,7 @@ export default function IndiaScamMap() {
           {/* Color Gradient Legend */}
           <div className="w-full mt-4 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
             <span className="font-semibold text-slate-300">
-              Severity Intensity: {metric === "loss" ? "Financial Loss (Cr)" : "Case Count"}
+              {t("map.severity")}: {metric === "loss" ? t("map.metric.loss") : t("map.metric.cases")}
             </span>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-sky-300">&lt; ₹50 Cr</span>
@@ -578,7 +579,7 @@ export default function IndiaScamMap() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                 <MapPin className="w-4 h-4 text-rose-500" />
-                <span>Selected State Intelligence</span>
+                <span>{t("map.selected.intel")}</span>
               </div>
               <span
                 className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
@@ -589,7 +590,7 @@ export default function IndiaScamMap() {
                     : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                 }`}
               >
-                {activeDisplayState.riskTier} Threat Zone
+                {activeDisplayState.riskTier} {t("map.threat_zone")}
               </span>
             </div>
 
@@ -601,7 +602,7 @@ export default function IndiaScamMap() {
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
                 <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">
-                  5-Year Funds Lost
+                  {t("map.stat.funds_lost")}
                 </div>
                 <div className="text-2xl font-black text-rose-400">
                   ₹{activeDisplayState.lossCrores.toLocaleString()}
@@ -611,7 +612,7 @@ export default function IndiaScamMap() {
 
               <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
                 <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">
-                  Reported Cyber Incidents
+                  {t("map.stat.reported_cases")}
                 </div>
                 <div className="text-2xl font-black text-amber-400">
                   {activeDisplayState.casesReported.toLocaleString()}
@@ -624,7 +625,7 @@ export default function IndiaScamMap() {
             <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl mb-4 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
                 <AlertTriangle className="w-4 h-4" />
-                <span>Dominant Scam Modus Operandi</span>
+                <span>{t("map.dominant_modus")}</span>
               </div>
               <p className="text-xs sm:text-sm font-semibold text-slate-200 leading-snug">
                 {activeDisplayState.dominantScam}
@@ -634,12 +635,12 @@ export default function IndiaScamMap() {
             {/* Hotspots & Cybercell */}
             <div className="space-y-3 text-xs border-t border-slate-800 pt-4">
               <div>
-                <span className="text-slate-400 font-bold block mb-0.5">Key Identified Cybercrime Hotspots:</span>
+                <span className="text-slate-400 font-bold block mb-0.5">{t("map.hotspots")}</span>
                 <span className="text-slate-200 font-medium">{activeDisplayState.hotspots}</span>
               </div>
 
               <div>
-                <span className="text-slate-400 font-bold block mb-0.5">Official State Police Escalation:</span>
+                <span className="text-slate-400 font-bold block mb-0.5">{t("map.police_escalation")}</span>
                 <span className="text-emerald-400 font-bold font-mono">{activeDisplayState.helpline}</span>
               </div>
             </div>
@@ -650,9 +651,9 @@ export default function IndiaScamMap() {
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-rose-400" />
-                <span>Top 5 States by {metric === "loss" ? "Financial Loss" : "Incident Volume"}</span>
+                <span>{t("map.top_states")} {metric === "loss" ? t("map.metric.loss") : t("map.metric.cases")}</span>
               </h4>
-              <span className="text-[11px] text-slate-500 font-medium">Click to inspect</span>
+              <span className="text-[11px] text-slate-500 font-medium">{t("map.click_inspect")}</span>
             </div>
 
             <div className="space-y-2">

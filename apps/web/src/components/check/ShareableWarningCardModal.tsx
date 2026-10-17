@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CheckResult } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 import {
   Download,
   Share2,
@@ -21,6 +22,7 @@ export function ShareableWarningCardModal({
   onClose,
   checkResult,
 }: ShareableWarningCardModalProps) {
+  const { t } = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
@@ -226,10 +228,10 @@ export function ShareableWarningCardModal({
             </div>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">
-                Shareable Scam Warning Card
+                {t("warning_modal.title")}
               </h2>
               <p className="text-xs text-muted-foreground">
-                High-contrast alert card generated for WhatsApp groups & social media.
+                {t("warning_modal.subtitle")}
               </p>
             </div>
           </div>
@@ -259,7 +261,7 @@ export function ShareableWarningCardModal({
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition shadow-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Download Image (.png)</span>
+              <span>{t("warning_modal.download")}</span>
             </button>
 
             <button
@@ -268,7 +270,7 @@ export function ShareableWarningCardModal({
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold transition shadow-sm"
             >
               <Share2 className="w-4 h-4" />
-              <span>Share to WhatsApp</span>
+              <span>{t("warning_modal.share_whatsapp")}</span>
             </button>
 
             <button
@@ -279,12 +281,12 @@ export function ShareableWarningCardModal({
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Copied!</span>
+                  <span>{t("warning_modal.copied")}</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>Copy Image</span>
+                  <span>{t("warning_modal.copy_image")}</span>
                 </>
               )}
             </button>
@@ -295,7 +297,7 @@ export function ShareableWarningCardModal({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl bg-muted text-muted-foreground hover:text-foreground font-bold transition"
           >
-            Close
+            {t("warning_modal.close")}
           </button>
         </div>
       </div>

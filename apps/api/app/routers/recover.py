@@ -442,9 +442,9 @@ async def recovery_chat(
     user_msg = {"role": "user", "text": req.text, "ts": now_iso}
 
     answer_text = (
-        "Stay calm. The most important step right now is to contact National Cyber Crime Helpline 1930 "
-        "and file an official dispute with your bank branch so an interbank lien can be placed. "
-        "Remember: legitimate police and banks will never ask you to pay money to recover lost funds."
+        "• Stay calm and act quickly: Call the National Cyber Crime Helpline at 1930 immediately to place an interbank lien on fraudulent accounts.\n"
+        "• File an official written dispute at your home bank branch within 3 days to preserve zero/limited liability under RBI rules.\n"
+        "• Caution: Police and banks will never ask for fees to recover money. Never trust third-party 'recovery agents' on Telegram or social media."
     )
 
     if is_live_llm_enabled():
@@ -452,10 +452,9 @@ async def recovery_chat(
             from google.genai import types
 
             client = get_genai_client()
-            prompt = f"""
-You are the Scam Dojo Compassionate Recovery Advisor.
+            prompt = f"""You are the Scam Dojo Compassionate Recovery Advisor helping an Indian cybercrime victim.
 A victim who suffered a scam is asking a follow-up question.
-Provide calm, empathetic, clear, and legally sound advice strictly aligned with Indian law, RBI rules, and Cyber Helpline 1930.
+Provide calm, empathetic, crisp, and legally sound advice strictly aligned with Indian law, RBI guidelines, and Cyber Helpline 1930.
 
 Plan context:
 - Urgency: {doc.get('urgency')}
@@ -464,18 +463,33 @@ Plan context:
 User's question:
 \"\"\"{req.text}\"\"\"
 
-Rules:
-1. Always maintain a reassuring, non-judgmental, and calm tone.
-2. Never promise 100% money recovery; be honest and practical about bank and police timelines.
-3. Strictly emphasize official channels only (Helpline 1930, cybercrime.gov.in, RBI CMS 14448, bank fraud desk).
-4. Forbid and warn against private recovery scammers or hackers on Telegram/Instagram.
+MANDATORY RESPONSE FORMAT & LENGTH (STRICT):
+1. STRICT LENGTH LIMIT: Under 90 words total. Do NOT write long essays or walls of text.
+2. Structure your reply in 2 to 3 concise, bullet-pointed action items (or 2-3 short, clean sentences).
+3. First point: Empathetic, calm reassurance acknowledging their situation.
+4. Next points: Concrete, practical official steps (e.g. Call 1930, bank written grievance quoting RBI circular, cybercrime.gov.in).
+5. Explicitly warn against fake recovery agents on Telegram, Instagram, or WhatsApp.
+6. If the user mentions extreme distress or self-harm, immediately provide the Tele-MANAS toll-free helpline (14416 / 1800-891-4416).
 """
-            resp = await client.aio.models.generate_content(
-                model=settings.MODEL_FAST,
-                contents=prompt,
+            config = types.GenerateContentConfig(
+                max_output_tokens=500,
+                temperature=0.3,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
             )
-            if resp.text:
-                answer_text = resp.text.strip()
+            candidate_models = [settings.MODEL_FAST, settings.MODEL_FALLBACK]
+            resp = None
+            for candidate_model in candidate_models:
+                try:
+                    resp = await client.aio.models.generate_content(
+                        model=candidate_model,
+                        contents=prompt,
+                        config=config,
+                    )
+                    if resp and resp.text:
+                        answer_text = resp.text.strip()
+                        break
+                except Exception as model_err:
+                    logger.warning("Recovery chat candidate model %s failed: %s", candidate_model, model_err)
         except Exception as e:
             logger.warning("Recovery chat Gemini call failed: %s", e)
 

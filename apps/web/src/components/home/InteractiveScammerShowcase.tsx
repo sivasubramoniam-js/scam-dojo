@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "@/lib/navigation";
 import { RoughAnnotation } from "./RoughAnnotation";
+import { useT } from "@/lib/i18n";
 
 interface ScenarioSlide {
   id: string;
@@ -23,6 +24,7 @@ interface ScenarioSlide {
 }
 
 export function InteractiveScammerShowcase() {
+  const { t } = useT();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [activeModal, setActiveModal] = useState<"chat" | "voice" | "video">("chat");
   const [showAnnotations, setShowAnnotations] = useState(true);
@@ -56,16 +58,16 @@ export function InteractiveScammerShowcase() {
     try {
       const res = el.play();
       if (res && typeof res.catch === "function") {
-        res.catch(() => {});
+        res.catch(() => { });
       }
-    } catch {}
+    } catch { }
   };
 
   const safePause = (el: HTMLVideoElement | null) => {
     if (!el || typeof el.pause !== "function") return;
     try {
       el.pause();
-    } catch {}
+    } catch { }
   };
 
   // Synchronize 2x speed for talking video loop, 1x for listening video loop
@@ -532,9 +534,8 @@ export function InteractiveScammerShowcase() {
                 key={scen.id}
                 type="button"
                 onClick={() => setCurrentSlideIndex(idx)}
-                className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                  currentSlideIndex === idx ? "w-8 bg-[var(--act)]" : "w-2.5 bg-[var(--line)] hover:bg-[var(--mut)]"
-                }`}
+                className={`h-2.5 rounded-full transition-all cursor-pointer ${currentSlideIndex === idx ? "w-8 bg-[var(--act)]" : "w-2.5 bg-[var(--line)] hover:bg-[var(--mut)]"
+                  }`}
                 title={`Go to ${scen.title}`}
               />
             ))}
@@ -581,32 +582,29 @@ export function InteractiveScammerShowcase() {
           <button
             type="button"
             onClick={() => setActiveModal("chat")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-              activeModal === "chat" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "chat" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+              }`}
           >
             <span className="material-symbols-outlined text-[15px]">chat</span>
-            <span>Chat UI</span>
+            <span>{t("train.mode.chat")}</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveModal("voice")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-              activeModal === "voice" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "voice" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+              }`}
           >
             <span className="material-symbols-outlined text-[15px]">call</span>
-            <span>Voice Call UI</span>
+            <span>{t("train.mode.audio")}</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveModal("video")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-              activeModal === "video" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "video" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+              }`}
           >
             <span className="material-symbols-outlined text-[15px]">videocam</span>
-            <span>Video Call UI</span>
+            <span>{t("train.mode.video")}</span>
           </button>
         </div>
       </div>
@@ -637,11 +635,10 @@ export function InteractiveScammerShowcase() {
                 <button
                   type="button"
                   onClick={() => setShowAnnotations(!showAnnotations)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border ${
-                    showAnnotations
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border ${showAnnotations
                       ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
                       : "bg-slate-800 text-slate-400 border-slate-700"
-                  }`}
+                    }`}
                   title="Toggle Hand-drawn Red Flag Highlights"
                 >
                   <span className="material-symbols-outlined text-[15px]">draw</span>
@@ -764,9 +761,8 @@ export function InteractiveScammerShowcase() {
                 loop
                 muted
                 playsInline
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                  isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                }`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
               />
 
               {/* Listening Video (1x Speed Loop Mode, Muted, Plays until User Completes Speech) */}
@@ -777,9 +773,8 @@ export function InteractiveScammerShowcase() {
                 loop
                 muted
                 playsInline
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                  !isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                }`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${!isVideoTalking ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
               />
 
               {/* CCTV & Interrogation Overlay Grid */}
@@ -798,22 +793,20 @@ export function InteractiveScammerShowcase() {
                   <button
                     type="button"
                     onClick={() => setVideoPersona("police")}
-                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${
-                      videoPersona === "police"
+                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${videoPersona === "police"
                         ? "bg-blue-600 text-white font-black shadow-xs"
                         : "text-slate-400 hover:text-white"
-                    }`}
+                      }`}
                   >
                     👮 Police Feed
                   </button>
                   <button
                     type="button"
                     onClick={() => setVideoPersona("customs")}
-                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${
-                      videoPersona === "customs"
+                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${videoPersona === "customs"
                         ? "bg-amber-600 text-white font-black shadow-xs"
                         : "text-slate-400 hover:text-white"
-                    }`}
+                      }`}
                   >
                     🛃 Customs Feed
                   </button>
@@ -842,11 +835,10 @@ export function InteractiveScammerShowcase() {
                     <button
                       type="button"
                       onClick={() => setIsVideoTalking(true)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${
-                        isVideoTalking
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${isVideoTalking
                           ? "bg-rose-600 text-white shadow-xs font-black animate-pulse"
                           : "bg-slate-800 text-slate-300 hover:text-white"
-                      }`}
+                        }`}
                       title="Play Talking Video in 2x Speed Loop"
                     >
                       <span>🗣️</span>
@@ -861,11 +853,10 @@ export function InteractiveScammerShowcase() {
                         setIsVoiceoverPlaying(false);
                         setIsVideoTalking(false);
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${
-                        !isVideoTalking
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${!isVideoTalking
                           ? "bg-emerald-600 text-white shadow-xs font-black animate-pulse"
                           : "bg-slate-800 text-slate-300 hover:text-white"
-                      }`}
+                        }`}
                       title="Play Listening Video in Loop until speech completes"
                     >
                       <span>👂</span>
@@ -877,11 +868,10 @@ export function InteractiveScammerShowcase() {
                   <button
                     type="button"
                     onClick={() => toggleVoiceover(current.voiceTranscript)}
-                    className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-md ${
-                      isVoiceoverPlaying
+                    className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-md ${isVoiceoverPlaying
                         ? "bg-red-600 text-white animate-pulse"
                         : "bg-amber-500 hover:bg-amber-400 text-slate-950"
-                    }`}
+                      }`}
                     title="Play voiceover simultaneously with 2x talking video loop"
                   >
                     <span className="material-symbols-outlined text-[14px]">
@@ -921,7 +911,7 @@ export function InteractiveScammerShowcase() {
             <div className="space-y-3">
               <div className="p-3.5 rounded-xl bg-[var(--sf2)]/60 border border-[var(--line)]">
                 <div className="text-[11px] font-bold text-[var(--bad)] uppercase mb-1 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px]">shield_alert</span>
+                  <span className="material-symbols-outlined text-[16px]">shield</span>
                   <span>Primary Coercion Tactic</span>
                 </div>
                 <p className="text-xs text-[var(--ink)] font-medium">

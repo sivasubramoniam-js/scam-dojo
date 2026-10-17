@@ -123,8 +123,14 @@ body {
 .dojo-main {
   max-width: 1280px;
   margin: auto;
-  padding: 0 20px 120px;
+  padding: 0 20px 100px;
   width: 100%;
+}
+
+@media (min-width: 768px) {
+  .dojo-main {
+    padding: 0 20px 32px;
+  }
 }
 
 .dojo-card {
@@ -231,9 +237,15 @@ body {
   z-index: 50;
 }
 
+@media (min-width: 768px) {
+  .dojo-tabs {
+    display: none !important;
+  }
+}
+
 .dojo-tab-btn {
   flex: 1;
-  max-width: 140px;
+  max-width: 160px;
   min-height: 48px;
   border-radius: 12px;
   font-weight: 600;

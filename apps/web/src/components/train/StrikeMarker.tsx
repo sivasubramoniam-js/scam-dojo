@@ -1,4 +1,5 @@
 import React from "react";
+import { useT } from "@/lib/i18n";
 
 interface StrikeMarkerProps {
   result: "blocked" | "landed" | "neutral";
@@ -6,19 +7,21 @@ interface StrikeMarkerProps {
 }
 
 export function StrikeMarker({ result, className = "" }: StrikeMarkerProps) {
+  const { t } = useT();
+
   const configs = {
     blocked: {
-      label: "Blocked",
+      label: t("strike_marker.blocked"),
       icon: "shield",
       color: "text-safe-matcha bg-safe-matcha/10 border-safe-matcha/30",
     },
     landed: {
-      label: "Landed",
+      label: t("strike_marker.landed"),
       icon: "close",
       color: "text-danger-beni bg-danger-beni/10 border-danger-beni/30",
     },
     neutral: {
-      label: "Neutral",
+      label: t("strike_marker.neutral"),
       icon: "remove",
       color: "text-ink-sumi bg-surface-hanshi border-line-ito/50",
     },

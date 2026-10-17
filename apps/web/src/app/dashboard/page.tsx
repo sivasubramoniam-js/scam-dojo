@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchDashboard, DashboardResponse } from "@/lib/api";
 import BeltGraphic from "@/components/common/BeltGraphic";
+import { useT } from "@/lib/i18n";
 import {
   Flame,
   ShieldCheck,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export function DashboardPage() {
+  const { t } = useT();
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,13 +74,13 @@ export function DashboardPage() {
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
           <Award className="w-3.5 h-3.5" />
-          Martial Defense Progress
+          {t("dash.header.tag")}
         </div>
         <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-          Your Belt & Resilience Ladder
+          {t("dash.header.title")}
         </h1>
         <p className="text-muted-foreground text-sm max-w-2xl">
-          Track your progress as you train your instincts, verify suspicious communications, and build permanent behavioral immunity against social engineering.
+          {t("dash.header.desc")}
         </p>
       </div>
 
@@ -95,16 +97,16 @@ export function DashboardPage() {
             {resilienceScore}
           </div>
           <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Resilience Score
+            {t("dash.stat.resilience")}
           </span>
         </div>
 
         {/* Belt & Streak Status */}
         <p className="text-sm sm:text-base text-foreground font-semibold">
-          <span className="capitalize">{currentBelt}</span> Belt · {streakDays}-Day Practice Streak
+          <span className="capitalize">{currentBelt}</span> {t("nav.belt")} · {streakDays} {t("dash.stat.days")} {t("dash.stat.streak")}
         </p>
         <p className="text-xs text-muted-foreground max-w-md">
-          Higher belts require consistent victory across diverse attack vectors: refusing OTP requests, verifying independently, and walking away from pressure.
+          {t("dash.radar.desc")}
         </p>
 
         {/* Quick Action CTAs */}
@@ -114,7 +116,7 @@ export function DashboardPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition shadow"
           >
             <Flame className="w-4 h-4 text-amber-400" />
-            <span>Enter Training Arena</span>
+            <span>{t("dash.btn.arena")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link
@@ -122,18 +124,18 @@ export function DashboardPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-muted text-foreground font-bold text-xs hover:bg-muted/80 transition border border-border"
           >
             <ShieldAlert className="w-4 h-4 text-emerald-500" />
-            <span>Inspect a Message</span>
+            <span>{t("dash.btn.inspect")}</span>
           </Link>
         </div>
       </div>
 
       {/* Recommended Next Drill */}
       {dashboard?.recommendedDrill && (
-        <div className="p-5 rounded-2xl border border-border bg-muted/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 rounded-2xl border border-border bg-muted/40 flex flex-col sm:row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="text-[10px] uppercase font-bold tracking-wider text-primary flex items-center gap-1.5">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
-              <span>Recommended Next Drill</span>
+              <span>{t("dash.drill.rec")}</span>
             </div>
             <div className="text-sm font-bold text-foreground">
               {dashboard.recommendedDrill.title}
@@ -146,7 +148,7 @@ export function DashboardPage() {
             to={`/train?slug=${dashboard.recommendedDrill.slug}`}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-95 transition shadow whitespace-nowrap self-start sm:self-auto"
           >
-            <span>Start Practice Drill</span>
+            <span>{t("dash.drill.start")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -157,20 +159,20 @@ export function DashboardPage() {
         {/* Tactics Sensitivity Breakdown */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-foreground">Tactics Sensitivity Profile</h3>
+            <h3 className="text-sm font-bold text-foreground">{t("dash.radar.title")}</h3>
             <p className="text-xs text-muted-foreground">
-              Your susceptibility score to different psychological triggers across recent drills.
+              {t("dash.radar.desc")}
             </p>
           </div>
 
           <div className="space-y-3.5 pt-2">
-            {dashboard?.tactics.map((t, idx) => {
-              const pct = Math.round(t.weakness * 100);
+            {dashboard?.tactics.map((tactic, idx) => {
+              const pct = Math.round(tactic.weakness * 100);
               return (
                 <div key={idx} className="space-y-1.5 text-xs">
                   <div className="flex items-center justify-between font-semibold">
-                    <span className="text-foreground">{t.label}</span>
-                    <span className="text-muted-foreground">{pct}% sensitivity</span>
+                    <span className="text-foreground">{tactic.label}</span>
+                    <span className="text-muted-foreground">{pct}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <div
@@ -189,30 +191,30 @@ export function DashboardPage() {
         {/* Global Stats & Milestones */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-foreground">Activity Summary</h3>
+            <h3 className="text-sm font-bold text-foreground">{t("dash.stats.activity")}</h3>
             <p className="text-xs text-muted-foreground">
-              Your defensive history across all three Scam Dojo modules.
+              {t("dash.stats.activity_desc")}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-1">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase">Threats Checked</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">{t("dash.stats.threats")}</div>
               <div className="text-2xl font-black text-foreground font-mono">
                 {dashboard?.checks.total ?? 0}
               </div>
               <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                {dashboard?.checks.likelyScam ?? 0} confirmed scams
+                {dashboard?.checks.likelyScam ?? 0} {t("dash.stats.confirmed")}
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-1">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase">Recovery Plans</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">{t("dash.stats.plans")}</div>
               <div className="text-2xl font-black text-foreground font-mono">
                 {dashboard?.recoveries.total ?? 0}
               </div>
               <div className="text-[11px] text-muted-foreground">
-                {dashboard?.recoveries.openSteps ?? 0} pending actions
+                {dashboard?.recoveries.openSteps ?? 0} {t("dash.stats.pending")}
               </div>
             </div>
           </div>
@@ -220,12 +222,12 @@ export function DashboardPage() {
           <div className="p-4 rounded-xl bg-muted/20 border border-border/60 text-xs space-y-2">
             <div className="font-bold text-foreground flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Dojo Defense Rules to Internalize:</span>
+              <span>{t("dash.rules.title")}</span>
             </div>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>No genuine bank asks for your OTP or UPI PIN to credit funds.</li>
-              <li>Always disconnect high-pressure calls and dial the number on your card.</li>
-              <li>Real government officials never demand payments over video calls.</li>
+              <li>{t("dash.rules.r1")}</li>
+              <li>{t("dash.rules.r2")}</li>
+              <li>{t("dash.rules.r3")}</li>
             </ul>
           </div>
         </div>
@@ -236,7 +238,7 @@ export function DashboardPage() {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
             <History className="w-4 h-4 text-primary" />
-            <span>Unified Activity History</span>
+            <span>{t("dash.history.title")}</span>
           </h3>
 
           <div className="divide-y divide-border">

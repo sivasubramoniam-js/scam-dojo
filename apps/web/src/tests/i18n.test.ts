@@ -1,21 +1,26 @@
 import { describe, it, expect } from "vitest";
 import en from "@/i18n/en.json";
 import hi from "@/i18n/hi.json";
+import ta from "@/i18n/ta.json";
+import te from "@/i18n/te.json";
+import ja from "@/i18n/ja.json";
+import id from "@/i18n/id.json";
+import zh from "@/i18n/zh.json";
 
-describe("i18n Key Parity", () => {
-  it("en.json and hi.json have identical key sets", () => {
-    const enKeys = Object.keys(en).sort();
-    const hiKeys = Object.keys(hi).sort();
+describe("i18n Key Parity across 7 JAPAC Languages", () => {
+  const dictionaries = { en, hi, ta, te, ja, id, zh };
+  const enKeys = Object.keys(en).sort();
 
-    expect(enKeys).toEqual(hiKeys);
-  });
+  for (const [langCode, dict] of Object.entries(dictionaries)) {
+    it(`${langCode}.json has identical key set to en.json`, () => {
+      const keys = Object.keys(dict).sort();
+      expect(keys).toEqual(enKeys);
+    });
 
-  it("no translations are empty strings", () => {
-    for (const [key, val] of Object.entries(en)) {
-      expect(val.trim().length, `Empty English value for key: ${key}`).toBeGreaterThan(0);
-    }
-    for (const [key, val] of Object.entries(hi)) {
-      expect(val.trim().length, `Empty Hindi value for key: ${key}`).toBeGreaterThan(0);
-    }
-  });
+    it(`${langCode}.json contains no empty strings`, () => {
+      for (const [key, val] of Object.entries(dict)) {
+        expect(val.trim().length, `Empty ${langCode} value for key: ${key}`).toBeGreaterThan(0);
+      }
+    });
+  }
 });

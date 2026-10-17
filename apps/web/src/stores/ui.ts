@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type Theme = "light" | "dark" | "system";
-export type Language = "en" | "hi";
+export type Language = "en" | "hi" | "ta" | "te" | "ja" | "id" | "zh";
 
 interface UiState {
   theme: Theme;

@@ -53,3 +53,8 @@ export async function fetchUserLocation(): Promise<UserLocationDetails | null> {
     return null;
   }
 }
+
+export function getUserLocation(): UserLocationDetails | null {
+  return cachedLocation || (typeof window !== "undefined" ? (window as any).__USER_LOCATION__ || null : null);
+}
+

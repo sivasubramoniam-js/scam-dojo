@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   createRecoveryPlan,
@@ -26,8 +26,12 @@ import {
 import { EvidenceDossierModal } from "@/components/recover/EvidenceDossierModal";
 import { BankFreezeDirectory } from "@/components/recover/BankFreezeDirectory";
 import { AntiRecoveryScamShield } from "@/components/recover/AntiRecoveryScamShield";
+import { PhysicalLocationsMap } from "@/components/recover/PhysicalLocationsMap";
+import { MarkdownView } from "@/components/common/MarkdownView";
+import { useT } from "@/lib/i18n";
 
 export function RecoverPage() {
+  const { t } = useT();
   // Wizard state
   const [inWizard, setInWizard] = useState(true);
   const [incidents, setIncidents] = useState<string[]>(["upi_payment"]);
@@ -52,6 +56,19 @@ export function RecoverPage() {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, chatLoading]);
+
+  const quickPrompts = [
+    "What if the bank branch refuses to register my dispute?",
+    "Can fraudulent UPI transfers be reversed?",
+    "Someone online offered to recover my money for an upfront fee.",
+  ];
 
   const incidentOptions = [
     { id: "upi_payment", label: "Approved UPI collect request / QR scan" },
@@ -159,12 +176,12 @@ export function RecoverPage() {
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  const handleSendChat = async () => {
-    const q = chatInput.trim();
+  const handleSendChat = async (promptOverride?: string) => {
+    const q = (promptOverride || chatInput).trim();
     if (!q || !plan) return;
 
     setChatMessages((prev) => [...prev, { role: "user", text: q }]);
-    setChatInput("");
+    if (!promptOverride) setChatInput("");
     setChatLoading(true);
 
     try {
@@ -175,7 +192,7 @@ export function RecoverPage() {
         ...prev,
         {
           role: "assistant",
-          text: "Dial 1930 first to place a lien on the recipient bank account. If the bank branch hesitates, quote RBI Circular DBR.No.Leg.BC.78/09.07.005/2017-18 which limits customer liability for prompt fraud reports.",
+          text: "• Call Helpline 1930 immediately to place an interbank lien on the recipient account.\n• File an urgent dispute with your bank branch quoting RBI Circular DBR.No.Leg.BC.78/09.07.005/2017-18.\n• Never pay any fee to recovery agents—official assistance is always free.",
         },
       ]);
     } finally {
@@ -190,13 +207,13 @@ export function RecoverPage() {
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5" />
-            Golden-Hour Fraud Triage & Recovery
+            {t("recover.header.tag")}
           </div>
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            I was targeted or lost money. What now?
+            {t("recover.header.title")}
           </h1>
           <p className="text-muted-foreground text-sm max-w-2xl">
-            Do not panic. Follow this step-by-step incident response plan. The first 2 hours are the "Golden Hour" where banks and Helpline 1930 have the highest chance to freeze funds.
+            {t("recover.header.desc")}
           </p>
         </div>
 
@@ -207,7 +224,7 @@ export function RecoverPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm"
           >
             <PhoneCall className="w-4 h-4" />
-            <span>Call 1930 Cyber Helpline</span>
+            <span>{t("recover.header.call1930")}</span>
           </a>
 
           <button
@@ -216,7 +233,7 @@ export function RecoverPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-bold transition shadow-sm"
           >
             <FileText className="w-4 h-4" />
-            <span>Build Official Police & Bank Evidence Dossier</span>
+            <span>{t("recover.header.dossier")}</span>
           </button>
         </div>
       </div>
@@ -227,15 +244,18 @@ export function RecoverPage() {
       {/* Emergency Bank Freeze Directory */}
       <BankFreezeDirectory />
 
+      {/* Google Maps: Visit Physical Locations (Bank Branch & Police Station / Cyber Cell) */}
+      <PhysicalLocationsMap defaultBank={bank} />
+
       {/* Guided Intake Wizard */}
       {inWizard ? (
         <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-          <h2 className="text-lg font-bold text-foreground">Tell us what happened (30 seconds)</h2>
+          <h2 className="text-lg font-bold text-foreground">{t("recover.wizard.title")}</h2>
 
           {/* Incidents Multi-Select */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase">
-              1. What kind of fraud or compromise occurred?
+              {t("recover.wizard.q1")}
             </label>
             <div className="grid gap-2 sm:grid-cols-2">
               {incidentOptions.map((opt) => {
@@ -266,7 +286,7 @@ export function RecoverPage() {
           {/* Time Elapsed */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase">
-              2. How long ago did this happen?
+              {t("recover.wizard.q2")}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
               {[
@@ -296,7 +316,7 @@ export function RecoverPage() {
           <div className="space-y-4 pt-2 border-t border-border">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-bold text-foreground">Did you lose money?</div>
+                <div className="text-sm font-bold text-foreground">{t("recover.wizard.q3")}</div>
                 <div className="text-xs text-muted-foreground">Was money debited from your account or card?</div>
               </div>
               <div className="flex gap-2">
@@ -307,7 +327,7 @@ export function RecoverPage() {
                     moneyLost ? "bg-rose-500 text-white" : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  Yes, lost money
+                  {t("recover.money.yes")}
                 </button>
                 <button
                   type="button"
@@ -316,7 +336,7 @@ export function RecoverPage() {
                     !moneyLost ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  No, but shared data
+                  {t("recover.money.no")}
                 </button>
               </div>
             </div>
@@ -357,7 +377,7 @@ export function RecoverPage() {
             onClick={handleGeneratePlan}
             className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-95 active:scale-[0.99] transition shadow"
           >
-            {loading ? "Generating Priority Action Plan..." : "Create My Recovery Action Plan"}
+            {loading ? "Generating Priority Action Plan..." : t("recover.wizard.submit")}
           </button>
         </div>
       ) : (
@@ -546,26 +566,51 @@ export function RecoverPage() {
 
             {/* In-page Recovery Chatbot */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-primary" />
-                <span>Ask the Dojo Recovery Assistant</span>
-              </h3>
-              <div className="space-y-3 max-h-60 overflow-y-auto p-3 bg-muted/20 rounded-xl border border-border/50 text-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <span>Ask the Dojo Recovery Assistant</span>
+                </h3>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/60 px-2 py-0.5 rounded-full">
+                  Bite-sized official advice (Helpline 1930 & RBI)
+                </span>
+              </div>
+
+              {/* Quick Prompt Chips */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {quickPrompts.map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    disabled={chatLoading}
+                    onClick={() => handleSendChat(prompt)}
+                    className="text-[11px] px-2.5 py-1 rounded-lg border border-border/80 bg-muted/30 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-foreground transition disabled:opacity-50 text-left"
+                  >
+                    💬 {prompt}
+                  </button>
+                ))}
+              </div>
+
+              <div
+                ref={chatContainerRef}
+                className="space-y-3 max-h-80 overflow-y-auto p-3.5 bg-muted/20 rounded-xl border border-border/50 text-xs"
+              >
                 {chatMessages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`p-3 rounded-xl max-w-[85%] leading-relaxed ${
+                    className={`p-3.5 rounded-xl max-w-[85%] leading-relaxed ${
                       msg.role === "user"
-                        ? "ml-auto bg-primary text-primary-foreground font-medium"
-                        : "bg-background border border-border text-foreground"
+                        ? "ml-auto bg-primary text-primary-foreground font-medium shadow-xs"
+                        : "bg-background border border-border text-foreground shadow-xs"
                     }`}
                   >
-                    {msg.text}
+                    <MarkdownView content={msg.text} />
                   </div>
                 ))}
                 {chatLoading && (
-                  <div className="bg-background border border-border p-3 rounded-xl text-xs text-muted-foreground animate-pulse">
-                    Thinking and consulting verified RBI / Cyber Crime procedures...
+                  <div className="bg-background border border-border p-3.5 rounded-xl text-xs text-muted-foreground animate-pulse flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                    <span>Consulting verified Cyber Crime & RBI guidelines...</span>
                   </div>
                 )}
               </div>
@@ -582,8 +627,8 @@ export function RecoverPage() {
                 <button
                   type="button"
                   disabled={chatLoading || !chatInput.trim()}
-                  onClick={handleSendChat}
-                  className="px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition disabled:opacity-50"
+                  onClick={() => handleSendChat()}
+                  className="px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center"
                 >
                   <Send className="w-4 h-4" />
                 </button>
