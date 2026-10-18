@@ -39,13 +39,11 @@ class WebRiskService:
         if not normalized_url.startswith(("http://", "https://")):
             normalized_url = f"https://{normalized_url}"
 
-        params = [
-            ("threatTypes", "MALWARE"),
-            ("threatTypes", "SOCIAL_ENGINEERING"),
-            ("threatTypes", "UNWANTED_SOFTWARE"),
-            ("uri", normalized_url),
-            ("key", api_key),
-        ]
+        params = {
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"],
+            "uri": normalized_url,
+            "key": api_key,
+        }
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:

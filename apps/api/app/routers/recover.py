@@ -352,7 +352,7 @@ async def create_recovery_plan(
         protect_next=protect_next,
         suggested_drill=suggested_drill,
         degraded=False,
-        disclaimer=plan_doc["disclaimer"],
+        disclaimer=str(plan_doc["disclaimer"]),
         resources_verified_on="2026-10-14",
         chat=[],
     )
