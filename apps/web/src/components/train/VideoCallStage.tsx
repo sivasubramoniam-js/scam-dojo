@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
 import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
+import { createSpeechSynthesizer } from "@/lib/speech";
 import { useT } from "@/lib/i18n";
 
 export type VideoPersona = "police" | "customs" | "other";
@@ -130,6 +131,7 @@ export function VideoCallStage({
   const [liveCaptions, setLiveCaptions] = useState<string>("");
   const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
+  const synthRef = useRef(createSpeechSynthesizer());
 
   const userVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -296,6 +298,7 @@ export function VideoCallStage({
     return () => {
       isDisposed = true;
       onSpeakingChange?.(false);
+      synthRef.current.stop();
       liveClient.disconnect();
       liveClientRef.current = null;
     };
@@ -320,17 +323,25 @@ export function VideoCallStage({
       setLiveCaptions("");
     }
 
-    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
+    // Only synthesize when message has finished streaming completely (!isTyping) and not yet spoken
     if (
-      liveConnected &&
       !isTyping &&
       lastScammerText &&
-      liveClientRef.current &&
       !spokenTextsRef.current.has(lastScammerText)
     ) {
       spokenTextsRef.current.add(lastScammerText);
-      liveClientRef.current.stopAudioPlayback();
-      liveClientRef.current.sendText(lastScammerText);
+      if (liveConnected && liveClientRef.current) {
+        liveClientRef.current.stopAudioPlayback();
+        liveClientRef.current.sendText(lastScammerText);
+      } else {
+        synthRef.current.resume();
+        synthRef.current.speak(lastScammerText, () => {
+          setLiveSpeaking(false);
+          onSpeakingChange?.(false);
+        });
+        setLiveSpeaking(true);
+        onSpeakingChange?.(true);
+      }
     }
   }, [lastScammerText, isTyping, liveConnected]);
 

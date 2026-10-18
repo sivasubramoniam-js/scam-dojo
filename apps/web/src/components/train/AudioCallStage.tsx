@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
 import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
+import { createSpeechSynthesizer } from "@/lib/speech";
 import { useT } from "@/lib/i18n";
 
 interface AudioCallStageProps {
@@ -58,11 +59,12 @@ export function AudioCallStage({
   const [liveCaptions, setLiveCaptions] = useState<string>("");
   const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
+  const synthRef = useRef(createSpeechSynthesizer());
 
   const isSpeaking = liveSpeaking || externalIsSpeaking;
   const isListening = externalIsListening;
 
-  // Track which scammer texts have already been spoken by Gemini Live
+  // Track which scammer texts have already been spoken by Gemini Live / TTS
   const spokenTextsRef = useRef<Set<string>>(new Set());
   const lastScammerTextRef = useRef(lastScammerText);
   lastScammerTextRef.current = lastScammerText;
@@ -134,6 +136,7 @@ export function AudioCallStage({
     return () => {
       isDisposed = true;
       onSpeakingChange?.(false);
+      synthRef.current.stop();
       liveClient.disconnect();
       liveClientRef.current = null;
     };
@@ -146,17 +149,25 @@ export function AudioCallStage({
       setLiveCaptions("");
     }
 
-    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
+    // Only synthesize when message has finished streaming completely (!isTyping) and not yet spoken
     if (
-      liveConnected &&
       !isTyping &&
       lastScammerText &&
-      liveClientRef.current &&
       !spokenTextsRef.current.has(lastScammerText)
     ) {
       spokenTextsRef.current.add(lastScammerText);
-      liveClientRef.current.stopAudioPlayback();
-      liveClientRef.current.sendText(lastScammerText);
+      if (liveConnected && liveClientRef.current) {
+        liveClientRef.current.stopAudioPlayback();
+        liveClientRef.current.sendText(lastScammerText);
+      } else {
+        synthRef.current.resume();
+        synthRef.current.speak(lastScammerText, () => {
+          setLiveSpeaking(false);
+          onSpeakingChange?.(false);
+        });
+        setLiveSpeaking(true);
+        onSpeakingChange?.(true);
+      }
     }
   }, [lastScammerText, isTyping, liveConnected]);
 
