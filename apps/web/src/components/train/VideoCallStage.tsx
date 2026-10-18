@@ -3,9 +3,77 @@ import { GeminiLiveClient } from "@/lib/geminiLive";
 import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
 import { useT } from "@/lib/i18n";
 
+export type VideoPersona = "police" | "customs" | "other";
+
+export function detectVideoPersona(input: {
+  slug?: string;
+  title?: string;
+  callerOrg?: string;
+  callerName?: string;
+  text?: string;
+}): VideoPersona {
+  const slug = (input.slug || "").toLowerCase();
+  const callerOrg = (input.callerOrg || "").toLowerCase();
+  const title = (input.title || "").toLowerCase();
+  const callerName = (input.callerName || "").toLowerCase();
+  const text = (input.text || "").toLowerCase();
+
+  // Primary authority metadata reflects the agency the scammer is impersonating on video
+  const authorityMetadata = `${slug} ${callerOrg} ${title} ${callerName}`;
+
+  // 1. POLICE / LAW ENFORCEMENT / CBI / DIGITAL ARREST
+  // In Digital Arrest scams, scammers fabricate a narrative that "Customs seized a parcel",
+  // but the actor on the video call IS A POLICE OFFICER in uniform.
+  // Therefore, if the scenario slug, organization, title, or persona is police/cbi/digital arrest,
+  // it must ALWAYS use the Police video!
+  const isPoliceAuthority =
+    /digital_arrest|police|cbi\b|cyber\s*crime|cyber\s*cell|crime\s*branch|law\s*enforcement|anti-extortion|enforcement\s*directorate|\bed\b|nia\b|interpol|thana|police\s*station|sub-inspector|inspector\b/i.test(
+      authorityMetadata
+    );
+
+  const isUtilityOrBankAuthority =
+    /electricity|electric|power|bescom|discom|substation|lineman|feeder|meter\b|water\b|gas\b|utility|bill\b|banking|bank\b|sbi|hdfc|icici|rbi\b|kyc\b|telecom|airtel|jio|trai\b|sim\b|job\b|task\b|trading|crypto|loan\b|lottery/i.test(
+      authorityMetadata
+    );
+
+  if (isPoliceAuthority && !isUtilityOrBankAuthority) {
+    return "police";
+  }
+
+  // 2. CUSTOMS / NARCOTICS / COURIER INTERDICTION
+  const isCustomsAuthority =
+    /courier_customs|customs|narcotics|parcel|courier|fedex|dhl|cargo|contraband|shipment|logistics/i.test(
+      authorityMetadata
+    );
+
+  if (isCustomsAuthority) {
+    return "customs";
+  }
+
+  // 3. Fallback: inspect spoken text only if authority metadata was completely unspecified
+  if (text) {
+    const isPoliceInText =
+      /digital\s*arrest|cyber\s*crime\s*cell|cbi\b|police\s*officer|arrest\s*warrant|police\s*station|sub-inspector/i.test(
+        text
+      );
+    const isCustomsInText =
+      /customs\s*officer|customs\s*department|narcotics\s*control|courier\s*seizure/i.test(
+        text
+      );
+
+    if (isPoliceInText) return "police";
+    if (isCustomsInText) return "customs";
+  }
+
+  // 4. Any other department (Electricity, Bank, Telecom, Jobs, Generic Official -> Man video)
+  return "other";
+}
+
 interface VideoCallStageProps {
   callerName: string;
   callerOrg: string;
+  drillSlug?: string;
+  scenarioTitle?: string;
   tension: number; // 0 to 10
   isSpeaking: boolean;
   isListening: boolean;
@@ -28,6 +96,8 @@ interface VideoCallStageProps {
 export function VideoCallStage({
   callerName,
   callerOrg,
+  drillSlug,
+  scenarioTitle,
   tension,
   isSpeaking: externalIsSpeaking,
   isListening: externalIsListening,
@@ -125,12 +195,27 @@ export function VideoCallStage({
     };
   }, []);
 
-  const isCustomsDetected = /customs|fedex|parcel|narcotics|dhl|courier/i.test(
-    (callerOrg || "") + " " + (callerName || "")
+  const [videoPersona, setVideoPersona] = useState<VideoPersona>(() =>
+    detectVideoPersona({
+      slug: drillSlug,
+      title: scenarioTitle,
+      callerOrg,
+      callerName,
+      text: lastScammerText,
+    })
   );
-  const [videoPersona, setVideoPersona] = useState<"police" | "customs">(
-    isCustomsDetected ? "customs" : "police"
-  );
+
+  useEffect(() => {
+    setVideoPersona(
+      detectVideoPersona({
+        slug: drillSlug,
+        title: scenarioTitle,
+        callerOrg,
+        callerName,
+        text: lastScammerText,
+      })
+    );
+  }, [drillSlug, scenarioTitle, callerOrg, callerName]);
 
   const talkingVideoRef = useRef<HTMLVideoElement | null>(null);
   const listeningVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -249,18 +334,48 @@ export function VideoCallStage({
     }
   }, [lastScammerText, isTyping, liveConnected]);
 
-  const PERSONA_VIDEOS = {
+  const PERSONA_VIDEOS: Record<
+    VideoPersona,
+    {
+      name: string;
+      casePrefix: string;
+      legalNotice: string;
+      defaultName: string;
+      defaultOrg: string;
+      speakerLabel: string;
+      talking: string;
+      listening: string;
+    }
+  > = {
     police: {
       name: "CBI Cyber Crime Cell",
       casePrefix: "CBI/E-CYBER/2026/8942",
+      legalNotice: "LEGAL NOTICE: MANDATORY COMPLIANCE SUMMONS",
+      defaultName: "Inspector D.A. Togav",
+      defaultOrg: "CBI Cyber Crime Cell",
+      speakerLabel: "Officer:",
       talking: "/assets/video/Police-talking.mp4",
       listening: "/assets/video/Police-listening.mp4",
     },
     customs: {
       name: "Customs & Narcotics Interdiction",
       casePrefix: "CUSTOMS/NARCO/BOM-7741",
+      legalNotice: "CUSTOMS NOTICE: CONTRABAND INTERCEPTION ORDER",
+      defaultName: "Officer K. Mehta",
+      defaultOrg: "Customs & Narcotics Interdiction Bureau",
+      speakerLabel: "Customs Officer:",
       talking: "/assets/video/Customs-talking.mp4",
       listening: "/assets/video/Customs-listening.mp4",
+    },
+    other: {
+      name: "Department Verification Cell",
+      casePrefix: "DEPT/OFFICIAL/2026/44910",
+      legalNotice: "OFFICIAL NOTICE: IMMEDIATE VERIFICATION REQUIRED",
+      defaultName: "Officer R. Sharma",
+      defaultOrg: "Official Department (simulated)",
+      speakerLabel: "Official:",
+      talking: "/assets/video/Man-talking.mp4",
+      listening: "/assets/video/Man-listening.mp4",
     },
   };
 
@@ -306,33 +421,7 @@ export function VideoCallStage({
     }
   }, [isSpeaking, videoPersona]);
 
-  // Video State Badge
-  const getVideoBadge = () => {
-    if (tension >= 7) {
-      return {
-        label: isSpeaking ? "🔴 COERCIVE WARRANT (2X LOOP)" : "🔴 CITIZEN UNDER ARREST (LOOP)",
-        badgeColor: "bg-red-600/90 text-white animate-pulse border-red-500",
-      };
-    }
-    if (isSpeaking) {
-      return {
-        label: "🔴 OFFICER TALKING (2X SPEED LOOP)",
-        badgeColor: "bg-rose-600/90 text-white animate-pulse border-rose-400",
-      };
-    }
-    if (isListening) {
-      return {
-        label: "🟢 OFFICER LISTENING · SPEAK NOW (LOOP)",
-        badgeColor: "bg-emerald-600/90 text-white animate-pulse border-emerald-400",
-      };
-    }
-    return {
-      label: "🟡 OFFICER OBSERVING (AWAITING SPEECH)",
-      badgeColor: "bg-slate-800/90 text-slate-200 border-slate-600",
-    };
-  };
 
-  const videoBadge = getVideoBadge();
 
   const verbalCounters = [
     "I will verify with my local police station in person.",
@@ -380,76 +469,26 @@ export function VideoCallStage({
           <div className="absolute inset-0 border-4 border-red-600/80 animate-pulse pointer-events-none z-15" />
         )}
 
-        {/* Top Video Overlay Bar */}
-        <div className="absolute top-3 left-4 right-4 flex items-center justify-between text-xs pointer-events-none z-20">
-          {/* Agency Badge & Case ID */}
-          <div className="flex items-center gap-2 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span className="font-mono font-bold tracking-wider text-red-400">
-              ● REC {formatTime(callDuration)}
-            </span>
-            <span className="text-slate-400 font-mono text-[11px] hidden sm:inline">
-              | {activePersona.casePrefix}
-            </span>
-          </div>
-
-          {/* Persona Feed Selector & Live Video State Badge */}
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {/* Gemini Live Indicator */}
-            {liveConnected && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/90 border border-purple-500/60 text-purple-200 text-[10px] font-mono font-bold shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-                <span className="hidden sm:inline">Gemini 3.8 Live</span>
-                <span>(Audio+Video)</span>
-              </div>
-            )}
-
-            {/* Persona Switcher */}
-            <div className="flex items-center bg-black/80 backdrop-blur-md p-1 rounded-xl border border-white/15 text-[10px] font-bold">
-              <button
-                type="button"
-                onClick={() => setVideoPersona("police")}
-                className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${videoPersona === "police"
-                  ? "bg-blue-600 text-white font-black shadow-xs"
-                  : "text-slate-400 hover:text-white"
-                  }`}
-                title="Switch to Police / CBI Feed"
-              >
-                {t("train.call.police_feed")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setVideoPersona("customs")}
-                className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${videoPersona === "customs"
-                  ? "bg-amber-600 text-white font-black shadow-xs"
-                  : "text-slate-400 hover:text-white"
-                  }`}
-                title="Switch to Customs / Narcotics Feed"
-              >
-                {t("train.call.customs_feed")}
-              </button>
-            </div>
-
-            {/* Video State Badge */}
-            <div
-              className={`font-mono text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-xl backdrop-blur-md border ${videoBadge.badgeColor}`}
-            >
-              {videoBadge.label}
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Video HUD: Officer Name & Authority Stamp */}
-        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none">
+        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none z-20">
           <div className="bg-black/75 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 max-w-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span className="font-mono font-bold tracking-wider text-red-400 text-xs">
+                ● REC {formatTime(callDuration)}
+              </span>
+              <span className="text-slate-400 font-mono text-[10px] hidden sm:inline">
+                | {activePersona.casePrefix}
+              </span>
+            </div>
             <b className="text-sm font-display text-white block">
-              {callerName || "Inspector D.A. Togav"}
+              {callerName || activePersona.defaultName}
             </b>
             <span className="text-xs text-slate-300 block">
-              {callerOrg || "Cyber Crime Investigation Cell, New Delhi HQ"}
+              {callerOrg || activePersona.defaultOrg}
             </span>
             <span className="text-[10px] text-amber-400 font-mono block mt-0.5">
-              LEGAL NOTICE: MANDATORY COMPLIANCE SUMMONS
+              {activePersona.legalNotice}
             </span>
           </div>
 
@@ -503,7 +542,7 @@ export function VideoCallStage({
       {(currentTurnCaption || liveCaptions || lastScammerText) && (
         <div className="bg-slate-950 px-6 py-2.5 border-t border-b border-slate-800 text-center animate-in fade-in duration-200">
           <p className="text-xs sm:text-sm text-slate-200 font-medium">
-            <span className="text-amber-400 font-bold mr-1">Officer:</span>
+            <span className="text-amber-400 font-bold mr-1">{activePersona.speakerLabel}</span>
             "{currentTurnCaption || liveCaptions || lastScammerText}"
           </p>
         </div>

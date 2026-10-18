@@ -112,6 +112,89 @@ describe("Train Mode UI Components", () => {
     expect(screen.getByText(/Hang Up/i)).toBeInTheDocument();
   });
 
+  it("selects matching video versions: Police, Customs, or Other (Man) department", () => {
+    // 1. Other department (e.g. Electricity Dept) -> Man videos
+    const { container: containerOther } = render(
+      <I18nProvider>
+        <VideoCallStage
+          callerName="Officer Rajeshwar Sharma"
+          callerOrg="Electricity Dept (simulated)"
+          drillSlug="electricity_bill"
+          scenarioTitle="Urgent Electricity Bill Disconnection"
+          tension={5}
+          isSpeaking={false}
+          isListening={false}
+          isTyping={false}
+          aiStatus={null}
+          lastScammerText="Your meter payment is pending tonight."
+          onSendMessage={() => {}}
+          onHangUp={() => {}}
+          onToggleMic={() => {}}
+          isDone={false}
+        />
+      </I18nProvider>
+    );
+
+    const otherVideos = containerOther.querySelectorAll("video");
+    const otherSrcs = Array.from(otherVideos).map((v) => v.getAttribute("src"));
+    expect(otherSrcs).toContain("/assets/video/Man-talking.mp4");
+    expect(otherSrcs).toContain("/assets/video/Man-listening.mp4");
+
+    // 2. Customs department -> Customs videos
+    const { container: containerCustoms } = render(
+      <I18nProvider>
+        <VideoCallStage
+          callerName="Customs Officer K. Mehta"
+          callerOrg="Indian Customs Bureau"
+          drillSlug="courier_customs"
+          scenarioTitle="Customs & Drug Parcel Threat"
+          tension={5}
+          isSpeaking={false}
+          isListening={false}
+          isTyping={false}
+          aiStatus={null}
+          lastScammerText="Contraband found in your FedEx parcel."
+          onSendMessage={() => {}}
+          onHangUp={() => {}}
+          onToggleMic={() => {}}
+          isDone={false}
+        />
+      </I18nProvider>
+    );
+
+    const customsVideos = containerCustoms.querySelectorAll("video");
+    const customsSrcs = Array.from(customsVideos).map((v) => v.getAttribute("src"));
+    expect(customsSrcs).toContain("/assets/video/Customs-talking.mp4");
+    expect(customsSrcs).toContain("/assets/video/Customs-listening.mp4");
+
+    // 3. Police department -> Police videos
+    const { container: containerPolice } = render(
+      <I18nProvider>
+        <VideoCallStage
+          callerName="Inspector D.A. Togav"
+          callerOrg="CBI Cyber Crime Cell"
+          drillSlug="digital_arrest_call"
+          scenarioTitle="Digital Arrest Video Call"
+          tension={7}
+          isSpeaking={false}
+          isListening={false}
+          isTyping={false}
+          aiStatus={null}
+          lastScammerText="You are under CBI digital arrest."
+          onSendMessage={() => {}}
+          onHangUp={() => {}}
+          onToggleMic={() => {}}
+          isDone={false}
+        />
+      </I18nProvider>
+    );
+
+    const policeVideos = containerPolice.querySelectorAll("video");
+    const policeSrcs = Array.from(policeVideos).map((v) => v.getAttribute("src"));
+    expect(policeSrcs).toContain("/assets/video/Police-talking.mp4");
+    expect(policeSrcs).toContain("/assets/video/Police-listening.mp4");
+  });
+
   it("renders EmergencyCountermeasures with Power Off, Airplane Mode, 1930, and Reality Check", () => {
     render(
       <I18nProvider>

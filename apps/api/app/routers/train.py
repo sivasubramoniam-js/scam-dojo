@@ -1,6 +1,7 @@
 """Train mode router: sessions, messages with SSE, and scoring/debrief."""
 
 import json
+import re
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
@@ -109,7 +110,9 @@ async def create_session(
         pii_removed=[],
     )
 
-    org_label = f"{scenario_spec.fake_entities.org} (simulated)"
+    raw_org = scenario_spec.fake_entities.org or "Official Authority"
+    cleaned_org = re.sub(r"\s*\((?:simulated|Simulated)\)", "", raw_org, flags=re.IGNORECASE).strip()
+    org_label = f"{cleaned_org} (simulated)"
     scen_info = ScenarioInfo(
         slug=scenario_spec.slug,
         title=scenario_spec.get_title(req.lang),

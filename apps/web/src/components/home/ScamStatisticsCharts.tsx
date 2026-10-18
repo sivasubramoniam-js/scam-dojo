@@ -156,11 +156,10 @@ export function ScamStatisticsCharts() {
           <button
             type="button"
             onClick={() => setActiveMetric("losses")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeMetric === "losses"
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeMetric === "losses"
                 ? "bg-[var(--bad)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">payments</span>
             <span>{t("charts.tab.losses")}</span>
@@ -168,11 +167,10 @@ export function ScamStatisticsCharts() {
           <button
             type="button"
             onClick={() => setActiveMetric("cases")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeMetric === "cases"
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeMetric === "cases"
                 ? "bg-[var(--act)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">group</span>
             <span>{t("charts.tab.cases")}</span>
@@ -188,7 +186,6 @@ export function ScamStatisticsCharts() {
             <span>
               {activeMetric === "losses" ? t("charts.axis.loss") : t("charts.axis.cases")}
             </span>
-            <span className="text-[var(--ink)]">{t("charts.hover_inspect")}</span>
           </div>
 
           {/* Bar Chart Canvas */}
@@ -224,11 +221,10 @@ export function ScamStatisticsCharts() {
                     {/* Tooltip anchored exactly 10px from the top of the bar */}
                     <div
                       style={{ bottom: "calc(100% + 10px)" }}
-                      className={`absolute left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-150 pointer-events-none z-30 ${
-                        isTooltipVisible
+                      className={`absolute left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-150 pointer-events-none z-30 ${isTooltipVisible
                           ? "bg-[var(--ink)] text-[var(--on)] scale-100 opacity-100"
                           : "opacity-0 scale-95 pointer-events-none"
-                      }`}
+                        }`}
                     >
                       {activeMetric === "losses" ? item.lossLabel : item.casesLabel}
                       {/* Downward pointing triangle/caret */}
@@ -237,25 +233,23 @@ export function ScamStatisticsCharts() {
 
                     {/* The Bar */}
                     <div
-                      className={`stat-bar-fill w-full h-full rounded-t-xl transition-colors duration-200 ${
-                        isSelected || isHovered
+                      className={`stat-bar-fill w-full h-full rounded-t-xl transition-colors duration-200 ${isSelected || isHovered
                           ? activeMetric === "losses"
                             ? "bg-gradient-to-t from-red-600 to-rose-400 ring-2 ring-red-400"
                             : "bg-gradient-to-t from-blue-700 to-sky-400 ring-2 ring-blue-400"
                           : activeMetric === "losses"
-                          ? "bg-red-500/40 group-hover:bg-red-500/70"
-                          : "bg-blue-500/40 group-hover:bg-blue-500/70"
-                      }`}
+                            ? "bg-red-500/40 group-hover:bg-red-500/70"
+                            : "bg-blue-500/40 group-hover:bg-blue-500/70"
+                        }`}
                     />
                   </div>
 
                   {/* Year Label */}
                   <span
-                    className={`mt-3 text-xs font-bold transition-colors ${
-                      isSelected || isHovered
+                    className={`mt-3 text-xs font-bold transition-colors ${isSelected || isHovered
                         ? "text-[var(--ink)] underline underline-offset-4"
                         : "text-[var(--mut)] group-hover:text-[var(--ink)]"
-                    }`}
+                      }`}
                   >
                     {item.year}
                   </span>

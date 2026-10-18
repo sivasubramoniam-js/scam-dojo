@@ -126,6 +126,11 @@ export function AppShell({ children }: AppShellProps) {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => {
+                    if (item.path === "/train") {
+                      window.dispatchEvent(new CustomEvent("scam-dojo:reset-train"));
+                    }
+                  }}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                     isActive
                       ? "bg-[var(--act)] text-[var(--on)] shadow-xs"
@@ -251,6 +256,11 @@ export function AppShell({ children }: AppShellProps) {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => {
+                if (item.path === "/train") {
+                  window.dispatchEvent(new CustomEvent("scam-dojo:reset-train"));
+                }
+              }}
               className="dojo-tab-btn"
               aria-current={isActive ? "page" : undefined}
             >

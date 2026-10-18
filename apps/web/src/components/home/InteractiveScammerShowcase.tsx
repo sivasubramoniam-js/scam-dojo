@@ -29,7 +29,7 @@ export function InteractiveScammerShowcase() {
   const [activeModal, setActiveModal] = useState<"chat" | "voice" | "video">("chat");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [callTimer, setCallTimer] = useState(14);
-  const [videoPersona, setVideoPersona] = useState<"police" | "customs">("police");
+  const [videoPersona, setVideoPersona] = useState<"police" | "customs" | "other">("police");
   const [isVideoTalking, setIsVideoTalking] = useState(true);
   const [isVoiceoverPlaying, setIsVoiceoverPlaying] = useState(false);
 
@@ -50,6 +50,13 @@ export function InteractiveScammerShowcase() {
       casePrefix: "CUSTOMS/NARCO/BOM-7741",
       talking: "/assets/video/Customs-talking.mp4",
       listening: "/assets/video/Customs-listening.mp4",
+    },
+    other: {
+      name: "Utility & Department Verification",
+      agency: "OFFICIAL VERIFICATION BUREAU",
+      casePrefix: "DEPT/OFFICIAL/REF-44910",
+      talking: "/assets/video/Man-talking.mp4",
+      listening: "/assets/video/Man-listening.mp4",
     },
   };
 
@@ -131,12 +138,17 @@ export function InteractiveScammerShowcase() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Clean up voiceover when changing modals or slides
+  // Clean up voiceover and auto-switch persona when changing modals or slides
   useEffect(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
     setIsVoiceoverPlaying(false);
+    if (currentSlideIndex === 0) {
+      setVideoPersona("police");
+    } else {
+      setVideoPersona("other");
+    }
   }, [activeModal, currentSlideIndex]);
 
   // Auto increment call timer for voice/video
@@ -810,13 +822,23 @@ export function InteractiveScammerShowcase() {
                   >
                     🛃 Customs Feed
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setVideoPersona("other")}
+                    className={`px-2 py-0.5 rounded-lg transition cursor-pointer font-bold ${videoPersona === "other"
+                        ? "bg-purple-600 text-white font-black shadow-xs"
+                        : "text-slate-400 hover:text-white"
+                      }`}
+                  >
+                    🏢 Other Dept Feed
+                  </button>
                 </div>
               </div>
 
               {/* Center Insignia Watermark (Subtle Overlay) */}
               <div className="relative z-20 my-auto text-center pointer-events-none opacity-85">
                 <div className="w-12 h-12 rounded-full bg-red-950/80 border-2 border-red-500/50 mx-auto flex items-center justify-center text-xl shadow-xl mb-1">
-                  {videoPersona === "police" ? "👮‍♂️" : "🛃"}
+                  {videoPersona === "police" ? "👮‍♂️" : videoPersona === "customs" ? "🛃" : "🏢"}
                 </div>
                 <h4 className="text-xs font-black text-white tracking-widest uppercase drop-shadow-md">
                   {PERSONA_VIDEOS[videoPersona].agency}
@@ -886,7 +908,7 @@ export function InteractiveScammerShowcase() {
                 {/* Subtitle Dialogue */}
                 <p className="text-slate-200 text-[11px] leading-relaxed italic border-t border-white/10 pt-1.5">
                   <span className="text-amber-400 font-bold not-italic font-mono mr-1">
-                    {videoPersona === "police" ? "Officer:" : "Customs Agent:"}
+                    {videoPersona === "police" ? "Officer:" : videoPersona === "customs" ? "Customs Agent:" : "Official:"}
                   </span>
                   "{current.voiceTranscript}"
                 </p>

@@ -104,10 +104,17 @@ async def gemini_live_websocket(websocket: WebSocket, sid: str) -> None:
             scenario_info = sess.get("scenario", {})
             lang = sess.get("lang", "en")
             scen_slug = scenario_info.get("slug", "")
-            if "customs" in scen_slug or "parcel" in scen_slug:
-                video_persona = "customs"
+            title = scenario_info.get("title", "")
             persona_name = scenario_info.get("personaName", persona_name)
             org_label = scenario_info.get("orgLabel", org_label)
+
+            combined = f"{scen_slug} {title} {org_label} {persona_name}".lower()
+            if any(k in combined for k in ["digital_arrest", "police", "cbi", "cyber crime", "cybercrime", "cyber cell", "crime branch", "arrest", "warrant", "interpol", "thana"]):
+                video_persona = "police"
+            elif any(k in combined for k in ["courier_customs", "customs", "narcotics", "parcel", "courier", "fedex", "dhl", "cargo"]):
+                video_persona = "customs"
+            else:
+                video_persona = "other"
     except Exception as e:
         logger.debug("session_lookup_skipped sid=%s error=%s", sid, e)
 

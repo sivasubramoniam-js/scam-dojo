@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   fetchScenarios,
@@ -28,7 +28,7 @@ export function TrainPage() {
   const navigate = useNavigate();
   const { t } = useT();
   const [scenarios, setScenarios] = useState<ScenarioItem[]>([]);
-  const [selectedSlug, setSelectedSlug] = useState<string>("fake_kyc");
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [activeScenarioInfo, setActiveScenarioInfo] = useState<{
     title: string;
     orgLabel: string;
@@ -40,6 +40,7 @@ export function TrainPage() {
   });
 
   const [started, setStarted] = useState(false);
+  const [startingSlug, setStartingSlug] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputVal, setInputVal] = useState("");
@@ -57,6 +58,20 @@ export function TrainPage() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  const handleModeChange = (newMode: "chat" | "audio" | "video") => {
+    GeminiLiveClient.setActiveSelection(newMode);
+    setSimMode(newMode);
+    synthRef.current.stop();
+    recRef.current.stop();
+    setIsSpeaking(false);
+    setIsListening(false);
+
+    // Keep active immersion mode updated in URL
+    const params = new URLSearchParams(window.location.search);
+    params.set("mode", newMode);
+    navigate(`/train?${params.toString()}`, { replace: true });
+  };
 
   // Synchronize active simulation mode with Gemini Live singleton connection manager
   useEffect(() => {
@@ -117,10 +132,22 @@ export function TrainPage() {
     return true;
   });
 
-  // Load scenarios from live backend
+  // Load scenarios from live backend and synchronize URL if parameters present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const targetSlug = params.get("forged") || params.get("slug");
+    const targetMode = params.get("mode");
+    const initialMode: "chat" | "audio" | "video" =
+      targetMode === "audio" || targetMode === "video" || targetMode === "chat"
+        ? targetMode
+        : "chat";
+    setSimMode(initialMode);
+    GeminiLiveClient.setActiveSelection(initialMode);
+
+    if (targetMode) {
+      params.set("mode", initialMode);
+      window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+    }
 
     fetchScenarios()
       .then((res) => {
@@ -128,9 +155,11 @@ export function TrainPage() {
           setScenarios(res.items);
           if (targetSlug && res.items.some((s) => s.slug === targetSlug)) {
             setSelectedSlug(targetSlug);
+            // Auto-start drill on page load/refresh if specified in URL
+            startDrill(targetSlug, res.items);
           } else {
-            const defaultScen = res.items.find((s) => s.recommended && !s.locked) || res.items.find((s) => !s.locked) || res.items[0];
-            setSelectedSlug(defaultScen.slug);
+            // Keep no drill selected by default
+            setSelectedSlug(null);
           }
         }
       })
@@ -144,14 +173,35 @@ export function TrainPage() {
     "OK, the code is 482913",
   ];
 
-  const startDrill = async (slugToStart?: string) => {
+  const startDrill = async (slugToStart?: string, scenariosList?: ScenarioItem[]) => {
     const slug = slugToStart || selectedSlug;
-    const scen = scenarios.find((s) => s.slug === slug);
+    if (!slug) return;
+
+    setSelectedSlug(slug);
+
+    const currentScenarios = scenariosList || scenarios;
+    const scen = currentScenarios.find((s) => s.slug === slug);
     if (scen?.locked) {
       setSessionError(`Scenario is locked: ${scen.lockedReason || `Requires ${scen.minBelt} Belt`}. Please select an unlocked drill.`);
       return;
     }
 
+    // Stop ongoing speech, recognition, and ringtones when starting or switching drill
+    synthRef.current.stop();
+    recRef.current.stop();
+    ringtoneEngine.stop();
+    setIsSpeaking(false);
+    setIsListening(false);
+    setIsRedialing(false);
+    setDevicePoweredOff(false);
+
+    // Keep URL synced with active drill and active immersion mode
+    const params = new URLSearchParams(window.location.search);
+    params.set("slug", slug);
+    params.set("mode", simMode);
+    navigate(`/train?${params.toString()}`, { replace: true });
+
+    setStartingSlug(slug);
     setSessionError(null);
     setStarted(true);
     setIsDone(false);
@@ -186,9 +236,9 @@ export function TrainPage() {
           const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
           if (AudioContextClass) {
             const dummyCtx = new AudioContextClass();
-            dummyCtx.resume().then(() => dummyCtx.close()).catch(() => {});
+            dummyCtx.resume().then(() => dummyCtx.close()).catch(() => { });
           }
-        } catch {}
+        } catch { }
 
         if (simMode === "chat" && isVoiceMode) {
           synthRef.current.speak(initialMsg, () => setIsSpeaking(false));
@@ -209,11 +259,50 @@ export function TrainPage() {
       setStarted(false);
       setSessionId(null);
       setSessionError(`Unable to start drill: ${err.message || "Connection error"}`);
+      navigate("/train", { replace: true });
     } finally {
       setIsTyping(false);
       setAiStatus(null);
+      setStartingSlug(null);
     }
   };
+
+  const handleChooseAnotherDrill = useCallback(() => {
+    synthRef.current.stop();
+    recRef.current.stop();
+    ringtoneEngine.stop();
+    GeminiLiveClient.disconnectActive();
+    setIsSpeaking(false);
+    setIsListening(false);
+    setIsRedialing(false);
+    setDevicePoweredOff(false);
+    setStarted(false);
+    setSelectedSlug(null);
+    setSessionId(null);
+    setStartingSlug(null);
+    setSessionError(null);
+    setMessages([]);
+    setIsDone(false);
+    setDebriefInfo(null);
+    setSimMode("chat");
+    GeminiLiveClient.setActiveSelection("chat");
+
+    // Remove ALL query parameters from URL: strictly /train
+    navigate("/train", { replace: true });
+  }, [navigate]);
+
+  const handleExitDrill = handleChooseAnotherDrill;
+
+  // Listen for navbar "Train" tab selection
+  useEffect(() => {
+    const handleResetTrain = () => {
+      handleChooseAnotherDrill();
+    };
+    window.addEventListener("scam-dojo:reset-train", handleResetTrain);
+    return () => {
+      window.removeEventListener("scam-dojo:reset-train", handleResetTrain);
+    };
+  }, [handleChooseAnotherDrill]);
 
   const handleSend = async (textToSend?: string) => {
     if (isSendingRef.current || isSending || isTyping || isDone) return;
@@ -547,30 +636,20 @@ export function TrainPage() {
         <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-[var(--ink)] mb-1">
           Live Scammer Simulation
         </h2>
-        <p className="text-[var(--mut)] text-sm sm:text-base">
-          Connected to FastAPI backend with Google Cloud ADK & Gemini Agent orchestration.
-        </p>
       </div>
 
       {/* 3 Dedicated Immersion Simulation Tabs */}
-      <div className="flex items-center gap-2 flex-wrap mb-5">
+      <div className="flex items-center gap-2 flex-wrap mb-4">
         <span className="text-xs font-bold uppercase tracking-wider text-[var(--mut)] mr-1">
           Immersion Mode:
         </span>
         <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--sf2)] border border-[var(--line)]">
           <button
             type="button"
-            onClick={() => {
-              GeminiLiveClient.setActiveSelection("chat");
-              setSimMode("chat");
-              synthRef.current.stop();
-              recRef.current.stop();
-              setIsSpeaking(false);
-              setIsListening(false);
-            }}
+            onClick={() => handleModeChange("chat")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "chat"
-                ? "bg-[var(--act)] text-white shadow-xs"
-                : "text-[var(--mut)] hover:text-[var(--ink)]"
+              ? "bg-[var(--act)] text-white shadow-xs"
+              : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[16px]">chat</span>
@@ -578,15 +657,10 @@ export function TrainPage() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              GeminiLiveClient.setActiveSelection("audio");
-              synthRef.current.stop();
-              setIsSpeaking(false);
-              setSimMode("audio");
-            }}
+            onClick={() => handleModeChange("audio")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "audio"
-                ? "bg-[var(--act)] text-white shadow-xs"
-                : "text-[var(--mut)] hover:text-[var(--ink)]"
+              ? "bg-[var(--act)] text-white shadow-xs"
+              : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[16px]">call</span>
@@ -594,15 +668,10 @@ export function TrainPage() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              GeminiLiveClient.setActiveSelection("video");
-              synthRef.current.stop();
-              setIsSpeaking(false);
-              setSimMode("video");
-            }}
+            onClick={() => handleModeChange("video")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${simMode === "video"
-                ? "bg-[var(--act)] text-white shadow-xs"
-                : "text-[var(--mut)] hover:text-[var(--ink)]"
+              ? "bg-[var(--act)] text-white shadow-xs"
+              : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[16px]">videocam</span>
@@ -611,10 +680,65 @@ export function TrainPage() {
         </div>
       </div>
 
-      {/* Scenario Picker Carousel / Select */}
+      {/* Active Drill Control Bar: Shown during active drill so user can switch anytime */}
+      {started && (
+        <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-[var(--sf)] border border-[var(--line)] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--mut)]">
+                  Active Drill:
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--sf2)] text-[var(--safe)] border border-[var(--line)]">
+                  Turn {messages.filter((m) => m.role === "user").length + 1}
+                </span>
+              </div>
+              <b className="text-sm sm:text-base font-bold text-[var(--ink)] block truncate font-display">
+                {activeScenarioInfo.title}
+              </b>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleChooseAnotherDrill}
+              className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[var(--sf2)] hover:bg-[var(--sf)] border border-[var(--line)] hover:border-[var(--act)] text-[var(--ink)] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              title="End active drill and choose another scenario"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[var(--act)]">
+                swap_horiz
+              </span>
+              <span>Choose Another Drill</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Scenario Picker Carousel / Select: Accessible on drill selection page */}
       {!started && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+        <div className="mb-6 space-y-4 animate-in fade-in duration-200">
+
+          {/* PII Notice */}
+          <div className="dojo-notice flex items-center justify-between gap-2 text-xs text-[var(--mut)]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-[var(--safe)]">shield</span>
+              <span>Zero-PII Active: Client & backend auto-redact Aadhaar, PAN, OTP, and cards.</span>
+            </div>
+            <span className="inline-flex items-center gap-1 font-bold text-[var(--safe)] bg-[var(--safe)]/10 px-2 py-0.5 rounded-full text-[11px]">
+              ● Gemini 3.8 Flash Online
+            </span>
+          </div>
+
+          {sessionError && (
+            <div className="p-3 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2 text-left">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span>{sessionError}</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
             <label className="text-xs font-bold uppercase tracking-wider text-[var(--mut)]">
               Select Live Threat Scenario:
             </label>
@@ -624,7 +748,7 @@ export function TrainPage() {
           </div>
 
           {/* Category Filter Chips */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-3 text-xs">
+          <div className="flex items-center gap-1.5 flex-wrap text-xs">
             {[
               { id: "all", label: "All Scenarios" },
               { id: "family", label: "👨‍👩‍👧 Family & Senior Safety" },
@@ -636,8 +760,8 @@ export function TrainPage() {
                 type="button"
                 onClick={() => setCategoryFilter(f.id as any)}
                 className={`px-3 py-1.5 rounded-full font-bold transition text-xs cursor-pointer ${categoryFilter === f.id
-                    ? "bg-[var(--act)] text-white shadow-xs"
-                    : "bg-[var(--sf2)] text-[var(--mut)] hover:text-[var(--ink)]"
+                  ? "bg-[var(--act)] text-white shadow-xs"
+                  : "bg-[var(--sf2)] text-[var(--mut)] hover:text-[var(--ink)]"
                   }`}
               >
                 {f.label}
@@ -645,121 +769,143 @@ export function TrainPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filteredScenarios.map((scen) => {
-              const isSelected = scen.slug === selectedSlug;
+              const isActiveDrill = Boolean(started && scen.slug === selectedSlug);
+              const isSelected = Boolean(selectedSlug && scen.slug === selectedSlug);
               const isLocked = Boolean(scen.locked);
+              const isConnecting = startingSlug === scen.slug;
+              const modeLabel =
+                isConnecting
+                  ? "Connecting..."
+                  : simMode === "audio"
+                  ? "Start Voice Drill"
+                  : simMode === "video"
+                  ? "Start Video Drill"
+                  : "Start Live Drill";
+              const modeIcon =
+                simMode === "audio"
+                  ? "call"
+                  : simMode === "video"
+                  ? "videocam"
+                  : "arrow_forward";
+
               return (
-                <button
+                <div
                   key={scen.slug}
-                  type="button"
                   onClick={() => {
                     if (!isLocked) {
                       setSelectedSlug(scen.slug);
                       setSessionError(null);
                     }
                   }}
-                  className={`p-3.5 rounded-xl border text-left transition-all relative ${isLocked
-                      ? "opacity-60 bg-[var(--sf2)]/30 border-[var(--line)] cursor-not-allowed"
+                  className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${isLocked
+                    ? "opacity-60 bg-[var(--sf2)]/30 border-[var(--line)] cursor-not-allowed"
+                    : isActiveDrill
+                      ? "bg-[var(--sf)] border-emerald-500 ring-2 ring-emerald-500/30 shadow-xs cursor-default"
                       : isSelected
-                        ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 cursor-pointer"
-                        : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 cursor-pointer"
+                      ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 shadow-xs cursor-pointer"
+                      : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 hover:bg-[var(--sf)] cursor-pointer"
                     }`}
                 >
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-[var(--act)] capitalize flex items-center gap-1">
-                      {isLocked && <span className="material-symbols-outlined text-[14px]">lock</span>}
-                      {scen.channel?.replace("_", " ")}
-                      {familySlugs.includes(scen.slug) && (
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">
-                          👨‍👩‍👧 Family
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="font-bold text-[var(--act)] capitalize flex items-center gap-1.5 flex-wrap">
+                        <span className="material-symbols-outlined text-[15px]">
+                          {scen.channel?.includes("video")
+                            ? "videocam"
+                            : scen.channel?.includes("call")
+                            ? "call"
+                            : "chat"}
                         </span>
-                      )}
-                    </span>
-                    <span className={`font-semibold text-[11px] px-1.5 py-0.5 rounded ${isLocked ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold" : "text-[var(--mut)]"
-                      }`}>
-                      {isLocked ? (scen.lockedReason || `Requires ${scen.minBelt} Belt`) : `~${scen.estMinutes} mins`}
-                    </span>
+                        <span>{scen.channel?.replace("_", " ")}</span>
+                        {isActiveDrill && (
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                            Active
+                          </span>
+                        )}
+                        {scen.custom && (
+                          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                            ⚡ Live Drill
+                          </span>
+                        )}
+                        {familySlugs.includes(scen.slug) && (
+                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            👨‍👩‍👧 Family
+                          </span>
+                        )}
+                      </span>
+                      <span className={`font-semibold text-[11px] px-2 py-0.5 rounded-full ${isLocked
+                        ? "bg-[var(--warn)]/10 text-[var(--warn)] font-bold flex items-center gap-1"
+                        : "bg-[var(--bg)] text-[var(--mut)] border border-[var(--line)]"
+                        }`}>
+                        {isLocked ? (
+                          <>
+                            <span className="material-symbols-outlined text-[13px]">lock</span>
+                            <span>{scen.lockedReason || `Requires ${scen.minBelt} Belt`}</span>
+                          </>
+                        ) : (
+                          `~${scen.estMinutes} mins`
+                        )}
+                      </span>
+                    </div>
+                    <b className="text-sm sm:text-base text-[var(--ink)] block mb-1 font-display leading-snug">
+                      {scen.title}
+                    </b>
+                    <p className="text-xs text-[var(--mut)] line-clamp-2 leading-relaxed mb-3">
+                      {scen.blurb}
+                    </p>
                   </div>
-                  <b className="text-sm text-[var(--ink)] block mb-0.5">{scen.title}</b>
-                  <p className="text-xs text-[var(--mut)] line-clamp-2">{scen.blurb}</p>
-                </button>
+
+                  <div className="mt-2 pt-2.5 border-t border-[var(--line)]/60">
+                    {isLocked ? (
+                      <div className="w-full py-2 px-3 rounded-xl bg-[var(--sf2)]/60 text-[var(--mut)] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed">
+                        <span className="material-symbols-outlined text-[15px] text-[var(--warn)]">lock</span>
+                        <span>{scen.lockedReason || `Requires ${scen.minBelt} Belt`}</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isActiveDrill) {
+                            startDrill(scen.slug);
+                          }
+                        }}
+                        disabled={Boolean(startingSlug) || isActiveDrill}
+                        className={`w-full py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs group ${
+                          isActiveDrill
+                            ? "bg-emerald-600/90 text-white cursor-default"
+                            : "text-white bg-[var(--act)] hover:opacity-95 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+                        }`}
+                      >
+                        {isConnecting ? (
+                          <>
+                            <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                            <span>Connecting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{modeLabel}</span>
+                            <span className="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">
+                              {modeIcon}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* PII Notice */}
-      <div className="dojo-notice flex items-center justify-between gap-2 text-xs text-[var(--mut)]">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-[var(--safe)]">shield</span>
-          <span>Zero-PII Active: Client & backend auto-redact Aadhaar, PAN, OTP, and cards.</span>
-        </div>
-        <span className="inline-flex items-center gap-1 font-bold text-[var(--safe)] bg-[var(--safe)]/10 px-2 py-0.5 rounded-full text-[11px]">
-          ● Gemini 3.8 Flash Online
-        </span>
-      </div>
 
-      {!started ? (
-        <div className="mt-4 flex flex-col items-center justify-center p-8 bg-[var(--sf)] border border-[var(--line)] rounded-2xl text-center shadow-dojo">
-          {sessionError && (
-            <div className="w-full max-w-md mb-4 p-3 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2 text-left">
-              <span className="material-symbols-outlined text-[18px]">error</span>
-              <span>{sessionError}</span>
-            </div>
-          )}
-          <div className="w-14 h-14 rounded-full bg-[var(--sf2)] flex items-center justify-center text-[var(--act)] mb-3">
-            <span className="material-symbols-outlined text-[28px]">sports_martial_arts</span>
-          </div>
-          <h3 className="text-xl font-bold font-display text-[var(--ink)] mb-1">
-            {activeScenario?.title || "Fake KYC Call"}
-          </h3>
-          {/* Active Immersion Badge */}
-          <div className="mb-4">
-            {simMode === "audio" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">
-                <span className="material-symbols-outlined text-[16px]">call</span>
-                Audio Scam Mode Active · Live Voice Call & Hands-Free Mic
-              </span>
-            ) : simMode === "video" ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold border border-amber-500/20">
-                <span className="material-symbols-outlined text-[16px]">videocam</span>
-                Video Scam Mode Active · "Digital Arrest" Interrogation & Optional Webcam
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs font-bold border border-blue-500/20">
-                <span className="material-symbols-outlined text-[16px]">chat</span>
-                Chat Scam Mode Active · Messaging & Phishing Drill
-              </span>
-            )}
-          </div>
-
-          <p className="text-[var(--mut)] text-sm max-w-md mb-6 leading-relaxed">
-            {activeScenario?.blurb ||
-              "A simulated scammer will use authority, fear, and tight deadlines to extract your credentials. Practice countering in real-time."}
-          </p>
-          {activeScenario?.locked ? (
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-xs font-bold text-[var(--warn)] bg-[var(--warn)]/10 px-3 py-1.5 rounded-full flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px]">lock</span>
-                {activeScenario.lockedReason || `Requires ${activeScenario.minBelt} Belt`}
-              </span>
-              <p className="text-xs text-[var(--mut)]">
-                Train on White Belt scenarios to build resilience and unlock this threat simulation.
-              </p>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => startDrill()}
-              className="dojo-btn px-8 text-base shadow-dojo"
-            >
-              Start live drill →
-            </button>
-          )}
-        </div>
-      ) : devicePoweredOff ? (
+      {started && (
+        devicePoweredOff ? (
         <div className="max-w-xl mx-auto my-6 p-8 rounded-3xl bg-black border-2 border-slate-800 text-center shadow-2xl flex flex-col items-center justify-center min-h-[500px] animate-in fade-in zoom-in-95 duration-500">
           <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-6">
             <span className="material-symbols-outlined text-[32px] text-slate-600">
@@ -899,7 +1045,7 @@ export function TrainPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStarted(false)}
+                    onClick={handleExitDrill}
                     className="dojo-btn q min-h-[40px] px-4 text-xs"
                   >
                     Choose another drill
@@ -922,6 +1068,8 @@ export function TrainPage() {
             key={`video-stage-${sessionId || "initial"}`}
             callerName={activeScenarioInfo.personaName}
             callerOrg={activeScenarioInfo.orgLabel}
+            drillSlug={selectedSlug || undefined}
+            scenarioTitle={activeScenarioInfo.title}
             tension={tension}
             isSpeaking={isSpeaking}
             isListening={isListening}
@@ -1004,7 +1152,7 @@ export function TrainPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStarted(false)}
+                    onClick={handleExitDrill}
                     className="dojo-btn q min-h-[40px] px-4 text-xs"
                   >
                     Choose another drill
@@ -1060,8 +1208,8 @@ export function TrainPage() {
                   }
                 }}
                 className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${isVoiceMode
-                    ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
-                    : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
+                  ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
+                  : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
                   }`}
                 title="Toggle Voice Call Mode"
               >
@@ -1143,10 +1291,10 @@ export function TrainPage() {
               <div
                 key={m.id}
                 className={`max-w-[84%] px-3.5 py-2.5 text-sm sm:text-base leading-relaxed ${m.role === "scammer"
-                    ? "self-start bg-[var(--sf2)] text-[var(--ink)] rounded-2xl rounded-tl-xs"
-                    : m.role === "user"
-                      ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
-                      : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
+                  ? "self-start bg-[var(--sf2)] text-[var(--ink)] rounded-2xl rounded-tl-xs"
+                  : m.role === "user"
+                    ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
+                    : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
                   }`}
               >
                 <MarkdownView content={m.text} />
@@ -1190,8 +1338,8 @@ export function TrainPage() {
               onClick={toggleMic}
               disabled={isDone || isTyping || isSpeaking || isSending}
               className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
-                  ? "bg-rose-500 text-white border-rose-500 animate-pulse"
-                  : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
+                ? "bg-rose-500 text-white border-rose-500 animate-pulse"
+                : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
                 }`}
               title={isListening ? "Listening... click to stop" : "Speak reply using microphone"}
             >
@@ -1269,7 +1417,7 @@ export function TrainPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStarted(false)}
+                  onClick={handleExitDrill}
                   className="dojo-btn q min-h-[40px] px-4 text-xs"
                 >
                   Choose another drill
@@ -1285,7 +1433,7 @@ export function TrainPage() {
             </div>
           )}
         </div>
-      )}
+      ))}
     </div>
   );
 }

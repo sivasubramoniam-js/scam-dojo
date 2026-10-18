@@ -48,8 +48,6 @@ export function AudioCallStage({
 }: AudioCallStageProps) {
   const { t } = useT();
   const [callDuration, setCallDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeaker, setIsSpeaker] = useState(true);
   const [manualInput, setManualInput] = useState("");
   const [showManualFallback, setShowManualFallback] = useState(false);
   const [showEmergencyDeck, setShowEmergencyDeck] = useState(false);
@@ -438,22 +436,7 @@ export function AudioCallStage({
       )}
 
       {/* Primary Phone Action Controls */}
-      <div className="relative z-10 pt-4 border-t border-slate-800/80 flex items-center justify-around">
-        {/* Mute Button */}
-        <button
-          type="button"
-          onClick={() => setIsMuted(!isMuted)}
-          className={`flex flex-col items-center gap-1 p-3 rounded-full transition cursor-pointer ${
-            isMuted ? "bg-red-500/20 text-red-400" : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800"
-          }`}
-          title="Toggle Mute"
-        >
-          <span className="material-symbols-outlined text-[24px]">
-            {isMuted ? "mic_off" : "mic"}
-          </span>
-          <span className="text-[10px] font-medium">{isMuted ? t("train.call.muted") : t("train.call.mute")}</span>
-        </button>
-
+      <div className="relative z-10 pt-4 border-t border-slate-800/80 flex items-center justify-center gap-8">
         {/* PRIMARY MICROPHONE PUSH-TO-TALK BUTTON */}
         <button
           type="button"
@@ -472,21 +455,9 @@ export function AudioCallStage({
           <span className="material-symbols-outlined text-[32px]">
             {isListening ? "mic" : "mic_none"}
           </span>
-        </button>
-
-        {/* Speakerphone Toggle */}
-        <button
-          type="button"
-          onClick={() => setIsSpeaker(!isSpeaker)}
-          className={`flex flex-col items-center gap-1 p-3 rounded-full transition cursor-pointer ${
-            isSpeaker ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800"
-          }`}
-          title="Toggle Speakerphone"
-        >
-          <span className="material-symbols-outlined text-[24px]">
-            {isSpeaker ? "volume_up" : "volume_down"}
+          <span className="text-[10px] font-bold mt-1">
+            {isListening ? t("train.call.listening") : t("train.call.mic")}
           </span>
-          <span className="text-[10px] font-medium">{isSpeaker ? t("train.call.speaker_on") : t("train.call.speaker_off")}</span>
         </button>
 
         {/* Emergency SOS / Tactical Escape Button */}
