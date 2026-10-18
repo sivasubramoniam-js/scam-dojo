@@ -24,6 +24,7 @@ let activeGlobalLiveClient: GeminiLiveClient | null = null;
 
 export class GeminiLiveClient {
   public mode: "audio" | "video" = "audio";
+  public activeModel: string = "gemini-3.8-live";
   private ws: WebSocket | null = null;
   private audioCtx: AudioContext | null = null;
   private scheduledEndTime = 0;
@@ -130,12 +131,13 @@ export class GeminiLiveClient {
             this.handleServerMessage(msg);
             if (msg.type === "ready") {
               this.status = "ready";
+              if (msg.model) this.activeModel = msg.model;
               this.flushPending();
               addTraceEntry({
                 agent: "Gemini Live Audio",
-                model: "gemini-2.5-flash",
+                model: this.activeModel,
                 action: "Live Stream Ready",
-                details: `Bidirectional 16kHz audio stream established for ${this.mode.toUpperCase()} call mode. Persona active.`,
+                details: `Bidirectional 16kHz audio stream established for ${this.mode.toUpperCase()} call mode with ${this.activeModel}. Persona active.`,
                 kind: "start",
               });
               this.options.onReady?.();
@@ -182,10 +184,12 @@ export class GeminiLiveClient {
     }
     switch (msg.type) {
       case "connected":
-        this.options.onConnected?.(msg.model || "gemini-3.8-live");
+        if (msg.model) this.activeModel = msg.model;
+        this.options.onConnected?.(this.activeModel);
         break;
 
       case "ready":
+        if (msg.model) this.activeModel = msg.model;
         this.options.onReady?.();
         break;
 
@@ -222,9 +226,9 @@ export class GeminiLiveClient {
       case "turn_complete":
         addTraceEntry({
           agent: "Gemini Live Audio",
-          model: "gemini-2.5-flash",
+          model: this.activeModel,
           action: "Voice Turn Complete",
-          details: `Audio frame playback finished. Listening on microphone for user response.`,
+          details: `Audio frame playback finished (${this.activeModel}). Listening on microphone for user response.`,
           kind: "output",
         });
         this.options.onTurnComplete?.();

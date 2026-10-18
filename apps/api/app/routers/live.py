@@ -240,6 +240,9 @@ async def gemini_live_websocket(websocket: WebSocket, sid: str) -> None:
                     break
                 except Exception as ex:
                     logger.warning("gemini_receive_error sid=%s error=%s", sid, ex)
+                    err_str = str(ex).lower()
+                    if "deadline exceeded" in err_str or "goaway" in err_str or "closed" in err_str or "1000" in err_str:
+                        break
                     await asyncio.sleep(0.05)
 
         # Task 2: WebSocket Client -> Gemini Live Server
