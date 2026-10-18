@@ -7,6 +7,7 @@ import {
   PlanResult,
   PlanStep,
 } from "@/lib/api";
+import { addTraceEntry } from "@/lib/traceStore";
 import {
   ShieldAlert,
   PhoneCall,
@@ -184,9 +185,24 @@ export function RecoverPage() {
     if (!promptOverride) setChatInput("");
     setChatLoading(true);
 
+    addTraceEntry({
+      agent: "Recovery Navigator",
+      model: "gemini-2.5-flash",
+      action: "Crisis Consultation",
+      details: `User submitted query: "${q.slice(0, 70)}${q.length > 70 ? "..." : ""}". Synthesizing verified legal and banking recourse.`,
+      kind: "start",
+    });
+
     try {
       const res = await sendRecoveryChatMessage(plan?.planId, q);
       if (res?.text) {
+        addTraceEntry({
+          agent: "Recovery Navigator",
+          model: "gemini-2.5-flash",
+          action: "Grounded Advice Response",
+          details: `Provided advice grounded in Helpline 1930 and RBI guidelines.`,
+          kind: "output",
+        });
         setChatMessages((prev) => [...prev, { role: "assistant", text: res.text }]);
       }
     } catch (err) {

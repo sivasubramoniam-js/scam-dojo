@@ -16,6 +16,8 @@ export interface GeminiLiveOptions {
 
 export type SimModeSelection = "chat" | "audio" | "video";
 
+import { addTraceEntry } from "./traceStore";
+
 // Global active client and active selection mode tracker
 let currentActiveSelection: SimModeSelection = "chat";
 let activeGlobalLiveClient: GeminiLiveClient | null = null;
@@ -129,6 +131,13 @@ export class GeminiLiveClient {
             if (msg.type === "ready") {
               this.status = "ready";
               this.flushPending();
+              addTraceEntry({
+                agent: "Gemini Live Audio",
+                model: "gemini-2.5-flash",
+                action: "Live Stream Ready",
+                details: `Bidirectional 16kHz audio stream established for ${this.mode.toUpperCase()} call mode. Persona active.`,
+                kind: "start",
+              });
               this.options.onReady?.();
               resolve();
             }
@@ -200,10 +209,24 @@ export class GeminiLiveClient {
 
       case "interrupted":
         this.stopAudioPlayback();
+        addTraceEntry({
+          agent: "Observer Agent",
+          model: "gemini-2.5-flash-lite",
+          action: "User Interruption Detected",
+          details: `User interrupted scammer speech stream. Speech playback cut off.`,
+          kind: "info",
+        });
         this.options.onInterrupted?.();
         break;
 
       case "turn_complete":
+        addTraceEntry({
+          agent: "Gemini Live Audio",
+          model: "gemini-2.5-flash",
+          action: "Voice Turn Complete",
+          details: `Audio frame playback finished. Listening on microphone for user response.`,
+          kind: "output",
+        });
         this.options.onTurnComplete?.();
         break;
 

@@ -17,6 +17,7 @@ import { ringtoneEngine } from "@/lib/ringtone";
 import { GeminiLiveClient } from "@/lib/geminiLive";
 import { MarkdownView } from "@/components/common/MarkdownView";
 import { useT } from "@/lib/i18n";
+import { addTraceEntry } from "@/lib/traceStore";
 
 interface ChatMessage {
   id: string;
@@ -349,6 +350,14 @@ export function TrainPage() {
     setIsTyping(true);
     setAiStatus("Observer Agent (Gemini 3.8) evaluating your defense & tactics...");
 
+    addTraceEntry({
+      agent: "Observer Agent",
+      model: "gemini-2.5-flash-lite",
+      action: "Turn Defense Evaluation",
+      details: `User submitted response: "${scrubbed.text.slice(0, 75)}${scrubbed.text.length > 75 ? "..." : ""}". Referee scanning for compliance vs skepticism.`,
+      kind: "start",
+    });
+
     const scammerMsgId = `scam-${Date.now()}`;
     let messageCreated = false;
 
@@ -509,6 +518,13 @@ export function TrainPage() {
       setIsRedialing(true);
       setRedialAttempt((prev) => prev + 1);
       setTension((t) => Math.min(10, Math.max(t, 5) + 2));
+      addTraceEntry({
+        agent: "Observer Referee",
+        model: "gemini-2.5-flash",
+        action: "Call Disconnected",
+        details: `Line disconnected by user. Scammer triggering panic redial (Attempt ${nextAttempt} of 3). Tension raised.`,
+        kind: "info",
+      });
       setTraces((t) => [
         ...t,
         `⚠️ Line disconnected: Scammer immediately triggers aggressive emergency redial (Attempt ${nextAttempt} of 3) to panic you!`,
