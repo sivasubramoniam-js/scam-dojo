@@ -70,3 +70,9 @@ mcp.json
 
 # Test outputs and screenshots
 test_screenshots/
+
+# Recordings media
+recordings/raw_video/
+recordings/audio/
+recordings/*.mp4
+recordings/*.wav
