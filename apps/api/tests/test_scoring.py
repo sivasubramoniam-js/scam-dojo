@@ -43,7 +43,7 @@ def create_dummy_scenario() -> ScenarioSpec:
     )
 
 
-def test_outcome_points():
+def test_outcome_points() -> None:
     scenario = create_dummy_scenario()
     assessments = [
         TurnAssessment(
@@ -75,7 +75,7 @@ def test_outcome_points():
     assert res_fell.outcome_points == 0
 
 
-def test_flag_points():
+def test_flag_points() -> None:
     scenario = create_dummy_scenario()
     # Total flag weight is 2 + 3 + 2 = 7
 
@@ -102,7 +102,7 @@ def test_flag_points():
     assert res_full.flag_points == 25
 
 
-def test_verify_points_earliness():
+def test_verify_points_earliness() -> None:
     scenario = create_dummy_scenario()
 
     # Verified on turn 1 -> 20 * (1 - 0) = 20
@@ -123,7 +123,7 @@ def test_verify_points_earliness():
     assert res_none.verify_points == 0
 
 
-def test_data_points_leak_penalty():
+def test_data_points_leak_penalty() -> None:
     scenario = create_dummy_scenario()
 
     # Leaked OTP (weight 1.0) -> leak_penalty 1.0 -> 0 data points
@@ -142,7 +142,7 @@ def test_data_points_leak_penalty():
     assert res_clean.data_points == 15
 
 
-def test_coach_adjustment_clamping():
+def test_coach_adjustment_clamping() -> None:
     scenario = create_dummy_scenario()
     a = TurnAssessment(user_action="resisted", rationale="")
 
@@ -157,7 +157,7 @@ def test_coach_adjustment_clamping():
     assert res_max_adj.final == 60
 
 
-def test_compute_resilience():
+def test_compute_resilience() -> None:
     # First session
     r1 = compute_resilience(old_resilience=None, final_score=80, difficulty=3)
     assert r1 == 80
@@ -171,7 +171,7 @@ def test_compute_resilience():
     assert r_max <= 100
 
 
-def test_belt_progression_and_black_belt_gate():
+def test_belt_progression_and_black_belt_gate() -> None:
     # White belt: 0-19
     belt, next_b, prog = compute_belt(10)
     assert belt == "white"
@@ -200,7 +200,7 @@ def test_belt_progression_and_black_belt_gate():
     assert prog_black == 1.0
 
 
-def test_weak_tactics_update():
+def test_weak_tactics_update() -> None:
     current_weak = {"urgency": 0.2, "authority": 0.5, "fear": 0.3, "greed": 0.3, "trust": 0.3, "isolation": 0.3}
     # User fell for urgency 2 out of 2 times (landed_rate = 1.0)
     # weak["urgency"] = 0.7 * 0.2 + 0.3 * 1.0 = 0.14 + 0.30 = 0.44
@@ -211,7 +211,7 @@ def test_weak_tactics_update():
     assert updated["authority"] == 0.35
 
 
-def test_recommend_difficulty():
+def test_recommend_difficulty() -> None:
     # Resilience 30 -> base 1 + floor(1.5) = 2
     assert recommend_difficulty(30) == 2
 
@@ -225,7 +225,7 @@ def test_recommend_difficulty():
     assert recommend_difficulty(50, recent_scores=[35, 40]) == 2
 
 
-def test_streak_advancement():
+def test_streak_advancement() -> None:
     tz = "Asia/Kolkata"
     d1 = datetime(2026, 10, 10, 12, 0, tzinfo=ZoneInfo(tz))
     d2 = datetime(2026, 10, 11, 14, 0, tzinfo=ZoneInfo(tz))

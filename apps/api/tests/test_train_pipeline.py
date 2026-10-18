@@ -31,7 +31,7 @@ def create_mock_scenario() -> ScenarioSpec:
 
 
 @pytest.mark.asyncio
-async def test_pipeline_normal_resistance_turn():
+async def test_pipeline_normal_resistance_turn() -> None:
     scenario = create_mock_scenario()
     session = {
         "sessionId": "ts_test01",
@@ -60,7 +60,7 @@ async def test_pipeline_normal_resistance_turn():
 
 
 @pytest.mark.asyncio
-async def test_pipeline_otp_leak_forces_user_fell():
+async def test_pipeline_otp_leak_forces_user_fell() -> None:
     scenario = create_mock_scenario()
     session = {
         "sessionId": "ts_test02",
@@ -90,7 +90,7 @@ async def test_pipeline_otp_leak_forces_user_fell():
 
 
 @pytest.mark.asyncio
-async def test_pipeline_independent_verification_user_won():
+async def test_pipeline_independent_verification_user_won() -> None:
     scenario = create_mock_scenario()
     session = {
         "sessionId": "ts_test03",
@@ -120,7 +120,7 @@ async def test_pipeline_independent_verification_user_won():
 
 
 @pytest.mark.asyncio
-async def test_pipeline_distress_triggers_sensei_safety_break():
+async def test_pipeline_distress_triggers_sensei_safety_break() -> None:
     scenario = create_mock_scenario()
     session = {
         "sessionId": "ts_test04",
@@ -147,7 +147,7 @@ async def test_pipeline_distress_triggers_sensei_safety_break():
 
 
 @pytest.mark.asyncio
-async def test_pipeline_sse_event_stream_order():
+async def test_pipeline_sse_event_stream_order() -> None:
     scenario = create_mock_scenario()
     session = {
         "sessionId": "ts_test05",

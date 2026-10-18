@@ -5,7 +5,7 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_check_message_high_risk():
+async def test_check_message_high_risk() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         res = await ac.post(
@@ -23,7 +23,7 @@ async def test_check_message_high_risk():
 
 
 @pytest.mark.asyncio
-async def test_check_message_safe():
+async def test_check_message_safe() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         res = await ac.post(
@@ -39,7 +39,7 @@ async def test_check_message_safe():
 
 
 @pytest.mark.asyncio
-async def test_check_to_drill_forge():
+async def test_check_to_drill_forge() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         res = await ac.post(
@@ -71,7 +71,7 @@ async def test_check_to_drill_forge():
 
 
 @pytest.mark.asyncio
-async def test_check_message_typosquatted_bank_email_otp():
+async def test_check_message_typosquatted_bank_email_otp() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         res = await ac.post(
@@ -92,7 +92,7 @@ async def test_check_message_typosquatted_bank_email_otp():
 
 
 @pytest.mark.asyncio
-async def test_check_video_upload():
+async def test_check_video_upload() -> None:
     import base64
 
     fake_video_b64 = "data:video/mp4;base64," + base64.b64encode(b"\x00\x00\x00 ftypisom\x00\x00\x02\x00isomiso2mp41").decode()
@@ -117,7 +117,7 @@ async def test_check_video_upload():
 
 
 @pytest.mark.asyncio
-async def test_check_document_upload():
+async def test_check_document_upload() -> None:
     import base64
 
     # Valid 1-page blank PDF

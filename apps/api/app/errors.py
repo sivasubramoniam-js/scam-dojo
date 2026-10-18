@@ -27,7 +27,7 @@ class AppError(Exception):
         retryable: bool = False,
         retry_after_sec: int | None = None,
         details: list[dict[str, Any]] | None = None,
-    ):
+    ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
@@ -39,27 +39,27 @@ class AppError(Exception):
 
 
 class UnauthenticatedError(AppError):
-    def __init__(self, message: str = "Authentication required"):
+    def __init__(self, message: str = "Authentication required") -> None:
         super().__init__(code="unauthenticated", message=message, status_code=401)
 
 
 class ForbiddenError(AppError):
-    def __init__(self, message: str = "Access denied"):
+    def __init__(self, message: str = "Access denied") -> None:
         super().__init__(code="forbidden", message=message, status_code=403)
 
 
 class NotFoundError(AppError):
-    def __init__(self, message: str = "Resource not found"):
+    def __init__(self, message: str = "Resource not found") -> None:
         super().__init__(code="not_found", message=message, status_code=404)
 
 
 class ConflictError(AppError):
-    def __init__(self, code: str = "session_not_active", message: str = "Session is not active"):
+    def __init__(self, code: str = "session_not_active", message: str = "Session is not active") -> None:
         super().__init__(code=code, message=message, status_code=409)
 
 
 class RateLimitedError(AppError):
-    def __init__(self, message: str = "Daily limit reached", retry_after_sec: int = 3600):
+    def __init__(self, message: str = "Daily limit reached", retry_after_sec: int = 3600) -> None:
         super().__init__(
             code="rate_limited",
             message=message,
@@ -70,7 +70,7 @@ class RateLimitedError(AppError):
 
 
 class ModelBusyError(AppError):
-    def __init__(self, message: str = "AI Model is currently busy, please retry"):
+    def __init__(self, message: str = "AI Model is currently busy, please retry") -> None:
         super().__init__(
             code="model_busy",
             message=message,

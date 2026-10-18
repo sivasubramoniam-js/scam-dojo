@@ -5,7 +5,7 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_dashboard_endpoint():
+async def test_dashboard_endpoint() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         res = await ac.get("/v1/dashboard")

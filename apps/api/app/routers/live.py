@@ -11,7 +11,6 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-import google.auth.transport.requests
 from google.genai import types
 
 from app.agents.runtime import get_genai_client, is_live_llm_enabled
@@ -57,7 +56,7 @@ CRITICAL VERBATIM PERFORMANCE RULES:
 
 
 _active_live_connections: dict[str, WebSocket] = {}
-_active_live_tasks: dict[str, asyncio.Task[Any]] = {}
+_active_live_tasks: dict[str, asyncio.Task] = {}
 
 
 @router.websocket("/ws/{sid}")
@@ -241,6 +240,9 @@ async def gemini_live_websocket(websocket: WebSocket, sid: str) -> None:
                     break
                 except Exception as ex:
                     logger.warning("gemini_receive_error sid=%s error=%s", sid, ex)
+                    err_str = str(ex).lower()
+                    if "deadline exceeded" in err_str or "goaway" in err_str or "closed" in err_str or "1000" in err_str:
+                        break
                     await asyncio.sleep(0.05)
 
         # Task 2: WebSocket Client -> Gemini Live Server

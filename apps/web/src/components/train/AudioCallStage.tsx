@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
 import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
-import { createSpeechSynthesizer } from "@/lib/speech";
 import { useT } from "@/lib/i18n";
 
 interface AudioCallStageProps {
@@ -59,12 +58,11 @@ export function AudioCallStage({
   const [liveCaptions, setLiveCaptions] = useState<string>("");
   const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
-  const synthRef = useRef(createSpeechSynthesizer());
 
   const isSpeaking = liveSpeaking || externalIsSpeaking;
   const isListening = externalIsListening;
 
-  // Track which scammer texts have already been spoken by Gemini Live / TTS
+  // Track which scammer texts have already been spoken by Gemini Live
   const spokenTextsRef = useRef<Set<string>>(new Set());
   const lastScammerTextRef = useRef(lastScammerText);
   lastScammerTextRef.current = lastScammerText;
@@ -75,9 +73,11 @@ export function AudioCallStage({
       !enableLiveApi ||
       typeof window === "undefined" ||
       !sessionId ||
+      isDone ||
       GeminiLiveClient.getActiveSelection() !== "audio"
     ) {
       if (liveClientRef.current) {
+        liveClientRef.current.stopAudioPlayback();
         liveClientRef.current.disconnect();
         liveClientRef.current = null;
       }
@@ -136,11 +136,10 @@ export function AudioCallStage({
     return () => {
       isDisposed = true;
       onSpeakingChange?.(false);
-      synthRef.current.stop();
       liveClient.disconnect();
       liveClientRef.current = null;
     };
-  }, [sessionId, enableLiveApi]);
+  }, [sessionId, enableLiveApi, isDone, onSpeakingChange]);
 
   // When lastScammerText updates or connection is established, synchronize subtitles and trigger Gemini Live speech
   useEffect(() => {
@@ -149,25 +148,17 @@ export function AudioCallStage({
       setLiveCaptions("");
     }
 
-    // Only synthesize when message has finished streaming completely (!isTyping) and not yet spoken
+    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
     if (
+      liveConnected &&
       !isTyping &&
       lastScammerText &&
+      liveClientRef.current &&
       !spokenTextsRef.current.has(lastScammerText)
     ) {
       spokenTextsRef.current.add(lastScammerText);
-      if (liveConnected && liveClientRef.current) {
-        liveClientRef.current.stopAudioPlayback();
-        liveClientRef.current.sendText(lastScammerText);
-      } else {
-        synthRef.current.resume();
-        synthRef.current.speak(lastScammerText, () => {
-          setLiveSpeaking(false);
-          onSpeakingChange?.(false);
-        });
-        setLiveSpeaking(true);
-        onSpeakingChange?.(true);
-      }
+      liveClientRef.current.stopAudioPlayback();
+      liveClientRef.current.sendText(lastScammerText);
     }
   }, [lastScammerText, isTyping, liveConnected]);
 
@@ -200,14 +191,32 @@ export function AudioCallStage({
     >
       {/* Background glow effects based on tension */}
       <div
-        className={`absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-colors duration-700 opacity-30 ${
-          tension >= 7
+        className={`absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-colors duration-700 opacity-30 ${tension >= 7
             ? "bg-red-600"
             : tension >= 4
-            ? "bg-amber-500"
-            : "bg-emerald-500"
-        }`}
+              ? "bg-amber-500"
+              : "bg-emerald-500"
+          }`}
       />
+
+      {/* Call Terminated Disengagement Overlay */}
+      {isDone && (
+        <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+          <div className="w-16 h-16 rounded-full bg-red-600/20 border-2 border-red-500/50 flex items-center justify-center text-red-400 mb-3 shadow-lg shadow-red-500/20">
+            <span className="material-symbols-outlined text-[36px]">call_end</span>
+          </div>
+          <b className="text-xl font-display font-extrabold text-white tracking-wide">
+            CALL TERMINATED
+          </b>
+          <p className="text-xs text-slate-300 max-w-sm mt-1.5 leading-relaxed">
+            The extortion line has been permanently severed. Audio transmissions and live streams have completely stopped.
+          </p>
+          <div className="mt-4 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-[11px] font-mono text-emerald-400 font-bold flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px]">shield_check</span>
+            <span>Defensive Disengagement Complete</span>
+          </div>
+        </div>
+      )}
 
       {/* Top Status Bar */}
       <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-3">
@@ -221,7 +230,6 @@ export function AudioCallStage({
           {liveConnected && (
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-purple-300 bg-purple-950/70 border border-purple-500/50 px-2.5 py-0.5 rounded-full shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-              <span>Gemini 3.8 Live</span>
             </span>
           )}
           <div className="flex items-center gap-1.5 font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800/40">
@@ -250,13 +258,12 @@ export function AudioCallStage({
           )}
 
           <div
-            className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-3xl font-display font-extrabold shadow-inner transition-colors duration-300 relative z-10 ${
-              tension >= 7
+            className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-3xl font-display font-extrabold shadow-inner transition-colors duration-300 relative z-10 ${tension >= 7
                 ? "bg-gradient-to-tr from-red-900 to-red-600 text-white ring-4 ring-red-500/40"
                 : tension >= 4
-                ? "bg-gradient-to-tr from-amber-900 to-amber-600 text-white ring-4 ring-amber-500/40"
-                : "bg-gradient-to-tr from-slate-800 to-slate-700 text-slate-200 ring-4 ring-slate-700/50"
-            }`}
+                  ? "bg-gradient-to-tr from-amber-900 to-amber-600 text-white ring-4 ring-amber-500/40"
+                  : "bg-gradient-to-tr from-slate-800 to-slate-700 text-slate-200 ring-4 ring-slate-700/50"
+              }`}
           >
             <span className="material-symbols-outlined text-[48px]">
               support_agent
@@ -308,19 +315,18 @@ export function AudioCallStage({
           const heightFactor = isSpeaking
             ? Math.sin((idx + callDuration * 4) * 0.8) * 0.5 + 0.5
             : isListening
-            ? Math.cos((idx + callDuration * 3) * 0.6) * 0.4 + 0.3
-            : 0.15;
+              ? Math.cos((idx + callDuration * 3) * 0.6) * 0.4 + 0.3
+              : 0.15;
           const barHeight = Math.max(6, Math.round(heightFactor * 36));
           return (
             <span
               key={idx}
-              className={`w-1 rounded-full transition-all duration-150 ${
-                isSpeaking
+              className={`w-1 rounded-full transition-all duration-150 ${isSpeaking
                   ? "bg-red-500 shadow-sm shadow-red-500/50"
                   : isListening
-                  ? "bg-emerald-400 shadow-sm shadow-emerald-400/50"
-                  : "bg-slate-700"
-              }`}
+                    ? "bg-emerald-400 shadow-sm shadow-emerald-400/50"
+                    : "bg-slate-700"
+                }`}
               style={{ height: `${barHeight}px` }}
             />
           );
@@ -346,13 +352,12 @@ export function AudioCallStage({
             {t("hud.pressure_level")}
           </span>
           <span
-            className={`font-mono font-bold ${
-              tension >= 7
+            className={`font-mono font-bold ${tension >= 7
                 ? "text-red-400"
                 : tension >= 4
-                ? "text-amber-400"
-                : "text-emerald-400"
-            }`}
+                  ? "text-amber-400"
+                  : "text-emerald-400"
+              }`}
           >
             {tension}/10 ({tension >= 7 ? t("hud.critical") : tension >= 4 ? t("hud.elevated") : t("hud.moderate")})
           </span>
@@ -361,15 +366,14 @@ export function AudioCallStage({
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className={`flex-1 rounded-xs transition-colors duration-300 ${
-                i < tension
+              className={`flex-1 rounded-xs transition-colors duration-300 ${i < tension
                   ? tension >= 7
                     ? "bg-red-500 shadow-xs shadow-red-500/50"
                     : tension >= 4
-                    ? "bg-amber-400 shadow-xs shadow-amber-400/50"
-                    : "bg-emerald-400 shadow-xs shadow-emerald-400/50"
+                      ? "bg-amber-400 shadow-xs shadow-amber-400/50"
+                      : "bg-emerald-400 shadow-xs shadow-emerald-400/50"
                   : "bg-slate-800"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -453,11 +457,10 @@ export function AudioCallStage({
           type="button"
           onClick={onToggleMic}
           disabled={isDone || isSpeaking || isTyping}
-          className={`relative p-5 rounded-full shadow-lg transition-all duration-200 flex flex-col items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-            isListening
+          className={`relative p-5 rounded-full shadow-lg transition-all duration-200 flex flex-col items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
               ? "bg-emerald-500 text-black scale-110 ring-4 ring-emerald-400/50 shadow-emerald-500/50"
               : "bg-slate-800 text-white hover:bg-slate-700 ring-2 ring-slate-600"
-          }`}
+            }`}
           title={isSpeaking ? "Scammer is speaking..." : isTyping ? "AI is processing..." : isListening ? "Listening... click to stop" : "Click to speak your reply"}
         >
           {isListening && (
@@ -476,11 +479,10 @@ export function AudioCallStage({
           type="button"
           onClick={() => setShowEmergencyDeck(!showEmergencyDeck)}
           disabled={isDone}
-          className={`flex flex-col items-center gap-1 p-3 rounded-full transition cursor-pointer ${
-            showEmergencyDeck
+          className={`flex flex-col items-center gap-1 p-3 rounded-full transition cursor-pointer ${showEmergencyDeck
               ? "bg-amber-500 text-black shadow-lg shadow-amber-500/40"
               : "bg-slate-900 text-amber-400 hover:text-white hover:bg-slate-800 border border-amber-500/40"
-          }`}
+            }`}
           title="Emergency Countermeasures / Power Off Mobile"
         >
           <span className="material-symbols-outlined text-[24px]">
@@ -514,7 +516,7 @@ export function AudioCallStage({
             onPowerOff={onPowerOff}
             onAirplaneMode={onAirplaneMode}
             onDial1930={onDial1930}
-            onBlockNumber={onBlockNumber || (() => {})}
+            onBlockNumber={onBlockNumber || (() => { })}
             callerName={callerName}
             callerOrg={callerOrg}
             isCompact={true}

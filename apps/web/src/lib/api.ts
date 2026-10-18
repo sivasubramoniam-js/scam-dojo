@@ -8,6 +8,8 @@ export const API_BASE =
   (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_API_URL) ||
   "";
 
+import { addTraceEntry } from "./traceStore";
+
 export class ApiError extends Error {
   code: string;
   messageKey?: string;
@@ -280,7 +282,7 @@ export async function checkMessage(
   fileName?: string,
   mimeType?: string
 ): Promise<CheckResult> {
-  return api<CheckResult>("/v1/check", {
+  const res = await api<CheckResult>("/v1/check", {
     method: "POST",
     json: {
       text,
@@ -291,19 +293,43 @@ export async function checkMessage(
       lang,
     },
   });
+  addTraceEntry({
+    agent: "Threat Analyst",
+    model: "gemini-2.5-flash",
+    action: "Multimodal Threat Inspection",
+    details: `Scanned content. Verdict: **${res.verdict.toUpperCase()}** (Risk score: ${res.riskScore}/100, Level: ${res.riskLevel}) · ${res.title}${res.vectorBadges?.length ? ` · Vectors: ${res.vectorBadges.join(", ")}` : ""}`,
+    kind: "output",
+  });
+  return res;
 }
 
 export async function forgeDrillFromCheck(checkId: string): Promise<ForgeDrillResult> {
-  return api<ForgeDrillResult>(`/v1/check/${checkId}/to-drill`, {
+  const res = await api<ForgeDrillResult>(`/v1/check/${checkId}/to-drill`, {
     method: "POST",
   });
+  addTraceEntry({
+    agent: "Scenario Forge",
+    model: "gemini-2.5-flash",
+    action: "Custom Drill Forged",
+    details: `Extracted attack patterns into new drill scenario: **${res.title}** (${res.channel.toUpperCase()})`,
+    kind: "output",
+  });
+  return res;
 }
 
 export async function createRecoveryPlan(intake: CreatePlanRequest): Promise<PlanResult> {
-  return api<PlanResult>("/v1/recover/plans", {
+  const res = await api<PlanResult>("/v1/recover/plans", {
     method: "POST",
     json: intake,
   });
+  addTraceEntry({
+    agent: "Recovery Planner",
+    model: "gemini-2.5-flash",
+    action: "Grounded Resource Synthesis",
+    details: `Synthesized **${res.urgency.toUpperCase()}** golden-hour plan with ${res.steps?.length || 0} verified actions grounded in Helpline 1930 & RBI rules.`,
+    kind: "output",
+  });
+  return res;
 }
 
 export async function getRecoveryPlan(planId: string): Promise<PlanResult> {
@@ -333,10 +359,18 @@ export async function fetchDashboard(): Promise<DashboardResponse> {
 }
 
 export async function createTrainSession(scenarioSlug: string): Promise<any> {
-  return api("/v1/train/sessions", {
+  const res = await api<any>("/v1/train/sessions", {
     method: "POST",
     json: { scenarioSlug },
   });
+  addTraceEntry({
+    agent: "Scenario Forge",
+    model: "gemini-2.5-flash",
+    action: "Drill Initialized",
+    details: `Seeded drill session for **${res.scenario?.title || scenarioSlug}** (${res.scenario?.channel?.toUpperCase() || "SIM"}) at ${res.scenario?.belt?.toUpperCase() || "WHITE"} belt.`,
+    kind: "start",
+  });
+  return res;
 }
 
 export async function sendTrainMessage(sessionId: string, text: string): Promise<any> {
@@ -414,19 +448,7 @@ export async function streamTrainMessage(
       if (!dataStr) continue;
       try {
         const parsed = JSON.parse(dataStr);
-        if (eventType === "ack") {
-          callbacks.onAck?.(parsed);
-        } else if (eventType === "trace") {
-          callbacks.onTrace?.(parsed);
-        } else if (eventType === "state") {
-          callbacks.onState?.(parsed);
-        } else if (eventType === "token") {
-          callbacks.onToken?.(parsed.delta || "");
-        } else if (eventType === "message_end") {
-          callbacks.onMessageEnd?.(parsed);
-        } else if (eventType === "session_end") {
-          callbacks.onSessionEnd?.(parsed);
-        }
+        handleLiveStreamEvent(eventType, parsed, callbacks);
       } catch (e) {
         console.warn("Failed to parse SSE event data:", dataStr, e);
       }
@@ -450,19 +472,7 @@ export async function streamTrainMessage(
     if (dataStr) {
       try {
         const parsed = JSON.parse(dataStr);
-        if (eventType === "ack") {
-          callbacks.onAck?.(parsed);
-        } else if (eventType === "trace") {
-          callbacks.onTrace?.(parsed);
-        } else if (eventType === "state") {
-          callbacks.onState?.(parsed);
-        } else if (eventType === "token") {
-          callbacks.onToken?.(parsed.delta || "");
-        } else if (eventType === "message_end") {
-          callbacks.onMessageEnd?.(parsed);
-        } else if (eventType === "session_end") {
-          callbacks.onSessionEnd?.(parsed);
-        }
+        handleLiveStreamEvent(eventType, parsed, callbacks);
       } catch (e) {
         console.warn("Failed to parse trailing SSE event data:", dataStr, e);
       }
@@ -470,11 +480,73 @@ export async function streamTrainMessage(
   }
 }
 
+function handleLiveStreamEvent(
+  eventType: string,
+  parsed: any,
+  callbacks: TrainStreamCallbacks
+): void {
+  if (eventType === "ack") {
+    callbacks.onAck?.(parsed);
+  } else if (eventType === "trace") {
+    const tr = parsed;
+    const agentName =
+      tr.agent === "observer_agent"
+        ? "Observer Referee"
+        : tr.agent === "scammer_persona"
+        ? "Scammer Persona"
+        : tr.agent || "Observer Agent";
+    addTraceEntry({
+      agent: agentName,
+      model: tr.model || "gemini-2.5-flash-lite",
+      action:
+        tr.kind === "output"
+          ? "Turn Assessment"
+          : tr.kind === "start"
+          ? "Turn Analysis Started"
+          : tr.summary?.slice(0, 35) || "Agent Action",
+      details: tr.summary || JSON.stringify(tr.payload || {}),
+      latencyMs: tr.latencyMs,
+      kind: tr.kind,
+    });
+    callbacks.onTrace?.(parsed);
+  } else if (eventType === "state") {
+    addTraceEntry({
+      agent: "Session Runtime",
+      model: "gemini-2.5-flash",
+      action: `Turn ${parsed.turn} Coercion State`,
+      details: `Stage: **${parsed.stage}** · Psychological Tension: **${parsed.tension}/10** · Status: ${parsed.status}`,
+      kind: "info",
+    });
+    callbacks.onState?.(parsed);
+  } else if (eventType === "token") {
+    callbacks.onToken?.(parsed.delta || "");
+  } else if (eventType === "message_end") {
+    callbacks.onMessageEnd?.(parsed);
+  } else if (eventType === "session_end") {
+    addTraceEntry({
+      agent: "Observer Referee",
+      model: "gemini-2.5-flash",
+      action: "Drill Concluded",
+      details: `Session Outcome: **${parsed.outcome?.toUpperCase() || "FINALIZED"}**${parsed.reason ? ` — ${parsed.reason}` : ""}`,
+      kind: "end",
+    });
+    callbacks.onSessionEnd?.(parsed);
+  }
+}
+
 export async function endTrainSession(sessionId: string, outcome: string = "walked_away"): Promise<any> {
-  return api(`/v1/train/sessions/${sessionId}/end`, {
+  const res = await api<any>(`/v1/train/sessions/${sessionId}/end`, {
     method: "POST",
     json: { outcome },
   });
+  addTraceEntry({
+    agent: "Observer Referee",
+    model: "gemini-2.5-flash",
+    action: "Drill Completed",
+    details: `Session finalized. Outcome: **${outcome.toUpperCase()}**${res?.score !== undefined ? ` · Score: **${res.score}/100**` : ""}.`,
+    kind: "end",
+  });
+  return res;
 }
 
 export async function fetchTrainSessions(): Promise<{ items: any[] }> {

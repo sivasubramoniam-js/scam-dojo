@@ -115,7 +115,7 @@ async def run_scenario_turn(scenario_slug: str, user_input: str, prior_messages:
     )
 
 
-async def main():
+async def main() -> None:
     test_cases = [
         # 1. Fake KYC Call (Phone) - Independent verification pushback
         (

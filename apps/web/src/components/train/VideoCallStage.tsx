@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GeminiLiveClient } from "@/lib/geminiLive";
 import { EmergencyCountermeasures } from "./EmergencyCountermeasures";
-import { createSpeechSynthesizer } from "@/lib/speech";
 import { useT } from "@/lib/i18n";
 
 export type VideoPersona = "police" | "customs" | "other";
@@ -131,7 +130,6 @@ export function VideoCallStage({
   const [liveCaptions, setLiveCaptions] = useState<string>("");
   const [currentTurnCaption, setCurrentTurnCaption] = useState<string>(lastScammerText || "");
   const liveClientRef = useRef<GeminiLiveClient | null>(null);
-  const synthRef = useRef(createSpeechSynthesizer());
 
   const userVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -237,9 +235,11 @@ export function VideoCallStage({
       !enableLiveApi ||
       typeof window === "undefined" ||
       !sessionId ||
+      isDone ||
       GeminiLiveClient.getActiveSelection() !== "video"
     ) {
       if (liveClientRef.current) {
+        liveClientRef.current.stopAudioPlayback();
         liveClientRef.current.disconnect();
         liveClientRef.current = null;
       }
@@ -298,11 +298,25 @@ export function VideoCallStage({
     return () => {
       isDisposed = true;
       onSpeakingChange?.(false);
-      synthRef.current.stop();
       liveClient.disconnect();
       liveClientRef.current = null;
     };
-  }, [sessionId, enableLiveApi]);
+  }, [sessionId, enableLiveApi, isDone, onSpeakingChange]);
+
+  // Immediately shut down camera and pause video when isDone is true
+  useEffect(() => {
+    if (isDone) {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+      setCameraEnabled(false);
+      safePause(talkingVideoRef.current);
+      safePause(listeningVideoRef.current);
+      if (talkingVideoRef.current) talkingVideoRef.current.currentTime = 0;
+      if (listeningVideoRef.current) listeningVideoRef.current.currentTime = 0;
+    }
+  }, [isDone]);
 
   // Stream user camera frames to Gemini Live whenever camera is enabled
   useEffect(() => {
@@ -323,25 +337,17 @@ export function VideoCallStage({
       setLiveCaptions("");
     }
 
-    // Only synthesize when message has finished streaming completely (!isTyping) and not yet spoken
+    // Only synthesize when message has finished streaming completely (!isTyping), socket is connected, and not yet spoken
     if (
+      liveConnected &&
       !isTyping &&
       lastScammerText &&
+      liveClientRef.current &&
       !spokenTextsRef.current.has(lastScammerText)
     ) {
       spokenTextsRef.current.add(lastScammerText);
-      if (liveConnected && liveClientRef.current) {
-        liveClientRef.current.stopAudioPlayback();
-        liveClientRef.current.sendText(lastScammerText);
-      } else {
-        synthRef.current.resume();
-        synthRef.current.speak(lastScammerText, () => {
-          setLiveSpeaking(false);
-          onSpeakingChange?.(false);
-        });
-        setLiveSpeaking(true);
-        onSpeakingChange?.(true);
-      }
+      liveClientRef.current.stopAudioPlayback();
+      liveClientRef.current.sendText(lastScammerText);
     }
   }, [lastScammerText, isTyping, liveConnected]);
 
@@ -448,6 +454,24 @@ export function VideoCallStage({
     >
       {/* Central Scammer Video Stream Window */}
       <div className="relative w-full aspect-video sm:aspect-16/10 bg-slate-950 overflow-hidden flex items-center justify-center">
+        {/* Video Call Terminated Disengagement Overlay */}
+        {isDone && (
+          <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+            <div className="w-16 h-16 rounded-full bg-red-600/20 border-2 border-red-500/50 flex items-center justify-center text-red-400 mb-3 shadow-lg shadow-red-500/20">
+              <span className="material-symbols-outlined text-[36px]">videocam_off</span>
+            </div>
+            <b className="text-xl font-display font-extrabold text-white tracking-wide">
+              VIDEO CALL TERMINATED
+            </b>
+            <p className="text-xs text-slate-300 max-w-sm mt-1.5 leading-relaxed">
+              All video and audio links have been severed. Rogue transmission has been blocked.
+            </p>
+            <div className="mt-4 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-[11px] font-mono text-emerald-400 font-bold flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">shield_check</span>
+              <span>Extortion Loop Neutralized</span>
+            </div>
+          </div>
+        )}
         {/* Scammer Talking Video (2x Speed Loop Mode, Muted for voiceover clarity) */}
         <video
           ref={talkingVideoRef}

@@ -3,7 +3,7 @@
 from app.services.safety import detect_distress, validate_scammer_output
 
 
-def test_distress_detection():
+def test_distress_detection() -> None:
     # English distress phrases
     assert detect_distress("I am really scared right now") is True
     assert detect_distress("I actually sent money to them") is True
@@ -21,7 +21,7 @@ def test_distress_detection():
     assert detect_distress("I will check my bank app directly") is False
 
 
-def test_scammer_output_validation():
+def test_scammer_output_validation() -> None:
     # Valid fictional responses
     valid_text = "Sir, visit orion-kyc.example to update or contact +91 00000 00000 or pay via kyc.desk@fakebank."
     ok, _ = validate_scammer_output(valid_text)
@@ -57,7 +57,7 @@ def test_scammer_output_validation():
     assert "simulation" in reason.lower() or "ai" in reason.lower()
 
 
-def test_scammer_output_validation_with_realistic_fake_entities():
+def test_scammer_output_validation_with_realistic_fake_entities() -> None:
     fake_entities = {
         "phone": "+91 98712 43901",
         "link": "http://sbi-netbanking-verify.in/kyc",
