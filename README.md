@@ -1,9 +1,10 @@
 # 🥋 Scam Dojo — Practice Getting Scammed. Safely.
 
 > **AI Builder Cup 2026 Hackathon Entry**  
-> *A full-spectrum defensive cybersecurity training simulator, real-time threat verifier, and golden-hour incident recovery copilot powered by Google Gemini and 7 specialized Google GenAI agents.*
+> *A full-spectrum defensive cybersecurity training simulator, real-time threat verifier, and golden-hour incident recovery copilot powered by Google Gemini and 7 specialized Google GenAI agents. Engineered end-to-end with Google Antigravity IDE using Gemini 3.8 Flash.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
+[![Engineered with: Google Antigravity](https://img.shields.io/badge/Engineered_With-Google_Antigravity_IDE-4285F4?logo=google&logoColor=white)](https://antigravity.google)
 [![Live Web App: Firebase](https://img.shields.io/badge/Live_App-scam--dojo--v2.web.app-FFCA28?logo=firebase&logoColor=black)](https://scam-dojo-v2.web.app)
 [![Live Backend: Cloud Run](https://img.shields.io/badge/Live_API-Google_Cloud_Run-4285F4?logo=googlecloud&logoColor=white)](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
@@ -90,6 +91,7 @@ flowchart LR
 
 ### 3. 🛡️ Recover (Golden-Hour Emergency Playbook)
 - **Golden-Hour Direct Triage (< 2 Hours)**: Interactive incident timer, direct 1-click dialer to India's **1930 Cyber Fraud Helpline**, and direct access to **cybercrime.gov.in** and **Sanchar Saathi (CEIR / TAFCOP)**.
+- **Nearby Emergency Locator (Google Maps)**: Real-time Google Maps integration (`PhysicalLocationsMap.tsx`) enabling victims to instantly locate and navigate to the nearest **Cybercrime Police Station**, **local police station**, and **bank branches** for urgent physical Zero-FIR filing and immediate in-person fraud freeze escalation.
 - **Official Evidence Dossier & Case Builder**: Structured generator creating dual standardized packets for police/1930 reporting (CFCFRMS transaction trail) and RBI-compliant zero-liability bank dispute letters (`DBR.No.Leg.BC.78/09.07.005/2017-18`).
 - **24x7 Bank Freeze Directory**: Instant block codes and fraud hotlines for major Indian banks (SBI, HDFC, ICICI, Axis, PNB, Kotak, Canara).
 - **Anti-Recovery-Scam Warning Shield**: Critical safeguard advising victims against secondary recovery scammers soliciting upfront fees or remote access.
@@ -186,8 +188,13 @@ All critical user flows and threat scenarios are covered by automated browser ve
 
 ## 🛠️ Tech Stack & Implementation Details
 
+- **AI-Native Engineering & IDE**:
+  - **Google Antigravity IDE**: The entire project was designed, scaffolded, coded, and tested end-to-end using **Google Antigravity IDE** powered by **Gemini 3.8 Flash** — driving autonomous agentic development, multi-agent protocol choreography, full-stack reactive components, and automated browser verification suites.
 - **Backend**: Python 3.12+, FastAPI, Uvicorn, Google GenAI SDK (`google-genai`), Pydantic v2, aiosqlite.
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, `react-simple-maps`, `d3-scale`, GSAP, Rough Notation, Lucide Icons, Canvas-Confetti, React Router v7, Zustand.
+- **Maps & Location Services**:
+  - **Google Maps**: Integrated directly on the **Recover** page (`PhysicalLocationsMap.tsx`) for real-time location and navigation to nearby **Cybercrime Police Stations**, **local police stations**, and **bank branches**.
+  - **India Cybercrime Heatmap**: Custom TopoJSON interactive map (`india.json`) rendering all 36 Indian States and Union Territories with NCRB/I4C crime telemetry.
 - **AI & Cloud Infrastructure (Google Cloud & Vertex AI)**:
   - **Models**:
     - `gemini-3.8-live`: Low-latency bidirectional audio & video call simulation with custom authoritative voice profiles (`Fenrir`).
