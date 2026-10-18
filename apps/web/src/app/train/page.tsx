@@ -495,12 +495,23 @@ export function TrainPage() {
 
     // If active drill is in audio or video call mode, simulate realistic aggressive redialing to test panic resilience!
     if (!isDone && (simMode === "audio" || simMode === "video") && !isRedialing) {
+      if (redialAttempt >= 3) {
+        setEmergencyTacticalOutcome("repeatedly_declined");
+        await finalizeSession(
+          "repeatedly_declined",
+          "🏆 Masterful defense: Call terminated after 3 persistent attempts! You refused to yield to the scammer's intimidation loop.",
+          30
+        );
+        return;
+      }
+
+      const nextAttempt = redialAttempt;
       setIsRedialing(true);
-      setRedialAttempt(1);
+      setRedialAttempt((prev) => prev + 1);
       setTension((t) => Math.min(10, Math.max(t, 5) + 2));
       setTraces((t) => [
         ...t,
-        "⚠️ Line disconnected: Scammer immediately triggers aggressive emergency redial to panic you!",
+        `⚠️ Line disconnected: Scammer immediately triggers aggressive emergency redial (Attempt ${nextAttempt} of 3) to panic you!`,
       ]);
       return;
     }
@@ -779,16 +790,16 @@ export function TrainPage() {
                 isConnecting
                   ? "Connecting..."
                   : simMode === "audio"
-                  ? "Start Voice Drill"
-                  : simMode === "video"
-                  ? "Start Video Drill"
-                  : "Start Live Drill";
+                    ? "Start Voice Drill"
+                    : simMode === "video"
+                      ? "Start Video Drill"
+                      : "Start Live Drill";
               const modeIcon =
                 simMode === "audio"
                   ? "call"
                   : simMode === "video"
-                  ? "videocam"
-                  : "arrow_forward";
+                    ? "videocam"
+                    : "arrow_forward";
 
               return (
                 <div
@@ -804,8 +815,8 @@ export function TrainPage() {
                     : isActiveDrill
                       ? "bg-[var(--sf)] border-emerald-500 ring-2 ring-emerald-500/30 shadow-xs cursor-default"
                       : isSelected
-                      ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 shadow-xs cursor-pointer"
-                      : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 hover:bg-[var(--sf)] cursor-pointer"
+                        ? "bg-[var(--sf)] border-[var(--act)] ring-2 ring-[var(--act)]/30 shadow-xs cursor-pointer"
+                        : "bg-[var(--sf2)]/50 border-[var(--line)] hover:border-[var(--act)]/50 hover:bg-[var(--sf)] cursor-pointer"
                     }`}
                 >
                   <div>
@@ -815,8 +826,8 @@ export function TrainPage() {
                           {scen.channel?.includes("video")
                             ? "videocam"
                             : scen.channel?.includes("call")
-                            ? "call"
-                            : "chat"}
+                              ? "call"
+                              : "chat"}
                         </span>
                         <span>{scen.channel?.replace("_", " ")}</span>
                         {isActiveDrill && (
@@ -874,11 +885,10 @@ export function TrainPage() {
                           }
                         }}
                         disabled={Boolean(startingSlug) || isActiveDrill}
-                        className={`w-full py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs group ${
-                          isActiveDrill
+                        className={`w-full py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs group ${isActiveDrill
                             ? "bg-emerald-600/90 text-white cursor-default"
                             : "text-white bg-[var(--act)] hover:opacity-95 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
-                        }`}
+                          }`}
                       >
                         {isConnecting ? (
                           <>
@@ -906,534 +916,534 @@ export function TrainPage() {
 
       {started && (
         devicePoweredOff ? (
-        <div className="max-w-xl mx-auto my-6 p-8 rounded-3xl bg-black border-2 border-slate-800 text-center shadow-2xl flex flex-col items-center justify-center min-h-[500px] animate-in fade-in zoom-in-95 duration-500">
-          <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-6">
-            <span className="material-symbols-outlined text-[32px] text-slate-600">
-              power_settings_new
-            </span>
-          </div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-400 mb-4">
-            <span className="w-2 h-2 rounded-full bg-slate-600" />
-            <span>DEVICE POWERED OFF · SENSORY TRAP SEVERED</span>
-          </div>
-          <h3 className="text-xl sm:text-2xl font-bold font-display text-white mb-2">
-            Mobile Shut Down Complete
-          </h3>
-          <p className="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">
-            The repetitive ringtone has stopped. The extortion socket is severed. You refused to let the scammer dictate your cognitive state.
-          </p>
-          <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-left text-xs text-emerald-200 max-w-md mb-6 space-y-2">
-            <b className="text-emerald-300 block font-display flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">verified</span>
-              Sensei Tactical Assessment:
-            </b>
-            <p>
-              "In real digital arrests, fraudsters rely on continuous auditory intimidation to trigger an amygdala hijack. Shutting off your device breaks the sensory loop and kills any rogue remote access sessions (AnyDesk/TeamViewer)."
+          <div className="max-w-xl mx-auto my-6 p-8 rounded-3xl bg-black border-2 border-slate-800 text-center shadow-2xl flex flex-col items-center justify-center min-h-[500px] animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-6">
+              <span className="material-symbols-outlined text-[32px] text-slate-600">
+                power_settings_new
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-400 mb-4">
+              <span className="w-2 h-2 rounded-full bg-slate-600" />
+              <span>DEVICE POWERED OFF · SENSORY TRAP SEVERED</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold font-display text-white mb-2">
+              Mobile Shut Down Complete
+            </h3>
+            <p className="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">
+              The repetitive ringtone has stopped. The extortion socket is severed. You refused to let the scammer dictate your cognitive state.
             </p>
+            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-left text-xs text-emerald-200 max-w-md mb-6 space-y-2">
+              <b className="text-emerald-300 block font-display flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]">verified</span>
+                Sensei Tactical Assessment:
+              </b>
+              <p>
+                "In real digital arrests, fraudsters rely on continuous auditory intimidation to trigger an amygdala hijack. Shutting off your device breaks the sensory loop and kills any rogue remote access sessions (AnyDesk/TeamViewer)."
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setDevicePoweredOff(false);
+                setIsDone(true);
+              }}
+              className="dojo-btn px-6 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer shadow-lg shadow-emerald-600/30"
+            >
+              Power On Mobile & View Tactical Debrief →
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setDevicePoweredOff(false);
-              setIsDone(true);
-            }}
-            className="dojo-btn px-6 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer shadow-lg shadow-emerald-600/30"
-          >
-            Power On Mobile & View Tactical Debrief →
-          </button>
-        </div>
-      ) : isRedialing ? (
-        <div className="mt-4">
-          <IncomingCallOverlay
-            callerName={activeScenarioInfo.personaName}
-            callerOrg={activeScenarioInfo.orgLabel}
-            callType={simMode === "video" ? "video" : "audio"}
-            attempt={redialAttempt}
-            onAccept={handleAcceptRedial}
-            onDecline={handleDeclineRedial}
-            onPowerOff={handlePowerOffMobile}
-            onAirplaneMode={handleAirplaneMode}
-            onDial1930={handleDial1930}
-            onBlockNumber={handleBlockNumber}
-          />
-        </div>
-      ) : simMode === "audio" ? (
-        <div className="mt-4" key="audio-stage-container">
-          <AudioCallStage
-            key={`audio-stage-${sessionId || "initial"}`}
-            callerName={activeScenarioInfo.personaName}
-            callerOrg={activeScenarioInfo.orgLabel}
-            tension={tension}
-            isSpeaking={isSpeaking}
-            isListening={isListening}
-            isTyping={isTyping}
-            aiStatus={aiStatus}
-            lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
-            onSendMessage={handleSend}
-            onHangUp={handleHangUp}
-            onToggleMic={toggleMic}
-            onPowerOff={handlePowerOffMobile}
-            onAirplaneMode={handleAirplaneMode}
-            onDial1930={handleDial1930}
-            onBlockNumber={handleBlockNumber}
-            onSpeakingChange={setIsSpeaking}
-            isDone={isDone}
-            sessionId={sessionId || undefined}
-            enableLiveApi={simMode === "audio"}
-          />
-          {/* Completion Action Bar */}
-          {isDone && (
-            <div className="max-w-xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-col gap-3 animate-in fade-in shadow-dojo">
-              {/* Tactical Outcome Badge */}
-              {emergencyTacticalOutcome === "power_off" && (
-                <div className="w-full p-3 rounded-xl bg-red-950/60 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-200">
-                  <span className="material-symbols-outlined text-[20px] text-red-400 shrink-0">power_settings_new</span>
-                  <div>
-                    <b className="text-white block font-display">TACTICAL DEFENSE WIN: EMERGENCY POWER-DOWN</b>
-                    <span>You decisively shut off the device, neutralizing the psychological panic loop. +40 Resilience Bonus Awarded!</span>
+        ) : isRedialing ? (
+          <div className="mt-4">
+            <IncomingCallOverlay
+              callerName={activeScenarioInfo.personaName}
+              callerOrg={activeScenarioInfo.orgLabel}
+              callType={simMode === "video" ? "video" : "audio"}
+              attempt={redialAttempt}
+              onAccept={handleAcceptRedial}
+              onDecline={handleDeclineRedial}
+              onPowerOff={handlePowerOffMobile}
+              onAirplaneMode={handleAirplaneMode}
+              onDial1930={handleDial1930}
+              onBlockNumber={handleBlockNumber}
+            />
+          </div>
+        ) : simMode === "audio" ? (
+          <div className="mt-4" key="audio-stage-container">
+            <AudioCallStage
+              key={`audio-stage-${sessionId || "initial"}`}
+              callerName={activeScenarioInfo.personaName}
+              callerOrg={activeScenarioInfo.orgLabel}
+              tension={tension}
+              isSpeaking={isSpeaking}
+              isListening={isListening}
+              isTyping={isTyping}
+              aiStatus={aiStatus}
+              lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
+              onSendMessage={handleSend}
+              onHangUp={handleHangUp}
+              onToggleMic={toggleMic}
+              onPowerOff={handlePowerOffMobile}
+              onAirplaneMode={handleAirplaneMode}
+              onDial1930={handleDial1930}
+              onBlockNumber={handleBlockNumber}
+              onSpeakingChange={setIsSpeaking}
+              isDone={isDone}
+              sessionId={sessionId || undefined}
+              enableLiveApi={simMode === "audio" && !isDone}
+            />
+            {/* Completion Action Bar */}
+            {isDone && (
+              <div className="max-w-xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-col gap-3 animate-in fade-in shadow-dojo">
+                {/* Tactical Outcome Badge */}
+                {emergencyTacticalOutcome === "power_off" && (
+                  <div className="w-full p-3 rounded-xl bg-red-950/60 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-200">
+                    <span className="material-symbols-outlined text-[20px] text-red-400 shrink-0">power_settings_new</span>
+                    <div>
+                      <b className="text-white block font-display">TACTICAL DEFENSE WIN: EMERGENCY POWER-DOWN</b>
+                      <span>You decisively shut off the device, neutralizing the psychological panic loop. +40 Resilience Bonus Awarded!</span>
+                    </div>
                   </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "airplane_mode" && (
-                <div className="w-full p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 flex items-center gap-2.5 text-xs text-amber-200">
-                  <span className="material-symbols-outlined text-[20px] text-amber-400 shrink-0">airplanemode_active</span>
-                  <div>
-                    <b className="text-white block font-display">TACTICAL DEFENSE WIN: AIRPLANE MODE CUTOFF</b>
-                    <span>You severed the VoIP audio connection immediately without losing incident logs. +35 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "dial_1930" && (
-                <div className="w-full p-3 rounded-xl bg-blue-950/60 border border-blue-500/50 flex items-center gap-2.5 text-xs text-blue-200">
-                  <span className="material-symbols-outlined text-[20px] text-blue-400 shrink-0">verified</span>
-                  <div>
-                    <b className="text-white block font-display">GOLD STANDARD DEFENSE: REPORTED TO 1930 HELPLINE</b>
-                    <span>Connecting with authentic cyber authorities permanently neutralized the intimidation. +45 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "repeatedly_declined" && (
-                <div className="w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-center gap-2.5 text-xs text-emerald-200">
-                  <span className="material-symbols-outlined text-[20px] text-emerald-400 shrink-0">shield</span>
-                  <div>
-                    <b className="text-white block font-display">PANIC RESISTANCE WIN: 3 REDIALS DEFLECTED</b>
-                    <span>You calmly refused 3 persistent redial attempts without submitting to intimidation. +30 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <b className="text-sm text-[var(--ink)] block">
-                    Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 75} pts
-                  </b>
-                  <span className="text-xs text-[var(--mut)]">
-                    Session recorded in SQLite. Resilience updated on profile.
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
-                      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-                    }}
-                    className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
-                    title="Share this drill with family or elderly parents"
-                  >
-                    <span>Share Drill with Family</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="dojo-btn q min-h-[40px] px-4 text-xs"
-                  >
-                    Choose another drill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="dojo-btn min-h-[40px] px-4 text-xs"
-                  >
-                    View your belt →
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : simMode === "video" ? (
-        <div className="mt-4" key="video-stage-container">
-          <VideoCallStage
-            key={`video-stage-${sessionId || "initial"}`}
-            callerName={activeScenarioInfo.personaName}
-            callerOrg={activeScenarioInfo.orgLabel}
-            drillSlug={selectedSlug || undefined}
-            scenarioTitle={activeScenarioInfo.title}
-            tension={tension}
-            isSpeaking={isSpeaking}
-            isListening={isListening}
-            isTyping={isTyping}
-            aiStatus={aiStatus}
-            lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
-            onSendMessage={handleSend}
-            onHangUp={handleHangUp}
-            onToggleMic={toggleMic}
-            onPowerOff={handlePowerOffMobile}
-            onAirplaneMode={handleAirplaneMode}
-            onDial1930={handleDial1930}
-            onBlockNumber={handleBlockNumber}
-            onSpeakingChange={setIsSpeaking}
-            isDone={isDone}
-            sessionId={sessionId || undefined}
-            enableLiveApi={simMode === "video"}
-          />
-          {/* Completion Action Bar */}
-          {isDone && (
-            <div className="max-w-4xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-col gap-3 animate-in fade-in shadow-dojo">
-              {/* Tactical Outcome Badge */}
-              {emergencyTacticalOutcome === "power_off" && (
-                <div className="w-full p-3 rounded-xl bg-red-950/60 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-200">
-                  <span className="material-symbols-outlined text-[20px] text-red-400 shrink-0">power_settings_new</span>
-                  <div>
-                    <b className="text-white block font-display">TACTICAL DEFENSE WIN: EMERGENCY POWER-DOWN</b>
-                    <span>You decisively shut off the device, neutralizing the psychological panic loop. +40 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "airplane_mode" && (
-                <div className="w-full p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 flex items-center gap-2.5 text-xs text-amber-200">
-                  <span className="material-symbols-outlined text-[20px] text-amber-400 shrink-0">airplanemode_active</span>
-                  <div>
-                    <b className="text-white block font-display">TACTICAL DEFENSE WIN: AIRPLANE MODE CUTOFF</b>
-                    <span>You severed the VoIP audio connection immediately without losing incident logs. +35 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "dial_1930" && (
-                <div className="w-full p-3 rounded-xl bg-blue-950/60 border border-blue-500/50 flex items-center gap-2.5 text-xs text-blue-200">
-                  <span className="material-symbols-outlined text-[20px] text-blue-400 shrink-0">verified</span>
-                  <div>
-                    <b className="text-white block font-display">GOLD STANDARD DEFENSE: REPORTED TO 1930 HELPLINE</b>
-                    <span>Connecting with authentic cyber authorities permanently neutralized the intimidation. +45 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-              {emergencyTacticalOutcome === "repeatedly_declined" && (
-                <div className="w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-center gap-2.5 text-xs text-emerald-200">
-                  <span className="material-symbols-outlined text-[20px] text-emerald-400 shrink-0">shield</span>
-                  <div>
-                    <b className="text-white block font-display">PANIC RESISTANCE WIN: 3 REDIALS DEFLECTED</b>
-                    <span>You calmly refused 3 persistent redial attempts without submitting to intimidation. +30 Resilience Bonus Awarded!</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <b className="text-sm text-[var(--ink)] block">
-                    Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 75} pts
-                  </b>
-                  <span className="text-xs text-[var(--mut)]">
-                    Session recorded in SQLite. Resilience updated on profile.
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
-                      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
-                    }}
-                    className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
-                    title="Share this drill with family or elderly parents"
-                  >
-                    <span>Share Drill with Family</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="dojo-btn q min-h-[40px] px-4 text-xs"
-                  >
-                    Choose another drill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="dojo-btn min-h-[40px] px-4 text-xs"
-                  >
-                    View your belt →
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        /* Chat Stage */
-        <div className="dojo-stage mt-4 animate-in fade-in duration-200">
-          {/* Stage Header */}
-          <div className="dojo-sh">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--safe)] animate-pulse"></span>
-              <div>
-                <b className="text-sm sm:text-base text-[var(--ink)] block leading-tight flex items-center gap-2">
-                  {activeScenarioInfo.orgLabel}
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--sf2)] border border-[var(--line)] text-[var(--safe)] font-semibold hidden sm:inline">
-                    Gemini 3.8 Flash
-                  </span>
-                </b>
-                <span className="text-xs text-[var(--mut)]">
-                  Caller: {activeScenarioInfo.personaName} · Session: {sessionId?.slice(0, 8)}…
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  const next = !isVoiceMode;
-                  setIsVoiceMode(next);
-                  if (!next) {
-                    synthRef.current.stop();
-                    recRef.current.stop();
-                    setIsSpeaking(false);
-                    setIsListening(false);
-                  } else if (messages.length > 0) {
-                    const lastMsg = messages[messages.length - 1];
-                    if (lastMsg.role === "scammer") {
-                      synthRef.current.speak(lastMsg.text, () => setIsSpeaking(false));
-                      setIsSpeaking(true);
-                    }
-                  }
-                }}
-                className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${isVoiceMode
-                  ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
-                  : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
-                  }`}
-                title="Toggle Voice Call Mode"
-              >
-                <span className="material-symbols-outlined text-[15px]">
-                  {isVoiceMode ? "volume_up" : "volume_off"}
-                </span>
-                <span>{isVoiceMode ? "Voice Call Active" : "Voice Call Off"}</span>
-                {isSpeaking && (
-                  <span className="inline-flex gap-0.5 items-center ml-0.5">
-                    <span className="w-1 h-3 bg-white animate-pulse"></span>
-                    <span className="w-1 h-2 bg-white animate-pulse delay-75"></span>
-                    <span className="w-1 h-3.5 bg-white animate-pulse delay-150"></span>
-                  </span>
                 )}
-              </button>
+                {emergencyTacticalOutcome === "airplane_mode" && (
+                  <div className="w-full p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 flex items-center gap-2.5 text-xs text-amber-200">
+                    <span className="material-symbols-outlined text-[20px] text-amber-400 shrink-0">airplanemode_active</span>
+                    <div>
+                      <b className="text-white block font-display">TACTICAL DEFENSE WIN: AIRPLANE MODE CUTOFF</b>
+                      <span>You severed the VoIP audio connection immediately without losing incident logs. +35 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
+                {emergencyTacticalOutcome === "dial_1930" && (
+                  <div className="w-full p-3 rounded-xl bg-blue-950/60 border border-blue-500/50 flex items-center gap-2.5 text-xs text-blue-200">
+                    <span className="material-symbols-outlined text-[20px] text-blue-400 shrink-0">verified</span>
+                    <div>
+                      <b className="text-white block font-display">GOLD STANDARD DEFENSE: REPORTED TO 1930 HELPLINE</b>
+                      <span>Connecting with authentic cyber authorities permanently neutralized the intimidation. +45 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
+                {emergencyTacticalOutcome === "repeatedly_declined" && (
+                  <div className="w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-center gap-2.5 text-xs text-emerald-200">
+                    <span className="material-symbols-outlined text-[20px] text-emerald-400 shrink-0">shield</span>
+                    <div>
+                      <b className="text-white block font-display">PANIC RESISTANCE WIN: 3 REDIALS DEFLECTED</b>
+                      <span>You calmly refused 3 persistent redial attempts without submitting to intimidation. +30 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
 
-              <button
-                type="button"
-                onClick={() => setShowTrace(!showTrace)}
-                className="text-xs px-2.5 py-1 rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--mut)] hover:text-[var(--ink)] cursor-pointer flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[14px]">psychology</span>
-                {showTrace ? "Hide AI trace" : "AI reasoning trace"}
-              </button>
-              <button
-                type="button"
-                onClick={handleHangUp}
-                disabled={isDone}
-                className="dojo-btn bad min-h-[36px] px-3 text-xs"
-              >
-                {t("train.hangup")}
-              </button>
-            </div>
-          </div>
-
-          {sessionError && (
-            <div className="mx-4 mt-3 p-2.5 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">error</span>
-              <span>{sessionError}</span>
-            </div>
-          )}
-
-          {/* 10-Bar Pressure Meter (Live Backend Tension) */}
-          <div
-            className="flex items-center gap-1 px-4 pt-3 pb-1 text-xs"
-            role="meter"
-            aria-label={t("train.pressure")}
-            aria-valuenow={tension}
-            aria-valuemin={0}
-            aria-valuemax={10}
-          >
-            <span className="mr-2 text-[var(--mut)] font-semibold">{t("train.pressure")}: {tension}/10</span>
-            {Array.from({ length: 10 }).map((_, i) => {
-              const on = i < tension;
-              const colorClass = on
-                ? tension >= 7
-                  ? "bg-[var(--bad)] border-transparent"
-                  : tension >= 4
-                    ? "bg-[var(--warn)] border-transparent"
-                    : "bg-[var(--safe)] border-transparent"
-                : "bg-[var(--sf2)] border-[var(--line)]";
-              return (
-                <i
-                  key={i}
-                  className={`flex-1 h-2 rounded-xs border transition-all duration-300 ${colorClass}`}
-                />
-              );
-            })}
-          </div>
-
-          {/* Chat Message Log */}
-          <div
-            ref={logRef}
-            className="h-[360px] max-h-[44vh] overflow-y-auto p-4 flex flex-col gap-2.5"
-            role="log"
-            aria-live="polite"
-          >
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`max-w-[84%] px-3.5 py-2.5 text-sm sm:text-base leading-relaxed ${m.role === "scammer"
-                  ? "self-start bg-[var(--sf2)] text-[var(--ink)] rounded-2xl rounded-tl-xs"
-                  : m.role === "user"
-                    ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
-                    : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
-                  }`}
-              >
-                <MarkdownView content={m.text} />
-              </div>
-            ))}
-
-            {/* Live AI Status / Typing Indicator */}
-            {(isTyping || aiStatus) && (
-              <div className="flex flex-col gap-1.5 self-start">
-                <div className="flex items-center gap-2 px-3 py-2 bg-[var(--sf2)] rounded-2xl rounded-tl-xs text-xs text-[var(--mut)] border border-[var(--line)]">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--act)] animate-spin">
-                    progress_activity
-                  </span>
-                  <span>{aiStatus || "Gemini 3.8 Scammer is generating response…"}</span>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <b className="text-sm text-[var(--ink)] block">
+                      Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 75} pts
+                    </b>
+                    <span className="text-xs text-[var(--mut)]">
+                      Session recorded in SQLite. Resilience updated on profile.
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                      }}
+                      className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                      title="Share this drill with family or elderly parents"
+                    >
+                      <span>Share Drill with Family</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExitDrill}
+                      className="dojo-btn q min-h-[40px] px-4 text-xs"
+                    >
+                      Choose another drill
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/dashboard")}
+                      className="dojo-btn min-h-[40px] px-4 text-xs"
+                    >
+                      View your belt →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Quick Reply Chips */}
-          {!isDone && (
-            <div className="flex flex-wrap gap-2 px-3 pb-2 pt-1">
-              {chips.map((chip, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSend(chip)}
-                  disabled={isDone || isTyping || isSpeaking || isSending}
-                  className="px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--bg)] text-xs text-[var(--ink)] hover:border-[var(--act)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Input Composer */}
-          <div className="flex gap-2 p-3 border-t border-[var(--line)] bg-[var(--sf)]">
-            <button
-              type="button"
-              onClick={toggleMic}
-              disabled={isDone || isTyping || isSpeaking || isSending}
-              className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
-                ? "bg-rose-500 text-white border-rose-500 animate-pulse"
-                : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
-                }`}
-              title={isListening ? "Listening... click to stop" : "Speak reply using microphone"}
-            >
-              <span className="material-symbols-outlined text-[20px]">
-                {isListening ? "mic" : "mic_none"}
-              </span>
-            </button>
-
-            <input
-              type="text"
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              disabled={isDone || isTyping || isSpeaking || isSending}
-              placeholder={
-                isListening
-                  ? "Listening to your voice..."
-                  : isSpeaking
-                    ? "Scammer is speaking..."
-                    : isDone
-                      ? "Drill completed."
-                      : t("train.placeholder")
-              }
-              maxLength={500}
-              aria-label="Your reply"
-              className="flex-1 min-h-[44px] rounded-lg border border-[var(--line)] bg-[var(--bg)] px-3 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--act)] disabled:opacity-50"
+        ) : simMode === "video" ? (
+          <div className="mt-4" key="video-stage-container">
+            <VideoCallStage
+              key={`video-stage-${sessionId || "initial"}`}
+              callerName={activeScenarioInfo.personaName}
+              callerOrg={activeScenarioInfo.orgLabel}
+              drillSlug={selectedSlug || undefined}
+              scenarioTitle={activeScenarioInfo.title}
+              tension={tension}
+              isSpeaking={isSpeaking}
+              isListening={isListening}
+              isTyping={isTyping}
+              aiStatus={aiStatus}
+              lastScammerText={[...messages].reverse().find((m) => m.role === "scammer")?.text}
+              onSendMessage={handleSend}
+              onHangUp={handleHangUp}
+              onToggleMic={toggleMic}
+              onPowerOff={handlePowerOffMobile}
+              onAirplaneMode={handleAirplaneMode}
+              onDial1930={handleDial1930}
+              onBlockNumber={handleBlockNumber}
+              onSpeakingChange={setIsSpeaking}
+              isDone={isDone}
+              sessionId={sessionId || undefined}
+              enableLiveApi={simMode === "video" && !isDone}
             />
-            <button
-              type="button"
-              onClick={() => handleSend()}
-              disabled={isDone || isTyping || isSpeaking || isSending || !inputVal.trim()}
-              className="dojo-btn min-h-[44px] px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t("train.send")}
-            </button>
-          </div>
+            {/* Completion Action Bar */}
+            {isDone && (
+              <div className="max-w-4xl mx-auto mt-4 p-4 bg-[var(--sf)] rounded-2xl border border-[var(--line)] flex flex-col gap-3 animate-in fade-in shadow-dojo">
+                {/* Tactical Outcome Badge */}
+                {emergencyTacticalOutcome === "power_off" && (
+                  <div className="w-full p-3 rounded-xl bg-red-950/60 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-200">
+                    <span className="material-symbols-outlined text-[20px] text-red-400 shrink-0">power_settings_new</span>
+                    <div>
+                      <b className="text-white block font-display">TACTICAL DEFENSE WIN: EMERGENCY POWER-DOWN</b>
+                      <span>You decisively shut off the device, neutralizing the psychological panic loop. +40 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
+                {emergencyTacticalOutcome === "airplane_mode" && (
+                  <div className="w-full p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 flex items-center gap-2.5 text-xs text-amber-200">
+                    <span className="material-symbols-outlined text-[20px] text-amber-400 shrink-0">airplanemode_active</span>
+                    <div>
+                      <b className="text-white block font-display">TACTICAL DEFENSE WIN: AIRPLANE MODE CUTOFF</b>
+                      <span>You severed the VoIP audio connection immediately without losing incident logs. +35 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
+                {emergencyTacticalOutcome === "dial_1930" && (
+                  <div className="w-full p-3 rounded-xl bg-blue-950/60 border border-blue-500/50 flex items-center gap-2.5 text-xs text-blue-200">
+                    <span className="material-symbols-outlined text-[20px] text-blue-400 shrink-0">verified</span>
+                    <div>
+                      <b className="text-white block font-display">GOLD STANDARD DEFENSE: REPORTED TO 1930 HELPLINE</b>
+                      <span>Connecting with authentic cyber authorities permanently neutralized the intimidation. +45 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
+                {emergencyTacticalOutcome === "repeatedly_declined" && (
+                  <div className="w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-center gap-2.5 text-xs text-emerald-200">
+                    <span className="material-symbols-outlined text-[20px] text-emerald-400 shrink-0">shield</span>
+                    <div>
+                      <b className="text-white block font-display">PANIC RESISTANCE WIN: 3 REDIALS DEFLECTED</b>
+                      <span>You calmly refused 3 persistent redial attempts without submitting to intimidation. +30 Resilience Bonus Awarded!</span>
+                    </div>
+                  </div>
+                )}
 
-          {/* Collapsible Live Agent Trace Panel */}
-          {showTrace && (
-            <div className="p-3 border-t border-[var(--line)] bg-[var(--sf2)]/50 text-xs font-mono text-[var(--mut)] max-h-36 overflow-y-auto">
-              <div className="flex items-center justify-between pb-1 border-b border-[var(--line)] mb-1.5">
-                <b className="text-[var(--ink)]">Google ADK Agent Trace:</b>
-                <span className="text-[10px] text-[var(--safe)] font-bold">LIVE AGENT TELEMETRY</span>
-              </div>
-              {traces.map((t, idx) => (
-                <div key={idx} className="py-0.5 leading-snug">
-                  › {t}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <b className="text-sm text-[var(--ink)] block">
+                      Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 75} pts
+                    </b>
+                    <span className="text-xs text-[var(--mut)]">
+                      Session recorded in SQLite. Resilience updated on profile.
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                      }}
+                      className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                      title="Share this drill with family or elderly parents"
+                    >
+                      <span>Share Drill with Family</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExitDrill}
+                      className="dojo-btn q min-h-[40px] px-4 text-xs"
+                    >
+                      Choose another drill
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/dashboard")}
+                      className="dojo-btn min-h-[40px] px-4 text-xs"
+                    >
+                      View your belt →
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Completion Action Bar */}
-          {isDone && (
-            <div className="p-4 bg-[var(--sf2)] border-t border-[var(--line)] flex flex-wrap items-center justify-between gap-3 animate-in fade-in">
-              <div>
-                <b className="text-sm text-[var(--ink)] block">
-                  Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 30} pts
-                </b>
-                <span className="text-xs text-[var(--mut)]">
-                  Session recorded in SQLite. Resilience updated on profile.
-                </span>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+            )}
+          </div>
+        ) : (
+          /* Chat Stage */
+          <div className="dojo-stage mt-4 animate-in fade-in duration-200">
+            {/* Stage Header */}
+            <div className="dojo-sh">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[var(--safe)] animate-pulse"></span>
+                <div>
+                  <b className="text-sm sm:text-base text-[var(--ink)] block leading-tight flex items-center gap-2">
+                    {activeScenarioInfo.orgLabel}
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--sf2)] border border-[var(--line)] text-[var(--safe)] font-semibold hidden sm:inline">
+                      Gemini 3.8 Flash
+                    </span>
+                  </b>
+                  <span className="text-xs text-[var(--mut)]">
+                    Caller: {activeScenarioInfo.personaName} · Session: {sessionId?.slice(0, 8)}…
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => {
-                    const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
-                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                    const next = !isVoiceMode;
+                    setIsVoiceMode(next);
+                    if (!next) {
+                      synthRef.current.stop();
+                      recRef.current.stop();
+                      setIsSpeaking(false);
+                      setIsListening(false);
+                    } else if (messages.length > 0) {
+                      const lastMsg = messages[messages.length - 1];
+                      if (lastMsg.role === "scammer") {
+                        synthRef.current.speak(lastMsg.text, () => setIsSpeaking(false));
+                        setIsSpeaking(true);
+                      }
+                    }
                   }}
-                  className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
-                  title="Share this drill with family or elderly parents"
+                  className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1.5 cursor-pointer ${isVoiceMode
+                    ? "bg-[var(--act)] text-white border-[var(--act)] shadow-xs font-bold"
+                    : "bg-[var(--bg)] border-[var(--line)] text-[var(--mut)] hover:text-[var(--ink)]"
+                    }`}
+                  title="Toggle Voice Call Mode"
                 >
-                  <span>Share Drill with Family</span>
+                  <span className="material-symbols-outlined text-[15px]">
+                    {isVoiceMode ? "volume_up" : "volume_off"}
+                  </span>
+                  <span>{isVoiceMode ? "Voice Call Active" : "Voice Call Off"}</span>
+                  {isSpeaking && (
+                    <span className="inline-flex gap-0.5 items-center ml-0.5">
+                      <span className="w-1 h-3 bg-white animate-pulse"></span>
+                      <span className="w-1 h-2 bg-white animate-pulse delay-75"></span>
+                      <span className="w-1 h-3.5 bg-white animate-pulse delay-150"></span>
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowTrace(!showTrace)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-[var(--line)] bg-[var(--bg)] text-[var(--mut)] hover:text-[var(--ink)] cursor-pointer flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">psychology</span>
+                  {showTrace ? "Hide AI trace" : "AI reasoning trace"}
                 </button>
                 <button
                   type="button"
-                  onClick={handleExitDrill}
-                  className="dojo-btn q min-h-[40px] px-4 text-xs"
+                  onClick={handleHangUp}
+                  disabled={isDone}
+                  className="dojo-btn bad min-h-[36px] px-3 text-xs"
                 >
-                  Choose another drill
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/dashboard")}
-                  className="dojo-btn min-h-[40px] px-4 text-xs"
-                >
-                  View your belt →
+                  {t("train.hangup")}
                 </button>
               </div>
             </div>
-          )}
-        </div>
-      ))}
+
+            {sessionError && (
+              <div className="mx-4 mt-3 p-2.5 rounded-xl bg-[var(--bad)]/10 border border-[var(--bad)]/30 text-xs text-[var(--bad)] flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">error</span>
+                <span>{sessionError}</span>
+              </div>
+            )}
+
+            {/* 10-Bar Pressure Meter (Live Backend Tension) */}
+            <div
+              className="flex items-center gap-1 px-4 pt-3 pb-1 text-xs"
+              role="meter"
+              aria-label={t("train.pressure")}
+              aria-valuenow={tension}
+              aria-valuemin={0}
+              aria-valuemax={10}
+            >
+              <span className="mr-2 text-[var(--mut)] font-semibold">{t("train.pressure")}: {tension}/10</span>
+              {Array.from({ length: 10 }).map((_, i) => {
+                const on = i < tension;
+                const colorClass = on
+                  ? tension >= 7
+                    ? "bg-[var(--bad)] border-transparent"
+                    : tension >= 4
+                      ? "bg-[var(--warn)] border-transparent"
+                      : "bg-[var(--safe)] border-transparent"
+                  : "bg-[var(--sf2)] border-[var(--line)]";
+                return (
+                  <i
+                    key={i}
+                    className={`flex-1 h-2 rounded-xs border transition-all duration-300 ${colorClass}`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Chat Message Log */}
+            <div
+              ref={logRef}
+              className="h-[360px] max-h-[44vh] overflow-y-auto p-4 flex flex-col gap-2.5"
+              role="log"
+              aria-live="polite"
+            >
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`max-w-[84%] px-3.5 py-2.5 text-sm sm:text-base leading-relaxed ${m.role === "scammer"
+                    ? "self-start bg-[var(--sf2)] text-[var(--ink)] rounded-2xl rounded-tl-xs"
+                    : m.role === "user"
+                      ? "self-end bg-[var(--act)] text-white rounded-2xl rounded-tr-xs"
+                      : "self-center bg-transparent border border-dashed border-[var(--line)] text-[var(--mut)] rounded-xl text-xs sm:text-sm text-center my-1"
+                    }`}
+                >
+                  <MarkdownView content={m.text} />
+                </div>
+              ))}
+
+              {/* Live AI Status / Typing Indicator */}
+              {(isTyping || aiStatus) && (
+                <div className="flex flex-col gap-1.5 self-start">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-[var(--sf2)] rounded-2xl rounded-tl-xs text-xs text-[var(--mut)] border border-[var(--line)]">
+                    <span className="material-symbols-outlined text-[16px] text-[var(--act)] animate-spin">
+                      progress_activity
+                    </span>
+                    <span>{aiStatus || "Gemini 3.8 Scammer is generating response…"}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Reply Chips */}
+            {!isDone && (
+              <div className="flex flex-wrap gap-2 px-3 pb-2 pt-1">
+                {chips.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSend(chip)}
+                    disabled={isDone || isTyping || isSpeaking || isSending}
+                    className="px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--bg)] text-xs text-[var(--ink)] hover:border-[var(--act)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Input Composer */}
+            <div className="flex gap-2 p-3 border-t border-[var(--line)] bg-[var(--sf)]">
+              <button
+                type="button"
+                onClick={toggleMic}
+                disabled={isDone || isTyping || isSpeaking || isSending}
+                className={`min-h-[44px] px-3 rounded-lg border flex items-center justify-center transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
+                  ? "bg-rose-500 text-white border-rose-500 animate-pulse"
+                  : "bg-[var(--bg)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--act)]"
+                  }`}
+                title={isListening ? "Listening... click to stop" : "Speak reply using microphone"}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {isListening ? "mic" : "mic_none"}
+                </span>
+              </button>
+
+              <input
+                type="text"
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                disabled={isDone || isTyping || isSpeaking || isSending}
+                placeholder={
+                  isListening
+                    ? "Listening to your voice..."
+                    : isSpeaking
+                      ? "Scammer is speaking..."
+                      : isDone
+                        ? "Drill completed."
+                        : t("train.placeholder")
+                }
+                maxLength={500}
+                aria-label="Your reply"
+                className="flex-1 min-h-[44px] rounded-lg border border-[var(--line)] bg-[var(--bg)] px-3 text-sm text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--act)] disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => handleSend()}
+                disabled={isDone || isTyping || isSpeaking || isSending || !inputVal.trim()}
+                className="dojo-btn min-h-[44px] px-5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t("train.send")}
+              </button>
+            </div>
+
+            {/* Collapsible Live Agent Trace Panel */}
+            {showTrace && (
+              <div className="p-3 border-t border-[var(--line)] bg-[var(--sf2)]/50 text-xs font-mono text-[var(--mut)] max-h-36 overflow-y-auto">
+                <div className="flex items-center justify-between pb-1 border-b border-[var(--line)] mb-1.5">
+                  <b className="text-[var(--ink)]">Google ADK Agent Trace:</b>
+                  <span className="text-[10px] text-[var(--safe)] font-bold">LIVE AGENT TELEMETRY</span>
+                </div>
+                {traces.map((t, idx) => (
+                  <div key={idx} className="py-0.5 leading-snug">
+                    › {t}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Completion Action Bar */}
+            {isDone && (
+              <div className="p-4 bg-[var(--sf2)] border-t border-[var(--line)] flex flex-wrap items-center justify-between gap-3 animate-in fade-in">
+                <div>
+                  <b className="text-sm text-[var(--ink)] block">
+                    Drill Completed · Score: {debriefInfo?.score?.finalScore ?? 30} pts
+                  </b>
+                  <span className="text-xs text-[var(--mut)]">
+                    Session recorded in SQLite. Resilience updated on profile.
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = `🛡️ I just trained on Scam Dojo against the "${activeScenarioInfo.title}" scam simulation! Practice getting scammed safely to protect yourself: https://scam-dojo-v2.web.app/train?slug=${selectedSlug}`;
+                      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+                    }}
+                    className="dojo-btn min-h-[40px] px-3.5 text-xs bg-[#25D366] hover:bg-[#20ba59] text-white border-0 flex items-center gap-1.5 cursor-pointer font-bold"
+                    title="Share this drill with family or elderly parents"
+                  >
+                    <span>Share Drill with Family</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExitDrill}
+                    className="dojo-btn q min-h-[40px] px-4 text-xs"
+                  >
+                    Choose another drill
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard")}
+                    className="dojo-btn min-h-[40px] px-4 text-xs"
+                  >
+                    View your belt →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
     </div>
   );
 }

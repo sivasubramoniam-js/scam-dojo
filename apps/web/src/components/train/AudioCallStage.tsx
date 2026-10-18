@@ -73,9 +73,11 @@ export function AudioCallStage({
       !enableLiveApi ||
       typeof window === "undefined" ||
       !sessionId ||
+      isDone ||
       GeminiLiveClient.getActiveSelection() !== "audio"
     ) {
       if (liveClientRef.current) {
+        liveClientRef.current.stopAudioPlayback();
         liveClientRef.current.disconnect();
         liveClientRef.current = null;
       }
@@ -137,7 +139,7 @@ export function AudioCallStage({
       liveClient.disconnect();
       liveClientRef.current = null;
     };
-  }, [sessionId, enableLiveApi]);
+  }, [sessionId, enableLiveApi, isDone, onSpeakingChange]);
 
   // When lastScammerText updates or connection is established, synchronize subtitles and trigger Gemini Live speech
   useEffect(() => {
@@ -197,6 +199,25 @@ export function AudioCallStage({
             : "bg-emerald-500"
         }`}
       />
+
+      {/* Call Terminated Disengagement Overlay */}
+      {isDone && (
+        <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+          <div className="w-16 h-16 rounded-full bg-red-600/20 border-2 border-red-500/50 flex items-center justify-center text-red-400 mb-3 shadow-lg shadow-red-500/20">
+            <span className="material-symbols-outlined text-[36px]">call_end</span>
+          </div>
+          <b className="text-xl font-display font-extrabold text-white tracking-wide">
+            CALL TERMINATED
+          </b>
+          <p className="text-xs text-slate-300 max-w-sm mt-1.5 leading-relaxed">
+            The extortion line has been permanently severed. Audio transmissions and live streams have completely stopped.
+          </p>
+          <div className="mt-4 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-[11px] font-mono text-emerald-400 font-bold flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px]">shield_check</span>
+            <span>Defensive Disengagement Complete</span>
+          </div>
+        </div>
+      )}
 
       {/* Top Status Bar */}
       <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 pb-3">
