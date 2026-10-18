@@ -317,8 +317,12 @@ export async function toggleRecoveryStep(planId: string, stepId: string, done: b
   });
 }
 
-export async function sendRecoveryChatMessage(planId: string, text: string): Promise<any> {
-  return api(`/v1/recover/plans/${planId}/chat`, {
+export async function sendRecoveryChatMessage(planId: string | undefined, text: string): Promise<any> {
+  const endpoint =
+    planId && planId !== "rec_local_fallback" && planId !== "general"
+      ? `/v1/recover/plans/${planId}/chat`
+      : `/v1/recover/chat`;
+  return api(endpoint, {
     method: "POST",
     json: { text },
   });

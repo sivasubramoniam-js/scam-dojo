@@ -470,44 +470,44 @@ export function VideoCallStage({
         )}
 
         {/* Bottom Video HUD: Officer Name & Authority Stamp */}
-        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none z-20">
-          <div className="bg-black/75 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 max-w-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span className="font-mono font-bold tracking-wider text-red-400 text-xs">
+        <div className="absolute bottom-3 left-3 right-3 sm:left-4 sm:right-4 flex items-end justify-between pointer-events-none z-20 gap-2">
+          <div className="bg-black/75 backdrop-blur-md px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-white/10 max-w-[65%] sm:max-w-sm">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
+              <span className="font-mono font-bold tracking-wider text-red-400 text-[11px] sm:text-xs">
                 ● REC {formatTime(callDuration)}
               </span>
               <span className="text-slate-400 font-mono text-[10px] hidden sm:inline">
                 | {activePersona.casePrefix}
               </span>
             </div>
-            <b className="text-sm font-display text-white block">
+            <b className="text-xs sm:text-sm font-display text-white block truncate">
               {callerName || activePersona.defaultName}
             </b>
-            <span className="text-xs text-slate-300 block">
+            <span className="text-[11px] sm:text-xs text-slate-300 block truncate">
               {callerOrg || activePersona.defaultOrg}
             </span>
-            <span className="text-[10px] text-amber-400 font-mono block mt-0.5">
+            <span className="text-[9px] sm:text-[10px] text-amber-400 font-mono block mt-0.5 truncate">
               {activePersona.legalNotice}
             </span>
           </div>
 
           {/* Tension Indicator on Video */}
-          <div className="bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">
+          <div className="bg-black/75 backdrop-blur-md px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-white/10 text-right shrink-0">
+            <span className="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold tracking-wider">
               Urgency Gauge
             </span>
             <span
-              className={`text-sm font-mono font-extrabold ${tension >= 7 ? "text-red-400" : tension >= 4 ? "text-amber-400" : "text-emerald-400"
+              className={`text-xs sm:text-sm font-mono font-extrabold ${tension >= 7 ? "text-red-400" : tension >= 4 ? "text-amber-400" : "text-emerald-400"
                 }`}
             >
-              {tension}/10 ({tension >= 7 ? "MAX PRESSURE" : "ACTIVE"})
+              {tension}/10 <span className="hidden sm:inline">({tension >= 7 ? "MAX PRESSURE" : "ACTIVE"})</span>
             </span>
           </div>
         </div>
 
         {/* User Picture-in-Picture (PiP) Window */}
-        <div className="absolute top-3 right-4 sm:top-4 sm:right-4 w-32 h-24 sm:w-44 sm:h-32 rounded-2xl overflow-hidden border-2 border-white/20 bg-slate-900/90 shadow-2xl backdrop-blur-md z-20 transition-all">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 w-28 h-20 sm:w-44 sm:h-32 rounded-2xl overflow-hidden border-2 border-white/20 bg-slate-900/90 shadow-2xl backdrop-blur-md z-20 transition-all">
           {cameraEnabled ? (
             <video
               ref={userVideoRef}
@@ -517,22 +517,22 @@ export function VideoCallStage({
               className="w-full h-full object-cover scale-x-[-1]"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-slate-900">
-              <span className="material-symbols-outlined text-[24px] text-slate-500 mb-1">
+            <div className="w-full h-full flex flex-col items-center justify-center p-1 sm:p-2 text-center bg-slate-900">
+              <span className="material-symbols-outlined text-[20px] sm:text-[24px] text-slate-500 mb-0.5 sm:mb-1">
                 videocam_off
               </span>
-              <span className="text-[10px] text-slate-400 font-medium leading-tight">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium leading-tight">
                 {t("train.call.camera_off")}
               </span>
-              <span className="text-[8px] text-slate-500">(Optional)</span>
+              <span className="text-[8px] text-slate-500 hidden sm:inline">(Optional)</span>
             </div>
           )}
 
           {/* User PiP Status Badge */}
-          <div className="absolute bottom-1 left-1.5 right-1.5 flex items-center justify-between text-[9px] font-mono text-slate-300 bg-black/60 px-1.5 py-0.5 rounded">
+          <div className="absolute bottom-1 left-1 right-1 sm:left-1.5 sm:right-1.5 flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-300 bg-black/60 px-1 sm:px-1.5 py-0.5 rounded">
             <span>{t("train.call.you_citizen")}</span>
             {isListening && (
-              <span className="text-emerald-400 font-bold animate-pulse">● Mic On</span>
+              <span className="text-emerald-400 font-bold animate-pulse">● Mic</span>
             )}
           </div>
         </div>
@@ -540,7 +540,7 @@ export function VideoCallStage({
 
       {/* Subtitles & Spoken Dialogue CC Banner */}
       {(currentTurnCaption || liveCaptions || lastScammerText) && (
-        <div className="bg-slate-950 px-6 py-2.5 border-t border-b border-slate-800 text-center animate-in fade-in duration-200">
+        <div className="bg-slate-950 px-4 sm:px-6 py-2.5 border-t border-b border-slate-800 text-center animate-in fade-in duration-200">
           <p className="text-xs sm:text-sm text-slate-200 font-medium">
             <span className="text-amber-400 font-bold mr-1">{activePersona.speakerLabel}</span>
             "{currentTurnCaption || liveCaptions || lastScammerText}"
@@ -559,7 +559,7 @@ export function VideoCallStage({
       )}
 
       {/* Video Call Tactical & Speaking Panel */}
-      <div className="p-4 sm:p-6 bg-slate-950 flex flex-col gap-3">
+      <div className="p-3 sm:p-6 bg-slate-950 flex flex-col gap-3">
         {/* Quick Verbal Tactical Counters */}
         {!isDone && (
           <div>
@@ -617,12 +617,12 @@ export function VideoCallStage({
                   onChange={(e) => setManualInput(e.target.value)}
                   placeholder={t("train.call.speak_or_type")}
                   disabled={isTyping || isSpeaking}
-                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50 min-h-[44px]"
                 />
                 <button
                   type="submit"
                   disabled={!manualInput.trim() || isTyping || isSpeaking}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {t("train.send")}
                 </button>
@@ -632,12 +632,12 @@ export function VideoCallStage({
         )}
 
         {/* Primary Video Conference Action Bar */}
-        <div className="pt-2 border-t border-slate-800 flex items-center justify-between sm:justify-center sm:gap-6 flex-wrap">
+        <div className="pt-2 border-t border-slate-800 grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-4">
           {/* User Camera Toggle Button */}
           <button
             type="button"
             onClick={toggleCamera}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${cameraEnabled
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer min-h-[44px] w-full sm:w-auto ${cameraEnabled
               ? "bg-slate-800 text-white border border-slate-700"
               : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
               }`}
@@ -646,7 +646,7 @@ export function VideoCallStage({
             <span className="material-symbols-outlined text-[18px]">
               {cameraEnabled ? "videocam" : "videocam_off"}
             </span>
-            <span>{cameraEnabled ? t("train.call.camera_on") : t("train.call.camera_off")}</span>
+            <span className="truncate">{cameraEnabled ? t("train.call.camera_on") : t("train.call.camera_off")}</span>
           </button>
 
           {/* User Microphone Toggle Button */}
@@ -654,7 +654,7 @@ export function VideoCallStage({
             type="button"
             onClick={onToggleMic}
             disabled={isDone || isSpeaking || isTyping}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${isListening
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] w-full sm:w-auto ${isListening
               ? "bg-emerald-500 text-black ring-4 ring-emerald-400/40"
               : "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700"
               }`}
@@ -663,7 +663,7 @@ export function VideoCallStage({
             <span className="material-symbols-outlined text-[18px]">
               {isListening ? "mic" : "mic_none"}
             </span>
-            <span>{isListening ? t("train.call.listening") : t("train.call.mic")}</span>
+            <span className="truncate">{isListening ? t("train.call.listening") : t("train.call.mic")}</span>
           </button>
 
           {/* Emergency SOS Countermeasures Button */}
@@ -671,7 +671,7 @@ export function VideoCallStage({
             type="button"
             onClick={() => setShowEmergencyDeck(!showEmergencyDeck)}
             disabled={isDone}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md min-h-[44px] w-full sm:w-auto ${
               showEmergencyDeck
                 ? "bg-amber-500 text-black ring-4 ring-amber-400/40"
                 : "bg-slate-800 text-amber-300 hover:text-white hover:bg-slate-700 border border-amber-500/40"
@@ -681,7 +681,7 @@ export function VideoCallStage({
             <span className="material-symbols-outlined text-[18px]">
               shield_with_heart
             </span>
-            <span>{t("train.call.sos_actions")}</span>
+            <span className="truncate">{t("train.call.sos_actions")}</span>
           </button>
 
           {/* Red Disconnect Video Call Button */}
@@ -692,13 +692,13 @@ export function VideoCallStage({
               onHangUp();
             }}
             disabled={isDone}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-lg shadow-red-600/40"
+            className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-lg shadow-red-600/40 min-h-[44px] w-full sm:w-auto"
             title="Disconnect Video Call"
           >
             <span className="material-symbols-outlined text-[18px]">
               call_end
             </span>
-            <span>{t("train.hangup")}</span>
+            <span className="truncate">{t("train.hangup")}</span>
           </button>
         </div>
 

@@ -185,7 +185,7 @@ export function AudioCallStage({
   return (
     <div
       onPointerDown={() => liveClientRef.current?.resumeAudio()}
-      className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white shadow-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[580px] animate-in fade-in duration-300"
+      className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border border-slate-800 bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white shadow-2xl p-4 sm:p-8 flex flex-col justify-between min-h-[520px] sm:min-h-[580px] animate-in fade-in duration-300"
     >
       {/* Background glow effects based on tension */}
       <div
@@ -436,7 +436,7 @@ export function AudioCallStage({
       )}
 
       {/* Primary Phone Action Controls */}
-      <div className="relative z-10 pt-4 border-t border-slate-800/80 flex items-center justify-center gap-8">
+      <div className="relative z-10 pt-4 border-t border-slate-800/80 flex items-center justify-center gap-4 sm:gap-8">
         {/* PRIMARY MICROPHONE PUSH-TO-TALK BUTTON */}
         <button
           type="button"

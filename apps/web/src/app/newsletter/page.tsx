@@ -43,7 +43,7 @@ export function NewsletterPage() {
   };
 
   return (
-    <div className="max-w-[1240px] mx-auto w-full px-4 lg:px-gutter-desktop py-6 lg:py-space-xl">
+    <div className="max-w-[1240px] mx-auto w-full px-2 sm:px-4 lg:px-gutter-desktop py-6 lg:py-space-xl">
       {/* Header */}
       <div className="flex flex-col gap-2 mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-container border border-line-ito/40 rounded-full w-fit">
@@ -57,7 +57,7 @@ export function NewsletterPage() {
         <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-ink-aizome font-extrabold tracking-tight">
           {t("news.title")}
         </h1>
-        <p className="font-body-lg text-sm sm:text-base text-ink-sumi max-w-2xl">
+        <p className="font-body-lg text-xs sm:text-base text-ink-sumi max-w-2xl leading-relaxed">
           {t("news.desc")}
         </p>
       </div>
@@ -68,7 +68,7 @@ export function NewsletterPage() {
           {bulletins.map((b) => (
             <div
               key={b.id}
-              className="bg-surface-shoji rounded-xl p-5 sm:p-6 border border-line-ito shadow-dojo"
+              className="bg-surface-shoji rounded-xl p-4 sm:p-6 border border-line-ito shadow-dojo"
             >
               <div className="flex items-center justify-between pb-3 border-b border-line-ito/40 mb-3">
                 <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export function NewsletterPage() {
 
         {/* RIGHT COLUMN: Subscription Form & Dispatch Frequency (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-4">
-          <div className="bg-surface-shoji rounded-xl p-5 sm:p-6 border border-line-ito shadow-dojo">
+          <div className="bg-surface-shoji rounded-xl p-4 sm:p-6 border border-line-ito shadow-dojo">
             <div className="flex items-center gap-2 mb-3">
               <span className="material-symbols-outlined text-action-ai text-[22px]">
                 mail
@@ -127,11 +127,11 @@ export function NewsletterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("news.join.placeholder")}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low border border-line-ito text-xs text-ink-aizome focus:outline-none focus:border-action-ai focus:ring-2 focus:ring-action-ai/20 transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low border border-line-ito text-xs text-ink-aizome focus:outline-none focus:border-action-ai focus:ring-2 focus:ring-action-ai/20 transition-all min-h-[44px]"
                 />
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-lg bg-action-ai text-action-ink text-xs font-bold hover:opacity-95 shadow-xs transition-opacity"
+                  className="w-full py-2.5 rounded-lg bg-action-ai text-action-ink text-xs font-bold hover:opacity-95 shadow-xs transition-opacity min-h-[44px] cursor-pointer"
                 >
                   {t("news.join.submit")}
                 </button>

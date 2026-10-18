@@ -402,13 +402,13 @@ export default function IndiaScamMap() {
   const geoUrl = typeof window !== "undefined" && window.location.origin ? `${window.location.origin}/india.json` : "/india.json";
 
   return (
-    <section className="my-14 rounded-3xl bg-slate-900 border-2 border-slate-800 p-6 sm:p-8 lg:p-10 shadow-2xl text-slate-100 overflow-hidden relative">
+    <section className="my-10 sm:my-14 rounded-2xl sm:rounded-3xl bg-slate-900 border-2 border-slate-800 p-4 sm:p-8 lg:p-10 shadow-2xl text-slate-100 overflow-hidden relative">
       {/* Background glow accents */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 relative z-10">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-8 relative z-10">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
             <Flame className="w-3.5 h-3.5 text-rose-400 fill-rose-400 animate-pulse" />
@@ -423,11 +423,11 @@ export default function IndiaScamMap() {
         </div>
 
         {/* Metric Switcher */}
-        <div className="flex items-center gap-2 bg-slate-800/90 p-1.5 rounded-2xl border border-slate-700 self-start lg:self-auto shrink-0 shadow-inner">
+        <div className="flex items-center gap-1.5 bg-slate-800/90 p-1 rounded-2xl border border-slate-700 w-full sm:w-auto justify-between sm:justify-start shrink-0 shadow-inner">
           <button
             type="button"
             onClick={() => setMetric("loss")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition ${
               metric === "loss"
                 ? "bg-rose-600 text-white shadow-md font-black"
                 : "text-slate-300 hover:text-white"
@@ -438,7 +438,7 @@ export default function IndiaScamMap() {
           <button
             type="button"
             onClick={() => setMetric("cases")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition ${
               metric === "cases"
                 ? "bg-amber-600 text-white shadow-md font-black"
                 : "text-slate-300 hover:text-white"
@@ -575,10 +575,10 @@ export default function IndiaScamMap() {
         {/* Right Side: Selected State Deep-Dive Dossier & Leaderboard (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Active State Profile Card */}
-          <div className="bg-slate-950/90 rounded-2xl border-2 border-slate-800 p-6 shadow-xl relative overflow-hidden">
+          <div className="bg-slate-950/90 rounded-2xl border-2 border-slate-800 p-4 sm:p-6 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <MapPin className="w-4 h-4 text-rose-500" />
+                <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
                 <span>{t("map.selected.intel")}</span>
               </div>
               <span
@@ -594,27 +594,27 @@ export default function IndiaScamMap() {
               </span>
             </div>
 
-            <h3 className="text-3xl font-black text-white tracking-tight mb-4">
+            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-4 break-words">
               {activeDisplayState.name}
             </h3>
 
             {/* Key Metrics Dual Box */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-                <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5">
+              <div className="bg-slate-900 border border-slate-800 p-3 sm:p-3.5 rounded-xl">
+                <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5 truncate">
                   {t("map.stat.funds_lost")}
                 </div>
-                <div className="text-2xl font-black text-rose-400">
+                <div className="text-xl sm:text-2xl font-black text-rose-400 truncate">
                   ₹{activeDisplayState.lossCrores.toLocaleString()}
                   <span className="text-xs font-bold text-slate-400 ml-1">Cr</span>
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
-                <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">
+              <div className="bg-slate-900 border border-slate-800 p-3 sm:p-3.5 rounded-xl">
+                <div className="text-[10px] uppercase font-bold text-slate-400 mb-0.5 truncate">
                   {t("map.stat.reported_cases")}
                 </div>
-                <div className="text-2xl font-black text-amber-400">
+                <div className="text-xl sm:text-2xl font-black text-amber-400 truncate">
                   {activeDisplayState.casesReported.toLocaleString()}
                   <span className="text-xs font-bold text-slate-400 ml-1">+</span>
                 </div>

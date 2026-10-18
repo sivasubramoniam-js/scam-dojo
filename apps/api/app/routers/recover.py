@@ -427,16 +427,25 @@ async def toggle_step_done(
     )
 
 
+@router.post("/chat", response_model=ChatMessageResponse)
 @router.post("/plans/{pid}/chat", response_model=ChatMessageResponse)
 async def recovery_chat(
-    pid: str,
     req: ChatMessageRequest,
+    pid: str = "general",
     user: Me = Depends(get_current_user),
     repo: Repo = Depends(get_repo),
 ) -> ChatMessageResponse:
-    doc = await repo.get_plan(user.uid, pid)
+    doc = None
+    if pid and pid not in ("general", "default", "rec_general", "rec_local_fallback"):
+        doc = await repo.get_plan(user.uid, pid)
+        if not doc:
+            raise HTTPException(status_code=404, detail="Recovery plan not found")
+
     if not doc:
-        raise HTTPException(status_code=404, detail="Recovery plan not found")
+        doc = {
+            "urgency": "critical",
+            "summary": "Urgent financial fraud triage and official recovery steps.",
+        }
 
     now_iso = datetime.now(UTC).isoformat()
     user_msg = {"role": "user", "text": req.text, "ts": now_iso}
@@ -494,6 +503,7 @@ MANDATORY RESPONSE FORMAT & LENGTH (STRICT):
             logger.warning("Recovery chat Gemini call failed: %s", e)
 
     bot_msg = {"role": "assistant", "text": answer_text, "ts": datetime.now(UTC).isoformat()}
-    await repo.append_plan_chat(user.uid, pid, [user_msg, bot_msg])
+    if pid and pid not in ("general", "default", "rec_general", "rec_local_fallback"):
+        await repo.append_plan_chat(user.uid, pid, [user_msg, bot_msg])
 
     return ChatMessageResponse(role="assistant", text=answer_text, ts=bot_msg["ts"])

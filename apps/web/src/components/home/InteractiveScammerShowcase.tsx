@@ -522,9 +522,9 @@ export function InteractiveScammerShowcase() {
   };
 
   return (
-    <section className="my-14 p-6 sm:p-10 rounded-3xl bg-[var(--sf)] border border-[var(--line)] shadow-dojo">
+    <section className="my-10 sm:my-14 p-4 sm:p-10 rounded-2xl sm:rounded-3xl bg-[var(--sf)] border border-[var(--line)] shadow-dojo">
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--act)]/10 text-[var(--act)] border border-[var(--act)]/20 mb-3">
             <span className="material-symbols-outlined text-[16px]">psychology</span>
@@ -533,13 +533,13 @@ export function InteractiveScammerShowcase() {
           <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-[var(--ink)] tracking-tight">
             How The Trap Unfolds in Real-Time
           </h2>
-          <p className="text-sm sm:text-base text-[var(--mut)] max-w-xl mt-1">
+          <p className="text-xs sm:text-base text-[var(--mut)] max-w-xl mt-1">
             Experience the identical psychological mechanics scammers deploy across Messaging, Phone Calls, and Video Interrogations.
           </p>
         </div>
 
         {/* Carousel Slide Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-1.5 mr-2">
             {SCENARIOS.map((scen, idx) => (
               <button
@@ -553,32 +553,34 @@ export function InteractiveScammerShowcase() {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setCurrentSlideIndex((prev) => (prev === 0 ? SCENARIOS.length - 1 : prev - 1))}
-            className="w-10 h-10 rounded-xl bg-[var(--sf2)] border border-[var(--line)] flex items-center justify-center text-[var(--ink)] hover:bg-[var(--act)] hover:text-white transition-all cursor-pointer shadow-xs"
-            title="Previous Scenario"
-          >
-            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrentSlideIndex((prev) => (prev === SCENARIOS.length - 1 ? 0 : prev + 1))}
-            className="w-10 h-10 rounded-xl bg-[var(--sf2)] border border-[var(--line)] flex items-center justify-center text-[var(--ink)] hover:bg-[var(--act)] hover:text-white transition-all cursor-pointer shadow-xs"
-            title="Next Scenario"
-          >
-            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentSlideIndex((prev) => (prev === 0 ? SCENARIOS.length - 1 : prev - 1))}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--sf2)] border border-[var(--line)] flex items-center justify-center text-[var(--ink)] hover:bg-[var(--act)] hover:text-white transition-all cursor-pointer shadow-xs"
+              title="Previous Scenario"
+            >
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">chevron_left</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentSlideIndex((prev) => (prev === SCENARIOS.length - 1 ? 0 : prev + 1))}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--sf2)] border border-[var(--line)] flex items-center justify-center text-[var(--ink)] hover:bg-[var(--act)] hover:text-white transition-all cursor-pointer shadow-xs"
+              title="Next Scenario"
+            >
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">chevron_right</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Scenario Summary Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-[var(--sf2)]/50 border border-[var(--line)] mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-[var(--sf2)]/50 border border-[var(--line)] mb-6">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{current.callerAvatar}</span>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-extrabold text-base sm:text-lg text-[var(--ink)]">
+              <h3 className="font-extrabold text-sm sm:text-lg text-[var(--ink)]">
                 {current.title}
               </h3>
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-red-600 text-white">
@@ -590,11 +592,11 @@ export function InteractiveScammerShowcase() {
         </div>
 
         {/* Modal Switcher: Chat / Voice / Video */}
-        <div className="flex items-center gap-1 bg-[var(--sf)] border border-[var(--line)] p-1 rounded-xl shadow-xs">
+        <div className="flex items-center gap-1 bg-[var(--sf)] border border-[var(--line)] p-1 rounded-xl shadow-xs w-full sm:w-auto justify-between sm:justify-start">
           <button
             type="button"
             onClick={() => setActiveModal("chat")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "chat" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeModal === "chat" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[15px]">chat</span>
@@ -603,7 +605,7 @@ export function InteractiveScammerShowcase() {
           <button
             type="button"
             onClick={() => setActiveModal("voice")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "voice" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeModal === "voice" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[15px]">call</span>
@@ -612,7 +614,7 @@ export function InteractiveScammerShowcase() {
           <button
             type="button"
             onClick={() => setActiveModal("video")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${activeModal === "video" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
+            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeModal === "video" ? "bg-[var(--act)] text-white shadow-xs" : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
           >
             <span className="material-symbols-outlined text-[15px]">videocam</span>
@@ -658,8 +660,8 @@ export function InteractiveScammerShowcase() {
                 </button>
               </div>
 
-              {/* Chat Messages (Fitted with No Scrolling) */}
-              <div className="space-y-2.5 my-auto overflow-hidden py-1">
+              {/* Chat Messages */}
+              <div className="space-y-2.5 my-auto overflow-y-auto py-1 max-h-[320px] sm:max-h-[360px] pr-1">
                 {current.chatMessages.map((msg, i) => (
                   <div key={i} className="flex flex-col items-start max-w-[94%]">
                     <div className="bg-slate-900 border border-slate-800 text-slate-100 p-2.5 sm:p-3 rounded-2xl rounded-tl-xs text-xs sm:text-[13px] leading-relaxed shadow-sm">
@@ -801,7 +803,7 @@ export function InteractiveScammerShowcase() {
                 </div>
 
                 {/* Persona Feed Selector */}
-                <div className="flex items-center gap-1.5 bg-black/80 p-0.5 rounded-xl border border-white/15 text-[10px]">
+                <div className="flex items-center gap-1 bg-black/80 p-0.5 rounded-xl border border-white/15 text-[10px]">
                   <button
                     type="button"
                     onClick={() => setVideoPersona("police")}
@@ -810,7 +812,7 @@ export function InteractiveScammerShowcase() {
                         : "text-slate-400 hover:text-white"
                       }`}
                   >
-                    👮 Police Feed
+                    👮 Police<span className="hidden sm:inline"> Feed</span>
                   </button>
                   <button
                     type="button"
@@ -820,7 +822,7 @@ export function InteractiveScammerShowcase() {
                         : "text-slate-400 hover:text-white"
                       }`}
                   >
-                    🛃 Customs Feed
+                    🛃 Customs<span className="hidden sm:inline"> Feed</span>
                   </button>
                   <button
                     type="button"
@@ -830,7 +832,7 @@ export function InteractiveScammerShowcase() {
                         : "text-slate-400 hover:text-white"
                       }`}
                   >
-                    🏢 Other Dept Feed
+                    🏢 Other<span className="hidden sm:inline"> Dept</span>
                   </button>
                 </div>
               </div>
@@ -849,15 +851,15 @@ export function InteractiveScammerShowcase() {
               </div>
 
               {/* Bottom Interactive Video Tactical Bar */}
-              <div className="relative z-20 p-3 bg-black/85 backdrop-blur-md border-t border-white/10 text-xs flex flex-col gap-2">
+              <div className="relative z-20 p-2.5 sm:p-3 bg-black/85 backdrop-blur-md border-t border-white/10 text-xs flex flex-col gap-2">
                 {/* Mode Controller & Voiceover Playback Trigger */}
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 justify-between sm:justify-start">
                     {/* Talking vs Listening Toggle */}
                     <button
                       type="button"
                       onClick={() => setIsVideoTalking(true)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${isVideoTalking
+                      className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center justify-center gap-1 ${isVideoTalking
                           ? "bg-rose-600 text-white shadow-xs font-black animate-pulse"
                           : "bg-slate-800 text-slate-300 hover:text-white"
                         }`}
@@ -875,7 +877,7 @@ export function InteractiveScammerShowcase() {
                         setIsVoiceoverPlaying(false);
                         setIsVideoTalking(false);
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1 ${!isVideoTalking
+                      className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center justify-center gap-1 ${!isVideoTalking
                           ? "bg-emerald-600 text-white shadow-xs font-black animate-pulse"
                           : "bg-slate-800 text-slate-300 hover:text-white"
                         }`}
@@ -890,7 +892,7 @@ export function InteractiveScammerShowcase() {
                   <button
                     type="button"
                     onClick={() => toggleVoiceover(current.voiceTranscript)}
-                    className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-md ${isVoiceoverPlaying
+                    className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md ${isVoiceoverPlaying
                         ? "bg-red-600 text-white animate-pulse"
                         : "bg-amber-500 hover:bg-amber-400 text-slate-950"
                       }`}
@@ -906,7 +908,7 @@ export function InteractiveScammerShowcase() {
                 </div>
 
                 {/* Subtitle Dialogue */}
-                <p className="text-slate-200 text-[11px] leading-relaxed italic border-t border-white/10 pt-1.5">
+                <p className="text-slate-200 text-[10px] sm:text-[11px] leading-relaxed italic border-t border-white/10 pt-1.5">
                   <span className="text-amber-400 font-bold not-italic font-mono mr-1">
                     {videoPersona === "police" ? "Officer:" : videoPersona === "customs" ? "Customs Agent:" : "Official:"}
                   </span>
@@ -918,7 +920,7 @@ export function InteractiveScammerShowcase() {
         </div>
 
         {/* Sidebar: Forensic Anatomy & Direct Dojo Route */}
-        <div className="lg:col-span-4 flex flex-col justify-between h-[540px] p-6 rounded-3xl bg-[var(--sf2)]/30 border border-[var(--line)]">
+        <div className="lg:col-span-4 flex flex-col justify-between lg:h-[540px] h-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[var(--sf2)]/30 border border-[var(--line)] gap-4 sm:gap-6">
           <div>
             <div className="text-xs font-bold uppercase tracking-wider text-[var(--mut)] mb-1">
               Threat Vector Anatomy

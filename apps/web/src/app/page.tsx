@@ -80,7 +80,7 @@ export function HomePage() {
         </div>
 
         {/* Hero Title & Subtitle */}
-        <h1 className="hero-anim text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight text-[var(--ink)] leading-[1.08] mb-4">
+        <h1 className="hero-anim text-2xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight text-[var(--ink)] leading-[1.15] sm:leading-[1.08] mb-4">
           {t("home.hero.title")}
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--act)] to-indigo-500">
@@ -88,29 +88,29 @@ export function HomePage() {
           </span>
         </h1>
 
-        <p className="hero-anim text-base sm:text-lg text-[var(--mut)] max-w-4xl leading-relaxed mb-6">
+        <p className="hero-anim text-sm sm:text-lg text-[var(--mut)] max-w-4xl leading-relaxed mb-6">
           {t("home.hero.sub")}
         </p>
 
         {/* Main CTA Action Buttons */}
-        <div className="hero-anim flex flex-wrap items-center gap-3 mb-8">
+        <div className="hero-anim flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 mb-8 max-w-md sm:max-w-none">
           <Link
             to="/train"
-            className="dojo-btn flex items-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-md hover:scale-[1.02] transition-transform"
+            className="dojo-btn flex items-center justify-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-md hover:scale-[1.02] transition-transform w-full sm:w-auto"
           >
             <span>{t("home.cta.train")}</span>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </Link>
           <Link
             to="/check"
-            className="dojo-btn q flex items-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-xs hover:border-[var(--act)] transition-all"
+            className="dojo-btn q flex items-center justify-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold shadow-xs hover:border-[var(--act)] transition-all w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">search_check</span>
             <span>{t("home.cta.check")}</span>
           </Link>
           <Link
             to="/recover"
-            className="px-4 py-3 rounded-xl border border-red-500/30 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition flex items-center gap-1.5"
+            className="px-4 py-3 rounded-xl border border-red-500/30 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition flex items-center justify-center gap-1.5 w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">emergency</span>
             <span>{t("home.cta.recover")}</span>
@@ -118,7 +118,7 @@ export function HomePage() {
         </div>
 
         {/* Instant Reflex Stance Card */}
-        <div className="hero-anim bg-gradient-to-br from-[var(--sf)] to-[var(--sf2)]/50 border border-[var(--line)] rounded-3xl p-5 sm:p-6 shadow-dojo max-w-4xl">
+        <div className="hero-anim bg-gradient-to-br from-[var(--sf)] to-[var(--sf2)]/50 border border-[var(--line)] rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-dojo max-w-4xl">
           <div className="flex items-center justify-between text-xs text-[var(--mut)] font-semibold mb-3">
             <span className="bg-[var(--sf2)] px-2.5 py-1 rounded-md font-mono text-[var(--ink)]">
               ORN-BNK
@@ -126,19 +126,19 @@ export function HomePage() {
             <span>{t("home.sms.received")}</span>
           </div>
 
-          <p className="text-sm sm:text-base text-[var(--ink)] font-medium leading-relaxed mb-4">
-            &ldquo;Your KYC verification has expired today. Your bank account will be blocked within 2 hours. Update immediately at <span className="text-[var(--act)] underline underline-offset-2 font-mono">http://sbi-netbanking-verify.in/kyc</span> or contact Verification Officer at +91 98712 43901 (sbi.verification@gmall.com).&rdquo;
+          <p className="text-xs sm:text-base text-[var(--ink)] font-medium leading-relaxed mb-4 break-words">
+            &ldquo;Your KYC verification has expired today. Your bank account will be blocked within 2 hours. Update immediately at <span className="text-[var(--act)] underline underline-offset-2 font-mono break-all">http://sbi-netbanking-verify.in/kyc</span> or contact Verification Officer at +91 98712 43901 (sbi.verification@gmall.com).&rdquo;
           </p>
 
           <div className="text-xs font-bold text-[var(--mut)] mb-2 uppercase tracking-wide">
             {t("home.sms.stance")}
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={() => setChoice("tap")}
-              className={`dojo-btn text-xs sm:text-sm py-2 px-4 cursor-pointer ${
+              className={`dojo-btn text-xs sm:text-sm py-2 px-3 text-center justify-center cursor-pointer ${
                 choice === "tap" ? "ring-2 ring-[var(--act)] ring-offset-2" : choice ? "opacity-70" : ""
               }`}
             >
@@ -147,7 +147,7 @@ export function HomePage() {
             <button
               type="button"
               onClick={() => setChoice("ign")}
-              className={`dojo-btn q text-xs sm:text-sm py-2 px-4 cursor-pointer ${
+              className={`dojo-btn q text-xs sm:text-sm py-2 px-3 text-center justify-center cursor-pointer ${
                 choice === "ign" ? "ring-2 ring-[var(--act)] ring-offset-2 font-bold" : choice ? "opacity-70" : ""
               }`}
             >
@@ -156,7 +156,7 @@ export function HomePage() {
             <button
               type="button"
               onClick={() => setChoice("chk")}
-              className={`dojo-btn q text-xs sm:text-sm py-2 px-4 cursor-pointer ${
+              className={`dojo-btn q text-xs sm:text-sm py-2 px-3 text-center justify-center cursor-pointer ${
                 choice === "chk" ? "ring-2 ring-[var(--act)] ring-offset-2 font-bold" : choice ? "opacity-70" : ""
               }`}
             >

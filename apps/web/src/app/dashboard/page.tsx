@@ -69,23 +69,23 @@ export function DashboardPage() {
   const streakDays = me.streak?.current ?? 3;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
           <Award className="w-3.5 h-3.5" />
           {t("dash.header.tag")}
         </div>
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
           {t("dash.header.title")}
         </h1>
-        <p className="text-muted-foreground text-sm max-w-2xl">
+        <p className="text-muted-foreground text-xs sm:text-sm max-w-2xl leading-relaxed">
           {t("dash.header.desc")}
         </p>
       </div>
 
       {/* Main Belt Card */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center text-center space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 shadow-sm flex flex-col items-center text-center space-y-4">
         {/* Belt Graphic Knot */}
         <div className="w-full max-w-[280px] my-2">
           <BeltGraphic belt={currentBelt} className="w-full h-auto" />
@@ -110,10 +110,10 @@ export function DashboardPage() {
         </p>
 
         {/* Quick Action CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-2 w-full sm:w-auto">
           <Link
             to="/train"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition shadow"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition shadow w-full sm:w-auto min-h-[44px]"
           >
             <Flame className="w-4 h-4 text-amber-400" />
             <span>{t("dash.btn.arena")}</span>
@@ -121,7 +121,7 @@ export function DashboardPage() {
           </Link>
           <Link
             to="/check"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-muted text-foreground font-bold text-xs hover:bg-muted/80 transition border border-border"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-muted text-foreground font-bold text-xs hover:bg-muted/80 transition border border-border w-full sm:w-auto min-h-[44px]"
           >
             <ShieldAlert className="w-4 h-4 text-emerald-500" />
             <span>{t("dash.btn.inspect")}</span>
@@ -131,7 +131,7 @@ export function DashboardPage() {
 
       {/* Recommended Next Drill */}
       {dashboard?.recommendedDrill && (
-        <div className="p-5 rounded-2xl border border-border bg-muted/40 flex flex-col sm:row sm:items-center justify-between gap-4">
+        <div className="p-4 sm:p-5 rounded-2xl border border-border bg-muted/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="text-[10px] uppercase font-bold tracking-wider text-primary flex items-center gap-1.5">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
@@ -146,7 +146,7 @@ export function DashboardPage() {
           </div>
           <Link
             to={`/train?slug=${dashboard.recommendedDrill.slug}`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-95 transition shadow whitespace-nowrap self-start sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-95 transition shadow whitespace-nowrap w-full sm:w-auto min-h-[40px]"
           >
             <span>{t("dash.drill.start")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export function DashboardPage() {
       {/* Grid: Tactics Sensitivity & Resilience Trend */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Tactics Sensitivity Breakdown */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
           <div>
             <h3 className="text-sm font-bold text-foreground">{t("dash.radar.title")}</h3>
             <p className="text-xs text-muted-foreground">

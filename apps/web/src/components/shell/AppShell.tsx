@@ -105,7 +105,15 @@ export function AppShell({ children }: AppShellProps) {
         <div className="dojo-top flex items-center justify-between">
           {/* Logo with Link to Home */}
           <div className="flex items-center flex-1 justify-start">
-            <Link to="/" className="flex items-center gap-2 font-extrabold text-xl tracking-tight hover:opacity-90 transition-opacity">
+            <Link
+              to="/"
+              onClick={() => {
+                if (location.pathname === "/") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+              className="flex items-center gap-2 font-extrabold text-xl tracking-tight hover:opacity-90 transition-opacity"
+            >
               <svg width="28" height="28" viewBox="0 0 32 32" className="shrink-0">
                 <rect width="32" height="32" rx="8" fill="var(--act)" />
                 <rect x="6" y="13" width="20" height="7" rx="3.5" fill="var(--on)" />
@@ -127,6 +135,9 @@ export function AppShell({ children }: AppShellProps) {
                   key={item.path}
                   to={item.path}
                   onClick={() => {
+                    if (location.pathname === item.path) {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
                     if (item.path === "/train") {
                       window.dispatchEvent(new CustomEvent("scam-dojo:reset-train"));
                     }
@@ -164,11 +175,11 @@ export function AppShell({ children }: AppShellProps) {
                 type="button"
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
                 aria-label="Select interface language"
-                className="h-[40px] px-2.5 rounded-lg bg-[var(--sf)] border border-[var(--line)] text-xs font-bold text-[var(--ink)] hover:border-[var(--act)] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="h-[38px] sm:h-[40px] px-2 sm:px-2.5 rounded-lg bg-[var(--sf)] border border-[var(--line)] text-xs font-bold text-[var(--ink)] hover:border-[var(--act)] transition-colors flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-xs"
                 title={`Current language: ${currentLangOption.nativeName}`}
               >
                 <span className="text-sm">{currentLangOption.flag}</span>
-                <span className="font-mono uppercase text-[11px]">{currentLangOption.code}</span>
+                <span className="font-mono uppercase text-[11px] hidden sm:inline">{currentLangOption.code}</span>
                 <span className="material-symbols-outlined text-[14px] text-[var(--mut)]">
                   {langMenuOpen ? "arrow_drop_up" : "arrow_drop_down"}
                 </span>
@@ -176,7 +187,7 @@ export function AppShell({ children }: AppShellProps) {
 
               {/* Languages Dropdown Menu */}
               {langMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[var(--sf)] border border-[var(--line)] shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-32px)] sm:w-64 max-w-64 rounded-2xl bg-[var(--sf)] border border-[var(--line)] shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-3 py-1.5 border-b border-[var(--line)] text-[11px] font-bold uppercase tracking-wider text-[var(--mut)] flex items-center justify-between">
                     <span>Interface Language</span>
                     <span className="text-[10px] text-amber-500 font-mono">7 JAPAC</span>
@@ -225,7 +236,7 @@ export function AppShell({ children }: AppShellProps) {
               type="button"
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="w-[40px] h-[40px] rounded-lg bg-[var(--sf)] border border-[var(--line)] text-sm font-bold text-[var(--ink)] hover:border-[var(--act)] transition-colors flex items-center justify-center cursor-pointer"
+              className="w-[38px] sm:w-[40px] h-[38px] sm:h-[40px] rounded-lg bg-[var(--sf)] border border-[var(--line)] text-sm font-bold text-[var(--ink)] hover:border-[var(--act)] transition-colors flex items-center justify-center cursor-pointer shrink-0"
             >
               {isDark ? "☀️" : "◐"}
             </button>
@@ -233,11 +244,11 @@ export function AppShell({ children }: AppShellProps) {
             {/* 1930 Helpline Quick Dial */}
             <a
               href="tel:1930"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bad)] text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs"
+              className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 h-[38px] sm:h-[40px] rounded-lg bg-[var(--bad)] text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs shrink-0"
               title="Call National Cyber Crime Helpline 1930"
             >
               <span className="material-symbols-outlined text-[16px]">call</span>
-              <span className="hidden xs:inline">1930</span>
+              <span className="hidden sm:inline">1930</span>
             </a>
           </div>
         </div>
@@ -257,6 +268,9 @@ export function AppShell({ children }: AppShellProps) {
               key={item.path}
               to={item.path}
               onClick={() => {
+                if (location.pathname === item.path) {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
                 if (item.path === "/train") {
                   window.dispatchEvent(new CustomEvent("scam-dojo:reset-train"));
                 }

@@ -199,23 +199,23 @@ export function CheckPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
           <ShieldAlert className="w-3.5 h-3.5" />
           {t("check.header.tag")}
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-slate-50 tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-950 dark:text-slate-50 tracking-tight">
           {t("check.header.title")}
         </h1>
-        <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base max-w-2xl font-medium leading-relaxed">
+        <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-base max-w-2xl font-medium leading-relaxed">
           {t("check.header.desc")}
         </p>
       </div>
 
       {/* Main Input Form */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -224,7 +224,7 @@ export function CheckPage() {
             {(inputText || imagePreview) && (
               <button
                 onClick={clearForm}
-                className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 underline transition"
+                className="text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 underline transition cursor-pointer"
               >
                 {t("check.input.clear")}
               </button>
@@ -235,13 +235,13 @@ export function CheckPage() {
             onChange={(e) => setInputText(e.target.value)}
             placeholder={t("check.input.placeholder")}
             rows={4}
-            className="w-full rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-4 text-sm text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 transition placeholder:text-slate-500 dark:placeholder:text-slate-500 resize-y"
+            className="w-full rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 p-3 sm:p-4 text-sm text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:border-indigo-600 dark:focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 transition placeholder:text-slate-500 dark:placeholder:text-slate-500 resize-y"
           />
         </div>
 
         {/* Multimodal Upload (Video, Document, Screenshot) */}
         <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
             <input
               type="file"
               ref={fileInputRef}
@@ -252,7 +252,7 @@ export function CheckPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 dark:border-slate-700 dark:hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 transition cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 dark:border-slate-700 dark:hover:border-indigo-400 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 transition cursor-pointer min-h-[44px] w-full sm:w-auto"
             >
               <Upload className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <span>{t("check.upload.btn")}</span>
@@ -499,11 +499,11 @@ export function CheckPage() {
                   : "border-emerald-200 dark:border-emerald-800/80"
                 }`}
             >
-              <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-wrap">
                 <button
                   type="button"
                   onClick={handleShareWhatsApp}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white text-xs font-black transition shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white text-xs font-black transition shadow-sm w-full sm:w-auto min-h-[44px] cursor-pointer"
                   title="Share warning to family and WhatsApp groups"
                 >
                   <Share2 className="w-4 h-4" />
@@ -512,7 +512,7 @@ export function CheckPage() {
                 <button
                   type="button"
                   onClick={() => setShowCardModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-black transition shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-black transition shadow-sm w-full sm:w-auto min-h-[44px] cursor-pointer"
                   title="Generate high-res downloadable warning poster"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
@@ -521,7 +521,7 @@ export function CheckPage() {
                 <button
                   type="button"
                   onClick={handleCopyAlert}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition shadow-xs"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition shadow-xs w-full sm:w-auto min-h-[44px] cursor-pointer"
                 >
                   {copiedAlert ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-700 dark:text-slate-300" />}
                   <span>{copiedAlert ? "Copied Alert!" : "Copy Warning Text"}</span>
@@ -533,7 +533,7 @@ export function CheckPage() {
                   type="button"
                   disabled={forging}
                   onClick={handleForgeDrill}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 active:scale-95 text-white dark:text-slate-950 text-xs font-black transition shadow-md whitespace-nowrap self-start sm:self-auto"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-950 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 active:scale-95 text-white dark:text-slate-950 text-xs font-black transition shadow-md w-full sm:w-auto min-h-[44px] cursor-pointer"
                 >
                   <Flame className="w-4 h-4 text-amber-400 dark:text-amber-500 fill-amber-400 dark:fill-amber-500" />
                   <span>{forging ? "Forging Custom Drill..." : "Train Me On This Scam"}</span>

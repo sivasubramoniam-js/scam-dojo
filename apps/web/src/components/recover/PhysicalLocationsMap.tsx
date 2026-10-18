@@ -600,7 +600,7 @@ export function PhysicalLocationsMap({ defaultBank = "" }: PhysicalLocationsMapP
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+    <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 shadow-sm space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider">
@@ -809,12 +809,12 @@ export function PhysicalLocationsMap({ defaultBank = "" }: PhysicalLocationsMapP
                 </h4>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${activeSelectedCenter.lat},${activeSelectedCenter.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-extrabold hover:opacity-90 transition shadow-xs cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-extrabold hover:opacity-90 transition shadow-xs cursor-pointer flex-1 sm:flex-initial min-h-[40px]"
                 >
                   <Navigation className="w-3.5 h-3.5" />
                   <span>{t("recover.map.directions_btn")}</span>
@@ -822,7 +822,7 @@ export function PhysicalLocationsMap({ defaultBank = "" }: PhysicalLocationsMapP
                 <button
                   type="button"
                   onClick={() => handleCopyDetails(activeSelectedCenter)}
-                  className="inline-flex items-center gap-1.5 py-2 px-3 rounded-xl border border-border bg-background hover:bg-muted text-xs font-bold text-foreground transition cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-border bg-background hover:bg-muted text-xs font-bold text-foreground transition cursor-pointer flex-1 sm:flex-initial min-h-[40px]"
                   title="Copy details"
                 >
                   {copiedId === activeSelectedCenter.id ? (
@@ -841,7 +841,7 @@ export function PhysicalLocationsMap({ defaultBank = "" }: PhysicalLocationsMapP
                   <button
                     type="button"
                     onClick={() => setSelectedLocationId(null)}
-                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer"
+                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer min-h-[40px] flex items-center justify-center"
                     title={t("recover.map.close_popover")}
                   >
                     <X className="w-4 h-4" />

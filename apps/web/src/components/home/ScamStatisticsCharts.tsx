@@ -135,9 +135,9 @@ export function ScamStatisticsCharts() {
   const selectedData = HISTORICAL_DATA[hoveredYearIndex !== null ? hoveredYearIndex : activeYearIndex];
 
   return (
-    <section className="my-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-[var(--sf)] to-[var(--sf2)]/40 border border-[var(--line)] shadow-dojo">
+    <section className="my-10 sm:my-14 p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[var(--sf)] to-[var(--sf2)]/40 border border-[var(--line)] shadow-dojo">
       {/* Header & Source Badge */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 mb-3">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
@@ -146,17 +146,17 @@ export function ScamStatisticsCharts() {
           <h2 className="text-2xl sm:text-4xl font-extrabold font-display text-[var(--ink)] tracking-tight">
             {t("charts.title")}
           </h2>
-          <p className="text-sm sm:text-base text-[var(--mut)] max-w-xl mt-1">
+          <p className="text-xs sm:text-base text-[var(--mut)] max-w-xl mt-1">
             {t("charts.desc")}
           </p>
         </div>
 
         {/* Metric Selector Tabs */}
-        <div className="flex items-center bg-[var(--sf)] border border-[var(--line)] p-1 rounded-2xl shadow-xs self-start md:self-auto">
+        <div className="flex items-center bg-[var(--sf)] border border-[var(--line)] p-1 rounded-2xl shadow-xs self-start md:self-auto w-full sm:w-auto justify-between sm:justify-start">
           <button
             type="button"
             onClick={() => setActiveMetric("losses")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeMetric === "losses"
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeMetric === "losses"
                 ? "bg-[var(--bad)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
@@ -167,7 +167,7 @@ export function ScamStatisticsCharts() {
           <button
             type="button"
             onClick={() => setActiveMetric("cases")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeMetric === "cases"
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeMetric === "cases"
                 ? "bg-[var(--act)] text-white shadow-xs"
                 : "text-[var(--mut)] hover:text-[var(--ink)]"
               }`}
@@ -179,9 +179,9 @@ export function ScamStatisticsCharts() {
       </div>
 
       {/* Main Grid: Visual Graph + Key Metric Callout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-end">
         {/* Animated Bar Chart Column */}
-        <div className="lg:col-span-8 bg-[var(--sf)]/70 border border-[var(--line)] rounded-2xl p-5 sm:p-6" ref={chartRef}>
+        <div className="lg:col-span-8 bg-[var(--sf)]/70 border border-[var(--line)] rounded-2xl p-4 sm:p-6" ref={chartRef}>
           <div className="flex items-center justify-between text-xs text-[var(--mut)] mb-6 font-semibold">
             <span>
               {activeMetric === "losses" ? t("charts.axis.loss") : t("charts.axis.cases")}
@@ -189,7 +189,7 @@ export function ScamStatisticsCharts() {
           </div>
 
           {/* Bar Chart Canvas */}
-          <div className="h-64 sm:h-72 flex items-end justify-between gap-2 sm:gap-4 border-b border-[var(--line)] pb-2 relative">
+          <div className="h-56 sm:h-72 flex items-end justify-between gap-1.5 sm:gap-4 border-b border-[var(--line)] pb-2 relative">
             {/* Horizontal guide lines */}
             <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
               <div className="border-b border-dashed border-[var(--ink)] w-full" />
@@ -221,7 +221,7 @@ export function ScamStatisticsCharts() {
                     {/* Tooltip anchored exactly 10px from the top of the bar */}
                     <div
                       style={{ bottom: "calc(100% + 10px)" }}
-                      className={`absolute left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-150 pointer-events-none z-30 ${isTooltipVisible
+                      className={`absolute left-1/2 -translate-x-1/2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold whitespace-nowrap shadow-md transition-all duration-150 pointer-events-none z-30 ${isTooltipVisible
                           ? "bg-[var(--ink)] text-[var(--on)] scale-100 opacity-100"
                           : "opacity-0 scale-95 pointer-events-none"
                         }`}

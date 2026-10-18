@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n";
 import { AppShell } from "@/components/shell/AppShell";
+import ScrollToTop from "@/components/common/ScrollToTop";
 import HomePage from "@/app/page";
 import TrainPage from "@/app/train/page";
 import CheckPage from "@/app/check/page";
@@ -12,6 +13,7 @@ import NewsletterPage from "@/app/newsletter/page";
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <I18nProvider>
         <AppShell>
           <Routes>

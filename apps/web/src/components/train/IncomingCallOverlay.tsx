@@ -74,7 +74,7 @@ export function IncomingCallOverlay({
   const activeAlert = threatAlerts[(attempt - 1) % threatAlerts.length];
 
   return (
-    <div className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border-2 border-red-500/80 bg-gradient-to-b from-slate-950 via-red-950/20 to-black text-white shadow-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[620px] animate-in fade-in zoom-in-95 duration-300">
+    <div className="relative w-full max-w-xl mx-auto rounded-3xl overflow-hidden border-2 border-red-500/80 bg-gradient-to-b from-slate-950 via-red-950/20 to-black text-white shadow-2xl p-4 sm:p-8 flex flex-col justify-between min-h-[560px] sm:min-h-[620px] animate-in fade-in zoom-in-95 duration-300">
       {/* Red Alert Ambient Glow & Flashing border */}
       <div className="absolute inset-0 bg-red-600/10 pointer-events-none animate-pulse" />
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-red-600/25 blur-3xl pointer-events-none" />

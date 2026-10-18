@@ -178,21 +178,37 @@ export function RecoverPage() {
 
   const handleSendChat = async (promptOverride?: string) => {
     const q = (promptOverride || chatInput).trim();
-    if (!q || !plan) return;
+    if (!q) return;
 
     setChatMessages((prev) => [...prev, { role: "user", text: q }]);
     if (!promptOverride) setChatInput("");
     setChatLoading(true);
 
     try {
-      const res = await sendRecoveryChatMessage(plan.planId, q);
-      setChatMessages((prev) => [...prev, { role: "assistant", text: res.text }]);
-    } catch {
+      const res = await sendRecoveryChatMessage(plan?.planId, q);
+      if (res?.text) {
+        setChatMessages((prev) => [...prev, { role: "assistant", text: res.text }]);
+      }
+    } catch (err) {
+      console.warn("Recovery chat API call failed, using offline fallback:", err);
+      const lower = q.toLowerCase();
+      let reply =
+        "• Call Helpline 1930 immediately to place an interbank lien on the recipient account.\n• File an urgent written dispute with your bank branch quoting RBI Circular DBR.No.Leg.BC.78/09.07.005/2017-18.\n• Never pay any fee to recovery agents—official assistance is always free.";
+      if (lower.includes("refuse") || lower.includes("branch") || lower.includes("dispute")) {
+        reply =
+          "• If your bank branch refuses your dispute: Meet the Branch Manager or Nodal Grievance Officer.\n• Demand an official written acknowledgment / dispute reference number under RBI Customer Protection guidelines.\n• If not resolved within 30 days, file an appeal with the RBI Banking Ombudsman at cms.rbi.org.in or dial 14448.";
+      } else if (lower.includes("reverse") || lower.includes("upi") || lower.includes("transfer")) {
+        reply =
+          "• UPI transfers settle in real time, but fraudulent recipient accounts can be frozen if reported within the 'Golden Hour' via 1930.\n• Report the 12-digit UPI UTR to your UPI app and bank immediately.\n• Under NPCI guidelines, recipient banks can freeze the beneficiary account to prevent cash withdrawal.";
+      } else if (lower.includes("fee") || lower.includes("upfront") || lower.includes("agent") || lower.includes("telegram")) {
+        reply =
+          "• ⚠️ CRITICAL WARNING: Anyone asking for upfront fees or commissions to 'recover' stolen money is a SECONDARY SCAMMER.\n• Neither cyber police nor private hackers can recover funds outside official banking and police channels.\n• Cease all contact with them immediately and report their handles on cybercrime.gov.in.";
+      }
       setChatMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: "• Call Helpline 1930 immediately to place an interbank lien on the recipient account.\n• File an urgent dispute with your bank branch quoting RBI Circular DBR.No.Leg.BC.78/09.07.005/2017-18.\n• Never pay any fee to recovery agents—official assistance is always free.",
+          text: reply,
         },
       ]);
     } finally {
@@ -201,7 +217,7 @@ export function RecoverPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="space-y-2">
@@ -209,19 +225,16 @@ export function RecoverPage() {
             <Clock className="w-3.5 h-3.5" />
             {t("recover.header.tag")}
           </div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
             {t("recover.header.title")}
           </h1>
-          <p className="text-muted-foreground text-sm max-w-2xl">
-            {t("recover.header.desc")}
-          </p>
         </div>
 
         {/* Immediate Action Buttons Bar */}
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 pt-1">
           <a
             href="tel:1930"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm w-full sm:w-auto min-h-[44px]"
           >
             <PhoneCall className="w-4 h-4" />
             <span>{t("recover.header.call1930")}</span>
@@ -230,10 +243,81 @@ export function RecoverPage() {
           <button
             type="button"
             onClick={() => setShowDossierModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-bold transition shadow-sm"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-bold transition shadow-sm w-full sm:w-auto min-h-[44px] cursor-pointer"
           >
             <FileText className="w-4 h-4" />
             <span>{t("recover.header.dossier")}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Ask the Dojo Recovery Assistant */}
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-primary" />
+            <span>Ask the Dojo Recovery Assistant</span>
+          </h3>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/60 px-2.5 py-0.5 rounded-full">
+            Bite-sized official advice (Helpline 1930 & RBI)
+          </span>
+        </div>
+
+        {/* Quick Prompt Chips */}
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {quickPrompts.map((prompt, idx) => (
+            <button
+              key={idx}
+              type="button"
+              disabled={chatLoading}
+              onClick={() => handleSendChat(prompt)}
+              className="text-[11px] px-2.5 py-1.5 rounded-lg border border-border/80 bg-muted/30 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-foreground transition disabled:opacity-50 text-left cursor-pointer"
+            >
+              💬 {prompt}
+            </button>
+          ))}
+        </div>
+
+        <div
+          ref={chatContainerRef}
+          className="space-y-3 max-h-80 overflow-y-auto p-3.5 bg-muted/20 rounded-xl border border-border/50 text-xs"
+        >
+          {chatMessages.map((msg, i) => (
+            <div
+              key={i}
+              className={`p-3.5 rounded-xl max-w-[85%] leading-relaxed ${
+                msg.role === "user"
+                  ? "ml-auto bg-primary text-primary-foreground font-medium shadow-xs"
+                  : "bg-background border border-border text-foreground shadow-xs"
+              }`}
+            >
+              <MarkdownView content={msg.text} />
+            </div>
+          ))}
+          {chatLoading && (
+            <div className="bg-background border border-border p-3.5 rounded-xl text-xs text-muted-foreground animate-pulse flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+              <span>Consulting verified Cyber Crime & RBI guidelines...</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
+            placeholder="e.g. 'What if my bank refuses to register the dispute?'"
+            className="flex-1 p-3 rounded-xl border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 min-h-[44px]"
+          />
+          <button
+            type="button"
+            disabled={chatLoading || !chatInput.trim()}
+            onClick={() => handleSendChat()}
+            className="px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center min-h-[44px] cursor-pointer"
+          >
+            <Send className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -249,7 +333,7 @@ export function RecoverPage() {
 
       {/* Guided Intake Wizard */}
       {inWizard ? (
-        <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-8 shadow-sm space-y-6">
           <h2 className="text-lg font-bold text-foreground">{t("recover.wizard.title")}</h2>
 
           {/* Incidents Multi-Select */}
@@ -269,11 +353,10 @@ export function RecoverPage() {
                         checked ? prev.filter((x) => x !== opt.id) : [...prev, opt.id]
                       );
                     }}
-                    className={`p-3 rounded-xl border text-left text-xs font-medium transition flex items-center justify-between ${
-                      checked
-                        ? "border-primary bg-primary/10 text-foreground"
-                        : "border-border bg-background hover:bg-muted text-muted-foreground"
-                    }`}
+                    className={`p-3 rounded-xl border text-left text-xs font-medium transition flex items-center justify-between ${checked
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-background hover:bg-muted text-muted-foreground"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {checked && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
@@ -300,11 +383,10 @@ export function RecoverPage() {
                   key={t.id}
                   type="button"
                   onClick={() => setTimeSince(t.id as any)}
-                  className={`p-3 rounded-xl border text-center font-medium transition ${
-                    timeSince === t.id
-                      ? "border-primary bg-primary/10 text-foreground font-bold"
-                      : "border-border bg-background hover:bg-muted text-muted-foreground"
-                  }`}
+                  className={`p-3 rounded-xl border text-center font-medium transition ${timeSince === t.id
+                    ? "border-primary bg-primary/10 text-foreground font-bold"
+                    : "border-border bg-background hover:bg-muted text-muted-foreground"
+                    }`}
                 >
                   {t.label}
                 </button>
@@ -323,18 +405,16 @@ export function RecoverPage() {
                 <button
                   type="button"
                   onClick={() => setMoneyLost(true)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    moneyLost ? "bg-rose-500 text-white" : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${moneyLost ? "bg-rose-500 text-white" : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {t("recover.money.yes")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setMoneyLost(false)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    !moneyLost ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${!moneyLost ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {t("recover.money.no")}
                 </button>
@@ -386,11 +466,10 @@ export function RecoverPage() {
           <div className="space-y-6">
             {/* Urgency Alert Banner */}
             <div
-              className={`p-6 rounded-2xl border shadow-sm space-y-4 ${
-                plan.urgency === "critical"
-                  ? "bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-100"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-100"
-              }`}
+              className={`p-6 rounded-2xl border shadow-sm space-y-4 ${plan.urgency === "critical"
+                ? "bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-100"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-100"
+                }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -405,10 +484,10 @@ export function RecoverPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
                   <a
                     href="tel:1930"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition shadow whitespace-nowrap"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition shadow whitespace-nowrap w-full sm:w-auto min-h-[44px]"
                   >
                     <PhoneCall className="w-4 h-4" />
                     <span>Call 1930</span>
@@ -417,7 +496,7 @@ export function RecoverPage() {
                   <button
                     type="button"
                     onClick={() => setShowDossierModal(true)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition shadow whitespace-nowrap"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition shadow whitespace-nowrap w-full sm:w-auto min-h-[44px] cursor-pointer"
                   >
                     <FileText className="w-4 h-4" />
                     <span>Generate Evidence Dossier</span>
@@ -448,23 +527,21 @@ export function RecoverPage() {
                 {plan.steps.map((step) => (
                   <div
                     key={step.id}
-                    className={`p-4 rounded-xl border transition ${
-                      step.done
-                        ? "bg-muted/20 border-border/50 opacity-60"
-                        : step.timeCritical
+                    className={`p-4 rounded-xl border transition ${step.done
+                      ? "bg-muted/20 border-border/50 opacity-60"
+                      : step.timeCritical
                         ? "bg-rose-500/5 border-rose-500/20"
                         : "bg-muted/30 border-border"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <button
                         type="button"
                         onClick={() => handleToggleStep(step.id, step.done)}
-                        className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition ${
-                          step.done
-                            ? "bg-emerald-600 border-emerald-600 text-white"
-                            : "border-muted-foreground/40 hover:border-primary bg-background"
-                        }`}
+                        className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition ${step.done
+                          ? "bg-emerald-600 border-emerald-600 text-white"
+                          : "border-muted-foreground/40 hover:border-primary bg-background"
+                          }`}
                       >
                         {step.done && <Check className="w-3.5 h-3.5" />}
                       </button>
@@ -561,77 +638,6 @@ export function RecoverPage() {
                     </li>
                   ))}
                 </ul>
-              </div>
-            </div>
-
-            {/* In-page Recovery Chatbot */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-primary" />
-                  <span>Ask the Dojo Recovery Assistant</span>
-                </h3>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold bg-muted/60 px-2 py-0.5 rounded-full">
-                  Bite-sized official advice (Helpline 1930 & RBI)
-                </span>
-              </div>
-
-              {/* Quick Prompt Chips */}
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {quickPrompts.map((prompt, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    disabled={chatLoading}
-                    onClick={() => handleSendChat(prompt)}
-                    className="text-[11px] px-2.5 py-1 rounded-lg border border-border/80 bg-muted/30 hover:bg-primary/10 hover:border-primary/40 text-muted-foreground hover:text-foreground transition disabled:opacity-50 text-left"
-                  >
-                    💬 {prompt}
-                  </button>
-                ))}
-              </div>
-
-              <div
-                ref={chatContainerRef}
-                className="space-y-3 max-h-80 overflow-y-auto p-3.5 bg-muted/20 rounded-xl border border-border/50 text-xs"
-              >
-                {chatMessages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`p-3.5 rounded-xl max-w-[85%] leading-relaxed ${
-                      msg.role === "user"
-                        ? "ml-auto bg-primary text-primary-foreground font-medium shadow-xs"
-                        : "bg-background border border-border text-foreground shadow-xs"
-                    }`}
-                  >
-                    <MarkdownView content={msg.text} />
-                  </div>
-                ))}
-                {chatLoading && (
-                  <div className="bg-background border border-border p-3.5 rounded-xl text-xs text-muted-foreground animate-pulse flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                    <span>Consulting verified Cyber Crime & RBI guidelines...</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
-                  placeholder="e.g. 'What if my bank refuses to register the dispute?'"
-                  className="flex-1 p-3 rounded-xl border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                />
-                <button
-                  type="button"
-                  disabled={chatLoading || !chatInput.trim()}
-                  onClick={() => handleSendChat()}
-                  className="px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
               </div>
             </div>
 
