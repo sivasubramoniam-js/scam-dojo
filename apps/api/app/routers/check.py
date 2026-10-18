@@ -9,7 +9,7 @@ import logging
 import re
 import urllib.parse
 import uuid
-from typing import Any, Literal, cast
+from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
@@ -25,10 +25,6 @@ from app.services.webrisk import webrisk_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v1", tags=["check"])
-
-
-RiskLevel = Literal["safe", "caution", "high"]
-Verdict = Literal["likely_scam", "suspicious", "likely_safe", "cannot_tell"]
 
 
 class CheckRequest(CamelModel):
@@ -524,8 +520,8 @@ async def check_message(
 
     if not matches and not has_urls and not upi_payload:
         base_score = 10
-        base_risk: RiskLevel = "safe"
-        base_verdict: Verdict = "likely_safe"
+        base_risk = "safe"
+        base_verdict = "likely_safe"
         base_title = "Safe — No Threat Vectors Detected"
         base_one_line = "No suspicious coercion, links, or credential requests were found."
         base_explanation = "The provided message appears standard and lacks known phishing or psychological manipulation indicators."
@@ -1009,7 +1005,6 @@ async def forge_drill_from_check(
     # Fictional entities derived from the scam
     org_match = re.search(r"\b(SBI|HDFC|ICICI|Airtel|Jio|Electricity|Courier|Customs|Police)\b", text, re.IGNORECASE)
     org_name = f"{org_match.group(1).title()} Dept" if org_match else "Orion Security Desk"
-    blurb_text = f"Forged from real scam: Practice shutting down pressure from {org_name}."
 
     custom_spec = {
         "id": scenario_id,
@@ -1017,8 +1012,8 @@ async def forge_drill_from_check(
         "custom": True,
         "title": {"en": drill_title, "hi": drill_title},
         "blurb": {
-            "en": blurb_text,
-            "hi": blurb_text,
+            "en": f"Forged from real scam: Practice shutting down pressure from {org_name}.",
+            "hi": f"Forged from real scam: Practice shutting down pressure from {org_name}.",
         },
         "scam_type": "custom_phishing",
         "channel": "sms",
@@ -1052,5 +1047,5 @@ async def forge_drill_from_check(
         title=drill_title,
         channel="sms",
         persona_name="Officer Sharma",
-        blurb=blurb_text,
+        blurb=custom_spec["blurb"]["en"],
     )

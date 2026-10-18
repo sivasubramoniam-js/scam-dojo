@@ -56,7 +56,7 @@ CRITICAL VERBATIM PERFORMANCE RULES:
 
 
 _active_live_connections: dict[str, WebSocket] = {}
-_active_live_tasks: dict[str, asyncio.Task[Any]] = {}
+_active_live_tasks: dict[str, asyncio.Task] = {}
 
 
 @router.websocket("/ws/{sid}")
