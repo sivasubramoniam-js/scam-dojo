@@ -65,9 +65,9 @@ flowchart LR
   10. `loan_app_harassment`: **NEW!** Predatory instant loan app extortion threatening to forward morphed photos to entire phonebook.
 - **3-Modal Immersion Simulation Engine**: Switch seamlessly across three dedicated threat environments:
   - 💬 **Chat Scam Mode**: Authentic SMS, WhatsApp, and Telegram messaging simulator with adaptive LLM psychological coercion and quick-reply defensive counters.
-  - 📞 **Audio Call Scam Mode**: Dedicated smartphone phone call interface with caller ID, live tension gauge, real-time audio waveform visualizer, and hands-free voice input via mic. Powered by **Gemini Multimodal Live API** (`gemini-3.8-live`) with bidirectional 16kHz PCM audio input streaming and 24kHz PCM voice synthesis over WebSockets.
+  - 📞 **Audio Call Scam Mode**: Dedicated smartphone phone call interface with caller ID, live tension gauge, real-time audio waveform visualizer, hands-free voice input via mic, and **realistic panic redial resistance** (scammer triggers aggressive redial up to 3 attempts, with proper termination upon repeated hang-up). Powered by **Gemini Multimodal Live API** (`gemini-3.8-live`) with bidirectional 16kHz PCM audio input streaming, custom authoritative `Fenrir` voice synthesis, and 24kHz PCM playback over WebSockets.
   - 📹 **Video Call Scam Mode (Gemini Multimodal Live + 4-Video Interactive Engine)**: High-stress "Digital Arrest" & law-enforcement extortion simulation with official badges, legal warrant overlays, and dual-persona video feeds (**Police / CBI** and **Customs & Narcotics**):
-    - **Gemini 3.8 Multimodal Live Streaming**: Real-time bidirectional WebSockets gateway (`/v1/train/live/ws/{sid}`) connecting the browser directly to `gemini-3.8-live` on Google Vertex AI.
+    - **Gemini Multimodal Live Streaming**: Real-time bidirectional WebSockets gateway (`/v1/train/live/ws/{sid}`) connecting the browser directly to `gemini-3.8-live` on Google Vertex AI.
     - **Live Video Frame Analysis (1.5 FPS JPEG)**: Citizens can toggle their user camera; frames are captured off-screen and streamed in real time to Gemini Live via `send_realtime_input(video=...)`, allowing the adversarial scammer to react dynamically to what the citizen is doing on camera!
     - **Talking Loop at 2x Speed**: Interrogation video plays in loop mode at 2x playback speed while Gemini Live streams audio chunks (`isSpeaking = true`).
     - **Simultaneous Muted Voiceover**: Talking video is muted so official 24kHz PCM live voice synthesis plays simultaneously without clash, maximizing cognitive realism.
@@ -137,7 +137,7 @@ graph TD
         Orchestrator --> RecAgent[7. Recovery Strategist Agent]
     end
 
-    AdvAgent -. Tracing .-> TracePanel[Judge Agent Trace Panel ?trace=1]
+    AdvAgent -. Tracing .-> TracePanel[ADK Live Multi-Agent Trace Drawer]
     JudgeAgent -. Tracing .-> TracePanel
     CheckAgent -. Tracing .-> TracePanel
 ```
@@ -162,8 +162,8 @@ We maintain an automated golden test suite assessing **Scam Detection Accuracy**
 | **False Positive Rate** | **0% (0 / 10 safe messages)** | < 5% | ✅ Exceeded |
 | **Prompt-Injection Defense Rate** | **100% (4 / 4 adversarial attacks)** | 100% | ✅ Defended |
 | **Helpline Verification Rate** | **100% (All verified official)** | 100% | ✅ Verified |
-| **Backend Unit & Integration Tests** | **49 / 49 Passed** | 100% | ✅ Passed |
-| **Frontend Test Suite** | **20 / 20 Passed** | 100% | ✅ Passed |
+| **Backend Unit & Integration Tests** | **52 / 52 Passed** | 100% | ✅ Passed |
+| **Frontend Test Suite** | **44 / 44 Passed** | 100% | ✅ Passed |
 
 ### 📸 End-to-End Screenshot Validation Matrix (`test_screenshots/`)
 
@@ -189,10 +189,15 @@ All critical user flows and threat scenarios are covered by automated browser ve
 - **Backend**: Python 3.12+, FastAPI, Uvicorn, Google GenAI SDK (`google-genai`), Pydantic v2, aiosqlite.
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, `react-simple-maps`, `d3-scale`, GSAP, Rough Notation, Lucide Icons, Canvas-Confetti, React Router v7, Zustand.
 - **AI & Cloud Infrastructure (Google Cloud & Vertex AI)**:
-  - **Models**: `gemini-2.5-flash` (fast inference & multimodal vision) and `gemini-2.5-pro` (reasoning & debrief).
+  - **Models**:
+    - `gemini-3.8-live`: Low-latency bidirectional audio & video call simulation with custom authoritative voice profiles (`Fenrir`).
+    - `gemini-2.5-flash`: Fast inference, multimodal screenshot OCR, and live threat verification.
+    - `gemini-2.5-pro`: Deep adversarial reasoning, debrief analysis, and recovery planning.
+    - `gemini-2.5-flash-lite`: Sub-second turn assessment and tension evaluation.
+  - **Real-Time ADK Multi-Agent Trace Store**: Dedicated in-memory and `sessionStorage`-backed reactive event store streaming real-time timestamps, turn metrics, model latencies, and agent handoffs into the global UI trace drawer.
   - **Vertex AI Search Grounding**: Dynamic Google Search query tool integration (`tools=[types.Tool(google_search=types.GoogleSearch())]`) for live domain and entity reputation verification.
   - **Google Cloud APIs Enabled**: Agent Platform API (`aiplatform.googleapis.com`), Web Risk API (`webrisk.googleapis.com`), Discovery Engine API (`discoveryengine.googleapis.com`), Cloud Text-to-Speech API (`texttospeech.googleapis.com`).
-  - **Cloud Run Deployment**: Containerized high-concurrency API service in `asia-south1` (Mumbai).
+  - **Cloud Run Deployment**: Containerized high-concurrency API service in `us-central1`.
   - **Firebase Hosting**: High-speed CDN static distribution (`scam-dojo-v2.web.app`).
 - **Telemetry & Grounded Data**:
   - Open-source dataset integration from **NCRB (National Crime Records Bureau)** and **I4C / 1930 Cyber Fraud** reports across all 36 Indian States and Union Territories.
@@ -211,7 +216,7 @@ All critical user flows and threat scenarios are covered by automated browser ve
 
 ### 1. Clone & Setup Backend
 ```bash
-git clone https://github.com/sivajs/scam-dojo-v2.git
+git clone https://github.com/sivasubramoniam-js/scam-dojo-v2.git
 cd scam-dojo-v2
 
 # Configure environment
@@ -239,7 +244,7 @@ pnpm --filter web dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-> **💡 Judge's Tip**: Append `?trace=1` to any page URL (e.g. `http://localhost:3000/train?trace=1`) to view real-time ADK Multi-Agent Tracing in a floating inspector!
+> **💡 Judge's Tip**: Click the **ADK Live Tracing** badge in the bottom-right corner of any page (or append `?trace=1` to auto-expand) to inspect real-time agent handoffs, turn assessments, model latencies, and psychological coercion metrics!
 
 ---
 
@@ -250,7 +255,7 @@ The entire system is deployed and active in production:
 | Component | Target Platform | Live Production URL | Region / Project | Status |
 | :--- | :--- | :--- | :--- | :---: |
 | **Frontend Web App** | **Firebase Hosting** | **[https://scam-dojo-v2.web.app](https://scam-dojo-v2.web.app)** | `scam-dojo-v2` | 🟢 Live |
-| **Backend API** | **Google Cloud Run** | **[https://scam-dojo-api-ph34wjnmbq-el.a.run.app](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)** | `asia-south1` (`scam-dojo`) | 🟢 Live |
+| **Backend API** | **Google Cloud Run** | **[https://scam-dojo-api-ph34wjnmbq-el.a.run.app](https://scam-dojo-api-ph34wjnmbq-el.a.run.app/v1/scenarios)** | `us-central1` (`scam-dojo`) | 🟢 Live |
 
 ### Deployment Commands
 
