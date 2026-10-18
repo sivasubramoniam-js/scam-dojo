@@ -801,7 +801,7 @@ Requirements:
                     config=config,
                 )
             except Exception as primary_err:
-                fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
+                fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
                 if fallback and fallback != used_model:
                     logger.warning("Primary check model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                     used_model = fallback

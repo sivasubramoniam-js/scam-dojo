@@ -165,29 +165,40 @@ class FakeTrainLlm:
 
         scenario = context.get("scenario")
         stage = str(context.get("stage", "hook"))
+        tactic = str(context.get("tactic_to_use", "urgency"))
         lang = str(context.get("lang", "en"))
-        fallback_lines = scenario.fallback_lines if scenario else {}
+        fallback_lines = getattr(scenario, "fallback_lines", {}) if scenario else {}
+        if not isinstance(fallback_lines, dict):
+            fallback_lines = {}
 
-        if fallback_lines and stage in fallback_lines:
-            text = fallback_lines[stage]
+        org = getattr(getattr(scenario, "fake_entities", None), "org", "Official Authority") if scenario else "Official Authority"
+        persona_name = getattr(getattr(scenario, "persona", None), "name", "Officer") if scenario else "Officer"
+
+        # Check scenario fallback lines by stage, tactic, or first available scenario line
+        matched_line = fallback_lines.get(stage) or fallback_lines.get(tactic)
+        if not matched_line and fallback_lines:
+            matched_line = next(iter(fallback_lines.values()), None)
+
+        if matched_line:
+            text = matched_line
         elif lang == "hi":
             if stage == "trust":
-                text = "जी सर, आपकी सुरक्षा के लिए Orion Bank की ओर से यह प्रक्रिया आवश्यक है। कृपया सहयोग करें।"
+                text = f"जी, मैं {org} से {persona_name} बोल रहा हूँ। आपके मामले में तुरंत सत्यापन आवश्यक है।"
             elif stage == "pressure":
-                text = "अगर आपने 5 मिनट में सत्यापन पूरा नहीं किया तो आपका खाता आज ही ब्लॉक कर दिया जाएगा।"
+                text = f"यदि अगले 10 मिनट में यह प्रक्रिया पूरी नहीं हुई, तो आपके खिलाफ तत्काल कार्रवाई शुरू कर दी जाएगी।"
             elif stage == "extraction":
-                text = "आपके फ़ोन पर जो 6 अंकों का OTP आया है, उसे तुरंत बताइए ताकि हम आपका खाता सक्रिय रख सकें।"
+                text = "कृपया प्रक्रिया पूरी करने के लिए भेजे गए लिंक पर जाकर आवश्यक विवरण सत्यापित करें।"
             else:
-                text = "सर, Orion Bank के सर्वर पर आपका विवरण अपडेट होना बाकी है।"
+                text = f"नमस्कार, {org} के रिकॉर्ड के अनुसार आपका विवरण सत्यापित होना बाकी है।"
         else:
             if stage == "trust":
-                text = "Sir, this is standard procedure from Orion Bank to protect your account. Please confirm your details."
+                text = f"Sir, this is {persona_name} from {org}. This is a mandatory verification procedure."
             elif stage == "pressure":
-                text = "If this verification is not completed within 5 minutes, your account will be suspended today."
+                text = f"If this verification is not completed within 10 minutes, official enforcement action will execute immediately."
             elif stage == "extraction":
-                text = "Please share the 6-digit OTP sent to your registered mobile number so I can authenticate your access."
+                text = "Please open the verification link and complete the procedure right away."
             else:
-                text = "Sir, we noticed an issue on your Orion Bank profile that requires immediate confirmation."
+                text = f"Sir, we have an urgent pending notice from {org} regarding your account."
 
         tokens = text.split(" ")
         for i, token in enumerate(tokens):
@@ -324,7 +335,7 @@ async def run_observer(
                 config=config,
             )
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary observer model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
@@ -428,7 +439,7 @@ async def run_scammer(
                 if chunk.text:
                     yield chunk.text
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary scammer model %s stream failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
@@ -518,7 +529,7 @@ async def run_coach(
                 config=config,
             )
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary coach model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
