@@ -11,7 +11,6 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-import google.auth.transport.requests
 from google.genai import types
 
 from app.agents.runtime import get_genai_client, is_live_llm_enabled
