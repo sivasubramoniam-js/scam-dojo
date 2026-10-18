@@ -324,7 +324,7 @@ async def run_observer(
                 config=config,
             )
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary observer model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
@@ -428,7 +428,7 @@ async def run_scammer(
                 if chunk.text:
                     yield chunk.text
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary scammer model %s stream failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
@@ -518,7 +518,7 @@ async def run_coach(
                 config=config,
             )
         except Exception as primary_err:
-            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-2.5-flash")
+            fallback = getattr(settings, "MODEL_FALLBACK", "gemini-3.8-flash")
             if fallback and fallback != used_model:
                 logger.warning("Primary coach model %s failed (%s), attempting fallback %s", used_model, primary_err, fallback)
                 used_model = fallback
