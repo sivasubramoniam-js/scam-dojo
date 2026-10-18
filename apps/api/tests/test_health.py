@@ -7,7 +7,7 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_healthz():
+async def test_healthz() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         res = await client.get("/healthz")
         assert res.status_code == 200
@@ -16,7 +16,7 @@ async def test_healthz():
 
 
 @pytest.mark.asyncio
-async def test_readyz():
+async def test_readyz() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         res = await client.get("/readyz")
         assert res.status_code == 200

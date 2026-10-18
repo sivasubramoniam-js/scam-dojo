@@ -7,7 +7,7 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_get_scenarios():
+async def test_get_scenarios() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Default English
         resp = await client.get("/v1/scenarios", headers={"X-Dev-User": "test-user"})
@@ -28,7 +28,7 @@ async def test_get_scenarios():
 
 
 @pytest.mark.asyncio
-async def test_get_resources():
+async def test_get_resources() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.get("/v1/resources", headers={"X-Dev-User": "test-user"})
         assert resp.status_code == 200
@@ -42,7 +42,7 @@ async def test_get_resources():
 
 
 @pytest.mark.asyncio
-async def test_user_profile_lifecycle():
+async def test_user_profile_lifecycle() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"X-Dev-User": "profile-tester"}
         # 1. Get Me (initializes default profile)
@@ -66,7 +66,7 @@ async def test_user_profile_lifecycle():
 
 
 @pytest.mark.asyncio
-async def test_train_session_flow_and_idempotency():
+async def test_train_session_flow_and_idempotency() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"X-Dev-User": "session-tester"}
 
@@ -110,7 +110,7 @@ async def test_train_session_flow_and_idempotency():
 
 
 @pytest.mark.asyncio
-async def test_train_session_sse_streaming():
+async def test_train_session_sse_streaming() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"X-Dev-User": "sse-tester"}
         create_resp = await client.post(
@@ -137,7 +137,7 @@ async def test_train_session_sse_streaming():
 
 
 @pytest.mark.asyncio
-async def test_train_scripted_victory_and_end_debrief():
+async def test_train_scripted_victory_and_end_debrief() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"X-Dev-User": "winner-tester"}
         create_resp = await client.post(
@@ -181,7 +181,7 @@ async def test_train_scripted_victory_and_end_debrief():
 
 
 @pytest.mark.asyncio
-async def test_train_scripted_user_fell_on_otp_leak():
+async def test_train_scripted_user_fell_on_otp_leak() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"X-Dev-User": "fell-tester"}
         create_resp = await client.post(

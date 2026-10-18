@@ -3,7 +3,7 @@
 from app.services.kb import kb_service
 
 
-def test_get_scenarios():
+def test_get_scenarios() -> None:
     scenarios_en = kb_service.get_scenarios("en")
     assert len(scenarios_en) >= 3
     slugs = [s["slug"] for s in scenarios_en]
@@ -17,7 +17,7 @@ def test_get_scenarios():
     assert scenarios_hi[0]["title"] != scenarios_en[0]["title"]
 
 
-def test_get_scenario_by_slug():
+def test_get_scenario_by_slug() -> None:
     scen = kb_service.get_scenario("fake_kyc")
     assert scen is not None
     assert scen["slug"] == "fake_kyc"
@@ -26,7 +26,7 @@ def test_get_scenario_by_slug():
     assert "verify" in scen["fake_entities"]["link"] or ".example" in scen["fake_entities"]["link"]
 
 
-def test_get_resources():
+def test_get_resources() -> None:
     res = kb_service.get_resources(country="IN")
     assert len(res) >= 10
     ids = [r["id"] for r in res]
@@ -34,7 +34,7 @@ def test_get_resources():
     assert "r_cybercrime_portal" in ids
 
 
-def test_fts_search_otp_refund():
+def test_fts_search_otp_refund() -> None:
     hits = kb_service.search_kb("OTP refund collect request")
     assert len(hits) > 0
     top_hit = hits[0]

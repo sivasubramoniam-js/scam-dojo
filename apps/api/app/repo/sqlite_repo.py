@@ -11,7 +11,7 @@ from app.repo.base import Repo
 
 
 class SqliteRepo(Repo):
-    def __init__(self, db_path: str | None = None):
+    def __init__(self, db_path: str | None = None) -> None:
         self.db_path = db_path or settings.SQLITE_PATH
         # Ensure parent directory exists
         parent = Path(self.db_path).resolve().parent

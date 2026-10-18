@@ -22,7 +22,7 @@ DATASET_FILE = EVALS_DIR / "golden_check.jsonl"
 OUTPUT_REPORT = Path(__file__).resolve().parent.parent.parent.parent / "docs" / "EVAL.md"
 
 
-async def main():
+async def main() -> None:
     if not DATASET_FILE.exists():
         print(f"Error: {DATASET_FILE} not found.")
         return

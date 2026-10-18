@@ -180,7 +180,7 @@ export function ShareableWarningCardModal({
     ctx.fillStyle = "#94a3b8";
     ctx.font = "500 20px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Practice getting scammed safely at scam-dojo-v2.web.app · Powered by Gemini 3.8", 540, 1015);
+    ctx.fillText("Practice getting scammed safely at scam-dojo-v2.web.app · Powered by Gemini", 540, 1015);
 
     setDataUrl(canvas.toDataURL("image/png"));
   }, [isOpen, checkResult]);

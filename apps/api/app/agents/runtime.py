@@ -61,7 +61,7 @@ def is_live_llm_enabled() -> bool:
     return bool(key and key not in ("test-api-key", "dummy", "fake", ""))
 
 
-def get_genai_client():
+def get_genai_client() -> Any:
     from google import genai
 
     if settings.GOOGLE_GENAI_USE_VERTEXAI and settings.GOOGLE_CLOUD_PROJECT:

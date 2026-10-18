@@ -9,7 +9,7 @@ from app.config import settings
 
 
 class KnowledgeBaseService:
-    def __init__(self, db_path: str | None = None):
+    def __init__(self, db_path: str | None = None) -> None:
         candidate = Path(db_path or settings.KB_PATH)
         if not candidate.exists():
             # Try finding data/knowledge.sqlite relative to repo root

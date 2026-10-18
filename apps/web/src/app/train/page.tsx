@@ -84,7 +84,7 @@ export function TrainPage() {
 
   // Realistic Panic & Tension Escalation States
   const [isRedialing, setIsRedialing] = useState(false);
-  const [redialAttempt, setRedialAttempt] = useState(1);
+  const [redialAttempt, setRedialAttempt] = useState(0);
   const [devicePoweredOff, setDevicePoweredOff] = useState(false);
   const [emergencyTacticalOutcome, setEmergencyTacticalOutcome] = useState<
     "power_off" | "airplane_mode" | "dial_1930" | "repeatedly_declined" | null
@@ -348,7 +348,7 @@ export function TrainPage() {
     }
 
     setIsTyping(true);
-    setAiStatus("Observer Agent (Gemini 3.8) evaluating your defense & tactics...");
+    setAiStatus("Observer Agent evaluating your defense & tactics...");
 
     addTraceEntry({
       agent: "Observer Agent",
@@ -371,7 +371,7 @@ export function TrainPage() {
             ]);
           }
           if (tr.agent === "observer_agent") {
-            setAiStatus("Scammer Agent (Gemini 3.8) adapting psychological pressure...");
+            setAiStatus("Scammer Agent adapting psychological pressure...");
           }
         },
         onState: (st) => {
@@ -753,9 +753,6 @@ export function TrainPage() {
               <span className="material-symbols-outlined text-[18px] text-[var(--safe)]">shield</span>
               <span>Zero-PII Active: Client & backend auto-redact Aadhaar, PAN, OTP, and cards.</span>
             </div>
-            <span className="inline-flex items-center gap-1 font-bold text-[var(--safe)] bg-[var(--safe)]/10 px-2 py-0.5 rounded-full text-[11px]">
-              ● Gemini 3.8 Flash Online
-            </span>
           </div>
 
           {sessionError && (
@@ -902,8 +899,8 @@ export function TrainPage() {
                         }}
                         disabled={Boolean(startingSlug) || isActiveDrill}
                         className={`w-full py-2 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs group ${isActiveDrill
-                            ? "bg-emerald-600/90 text-white cursor-default"
-                            : "text-white bg-[var(--act)] hover:opacity-95 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+                          ? "bg-emerald-600/90 text-white cursor-default"
+                          : "text-white bg-[var(--act)] hover:opacity-95 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                           }`}
                       >
                         {isConnecting ? (
@@ -1205,9 +1202,6 @@ export function TrainPage() {
                 <div>
                   <b className="text-sm sm:text-base text-[var(--ink)] block leading-tight flex items-center gap-2">
                     {activeScenarioInfo.orgLabel}
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--sf2)] border border-[var(--line)] text-[var(--safe)] font-semibold hidden sm:inline">
-                      Gemini 3.8 Flash
-                    </span>
                   </b>
                   <span className="text-xs text-[var(--mut)]">
                     Caller: {activeScenarioInfo.personaName} · Session: {sessionId?.slice(0, 8)}…
@@ -1334,7 +1328,7 @@ export function TrainPage() {
                     <span className="material-symbols-outlined text-[16px] text-[var(--act)] animate-spin">
                       progress_activity
                     </span>
-                    <span>{aiStatus || "Gemini 3.8 Scammer is generating response…"}</span>
+                    <span>{aiStatus || "Gemini Scammer Agent is generating response…"}</span>
                   </div>
                 </div>
               )}

@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_live_websocket_connect_and_ping():
+def test_live_websocket_connect_and_ping() -> None:
     client = TestClient(app)
     with client.websocket_connect("/v1/train/live/ws/test-sim-session") as ws:
         # First message is connection acknowledgment
